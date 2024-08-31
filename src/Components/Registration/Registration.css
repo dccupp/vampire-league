@@ -1,0 +1,55 @@
+/* Custom Bootstrap overrides for Registration component */
+
+/* General styling for the registration container */
+.register-container {
+  height: 100vh;
+  background-color: #1e1e1e;
+  font-family: 'Arial', sans-serif;
+  color: #ffffff;
+  padding: 20px;
+}
+
+/* Styling for the registration form */
+.register-form {
+  background-color: #2b2b2b;
+  border-radius: 10px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Input fields styling */
+.register-form .form-control {
+  background-color: #333333;
+  border: 2px solid #ffcc00;
+  color: #ffffff;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+/* Register button styling */
+.register-form .btn-primary {
+  background-color: #ffcc00;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+  color: #1e1e1e;
+  transition: background-color 0.3s;
+}
+
+.register-form .btn-primary:hover {
+  background-color: #ffaa00;
+}
+
+/* Link to the login page */
+.register-form a {
+  color: #ffcc00;
+}
+
+.register-form a:hover {
+  color: #ffaa00;
+  text-decoration: underline;
+}
+
+/* Message styling */
+.register-form p {
+  color: #ff0000;
+}
