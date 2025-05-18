@@ -9,11 +9,20 @@ const Registration = () => {
   const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
+      // Mock token for testing; uncomment API call for production
+      const mockToken = 'mock-auth-token';
+      console.log('Registration: Setting authToken'); // Debug log
+      localStorage.setItem('authToken', mockToken);
+      setMessage('Registration successful! Redirecting to login...');
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+      /*
       const response = await fetch('http://localhost/vampire_football/vamp_api/users/register', {
         method: 'POST',
         headers: {
@@ -26,72 +35,66 @@ const Registration = () => {
           password: password,
         }),
       });
-
       const data = await response.json();
-
       if (data.status === 'success') {
+        console.log('Registration: Setting authToken from API'); // Debug log
+        localStorage.setItem('authToken', data.token || 'mock-auth-token');
         setMessage('Registration successful! Redirecting to login...');
         setTimeout(() => {
-          navigate('/'); // Redirect to login page
-        }, 2000); // Redirect after 2 seconds
+          navigate('/');
+        }, 2000);
       } else {
         setMessage(data.message);
       }
+      */
     } catch (error) {
+      console.error('Registration: Error:', error); // Debug log
       setMessage('Error registering. Please try again.');
     }
   };
 
   return (
-    <div className="register-container d-flex justify-content-center align-items-center">
-      <form className="register-form bg-dark p-4 rounded shadow" onSubmit={handleRegister}>
-        <h2 className="text-center text-light mb-4">Fantasy Football Register</h2>
-        <div className="mb-3">
-          <input
-            type="email"
-            className="form-control"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="First Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <input
-            type="password"
-            className="form-control"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" className="btn btn-primary w-100">Register</button>
-        {message && <p className="text-center mt-3 text-danger">{message}</p>}
-        <a href="/" className="text-center d-block mt-3 text-warning">Already have an account? Login here</a>
+    <div className="register-form animate__animated animate__fadeIn">
+      <form onSubmit={handleRegister}>
+        <h3 className="text-center mb-3">Fantasy Football Register</h3>
+        <input
+          type="email"
+          className="form-control mb-2"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          className="form-control mb-2"
+          placeholder="First Name"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          className="form-control mb-2"
+          placeholder="Last Name"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          className="form-control mb-2"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit" className="btn btn-success w-100">Register</button>
+        {message && <p className="error-message mt-2">{message}</p>}
+        <a href="/" className="register-link d-block mt-2 text-center">Already have an account? Login</a>
       </form>
     </div>
   );
-}
+};
 
 export default Registration;

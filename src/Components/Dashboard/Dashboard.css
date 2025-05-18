@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+.dashboard-container {
+  padding: 8px;
+  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
+  border-radius: 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  margin: 0 auto;
+  font-family: 'Poppins', sans-serif;
+}
+
+.dashboard-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2ecc71;
+  letter-spacing: 0.5px;
+}
+
+.dashboard-subtitle {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #b0b0b0;
+}
+
+.dashboard-team-info {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #b0b0b0;
+}
+
+.dashboard-link {
+  color: #2ecc71;
+  text-decoration: none;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.dashboard-link:hover {
+  color: #27ae60;
+  transform: scale(1.03);
+}
+
+.dashboard-content {
+  padding: 6px;
+  background: #333333;
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dashboard-roster-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2ecc71;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 6px;
+  }
+  .dashboard-title {
+    font-size: 1.1rem;
+  }
+  .dashboard-subtitle,
+  .dashboard-team-info {
+    font-size: 0.75rem;
+  }
+  .dashboard-roster-title {
+    font-size: 0.9rem;
+  }
+  .dashboard-content {
+    padding: 4px;
+  }
+}

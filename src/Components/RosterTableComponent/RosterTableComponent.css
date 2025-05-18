@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+.roster-table-container {
+  padding: 10px;
+  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
+  border-radius: 5px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.roster-table-container h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2ecc71;
+  letter-spacing: 0.5px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.roster-table {
+  background-color: #333333;
+  color: #e0e0e0;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+}
+
+.roster-table th,
+.roster-table td {
+  border: 0.5px solid #27ae60;
+  padding: 8px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.roster-table th {
+  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+  color: #1c1c1c;
+  font-weight: 700;
+}
+
+.roster-table tr:hover {
+  background-color: #3a3a3a;
+  transition: background-color 0.2s;
+}
+
+.roster-position-cell {
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  background: #1c1c1c;
+  border: 0.5px solid #2ecc71;
+  color: #2ecc71;
+  font-weight: 700;
+  font-size: 11px;
+  text-align: center;
+  transition: box-shadow 0.2s;
+}
+
+.roster-position-cell:hover {
+  box-shadow: 0 0 4px rgba(46, 204, 113, 0.4);
+}
+
+.edit-button {
+  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+  border: none;
+  font-size: 10px;
+  padding: 4px 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.edit-button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.6);
+}
+
+@media (max-width: 768px) {
+  .roster-table-container {
+    padding: 8px;
+  }
+  .roster-table th,
+  .roster-table td {
+    padding: 6px;
+    font-size: 11px;
+  }
+  .roster-position-cell {
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    font-size: 10px;
+  }
+  .edit-button {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+}

@@ -1,3 +1,11 @@
+/* App.css */
+.app-wrapper {
+  min-height: 100vh; /* Full viewport height */
+  background-color: #1e1e1e; /* Matches Layout’s dark theme */
+  width: 100%; /* Full viewport width */
+}
+
+/* You can keep or remove the old styles if unused */
 .App {
   text-align: center;
 }

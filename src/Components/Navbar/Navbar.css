@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+.navbar-custom {
+  background: linear-gradient(90deg, #222222 0%, #1c1c1c 100%);
+  padding: 8px 0;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.navbar-brand-custom {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2ecc71;
+  letter-spacing: 0.5px;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.navbar-brand-custom:hover {
+  color: #27ae60;
+  transform: scale(1.03);
+}
+
+.nav-link-custom {
+  font-size: 12px;
+  color: #e0e0e0;
+  margin-left: 8px;
+  transition: color 0.2s, transform 0.2s;
+  display: block;
+}
+
+.nav-link-custom:hover {
+  color: #2ecc71;
+  transform: scale(1.03);
+}
+
+.nav-link-custom.active {
+  color: #2ecc71;
+  font-weight: 700;
+}
+
+.navbar-toggler {
+  border: 0.5px solid #27ae60;
+  border-radius: 3px;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%2327ae60' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+@media (max-width: 768px) {
+  .navbar-custom {
+    padding: 6px 0;
+  }
+  .nav-link-custom {
+    margin-left: 0;
+    padding: 5px;
+    text-align: center;
+  }
+}
