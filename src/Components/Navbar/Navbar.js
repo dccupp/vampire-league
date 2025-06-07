@@ -41,13 +41,6 @@ const NavBar = () => {
               <>
                 <Nav.Link
                   as={NavLink}
-                  to="/"
-                  className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
-                >
-                  Home
-                </Nav.Link>
-                <Nav.Link
-                  as={NavLink}
                   to="/dashboard"
                   className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
                 >
@@ -59,6 +52,13 @@ const NavBar = () => {
                   className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
                 >
                   Roster
+                </Nav.Link>
+                <Nav.Link
+                  as={NavLink}
+                  to="/trade"   
+                  className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
+                >
+                  Trade
                 </Nav.Link>
                 <Nav.Link onClick={handleLogout} className="nav-link-custom">
                   Logout

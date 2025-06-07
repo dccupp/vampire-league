@@ -5,7 +5,7 @@ import RosterTableComponent from '../RosterTableComponent/RosterTableComponent';
 import './Dashboard.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Dashboard = () => {
+const Dashboard = ({ initialRoster, rosterStructure }) => {
   return (
     <div className="dashboard-container animate__animated animate__fadeIn">
       <Container>
@@ -16,8 +16,11 @@ const Dashboard = () => {
           <NavLink to="/budget" className="dashboard-link">Free Agent Budget ($$)</NavLink>
         </p>
         <div className="dashboard-content">
-          <h3 className="dashboard-roster-title text-center mb-3">Fantasy Football Roster</h3>
-          <RosterTableComponent />
+          <h4 className="dashboard-roster-title text-center mb-3">Roster Overview</h4>
+          <RosterTableComponent
+            initialRoster={initialRoster}
+            rosterStructure={rosterStructure}
+          />
         </div>
       </Container>
     </div>

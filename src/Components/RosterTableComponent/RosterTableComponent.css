@@ -1,35 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 
-.roster-table-container {
-  padding: 10px;
+.fantasy-roster-container {
+  padding: 12px;
   background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
-  border-radius: 5px;
+  border-radius: 6px;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
-  max-width: 100%;
+  max-width: 700px;
+  width: 100%;
   margin: 0 auto;
 }
 
-.roster-table-container h3 {
-  font-size: 1.3rem;
+.roster-title {
+  font-size: 1.4rem;
   font-weight: 700;
   color: #2ecc71;
   letter-spacing: 0.5px;
   font-family: 'Poppins', sans-serif;
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
 .roster-table {
   background-color: #333333;
   color: #e0e0e0;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 13px;
+  width: 100%;
+  table-layout: fixed;
 }
 
 .roster-table th,
 .roster-table td {
   border: 0.5px solid #27ae60;
   padding: 8px;
-  text-align: left;
   vertical-align: middle;
 }
 
@@ -37,60 +41,144 @@
   background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
   color: #1c1c1c;
   font-weight: 700;
+  text-align: left;
 }
 
-.roster-table tr:hover {
+.roster-table th:first-child {
+  width: 80px;
+}
+
+.roster-row {
+  height: 80px; /* Consistent row height */
+}
+
+.roster-row:hover {
   background-color: #3a3a3a;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease-in-out;
 }
 
-.roster-position-cell {
-  width: 40px;
-  height: 40px;
-  line-height: 40px;
+.slot-cell {
+  width: 80px;
+  height: 80px;
   background: #1c1c1c;
-  border: 0.5px solid #2ecc71;
+  border: 0.5px solid #27ae60;
   color: #2ecc71;
   font-weight: 700;
-  font-size: 11px;
+  font-size: 12px;
   text-align: center;
-  transition: box-shadow 0.2s;
+  vertical-align: middle;
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.roster-position-cell:hover {
-  box-shadow: 0 0 4px rgba(46, 204, 113, 0.4);
+.slot-cell-hover {
+  background: #27ae60 !important;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.5);
 }
 
-.edit-button {
-  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+.slot-cell-ineligible {
+  background: #ff4444 !important;
+  box-shadow: 0 0 6px rgba(255, 68, 68, 0.5);
+}
+
+.player-cell.slot-eligible {
+  background: #27ae60;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.5);
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.error-message {
+  color: #ff4444;
+  text-align: center;
+  padding: 20px;
+  font-size: 1.2rem;
+}
+
+.table-responsive {
+  max-width: 700px;
+  margin: 0 auto;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.bench-button {
+  background: #2ecc71;
+  color: #1c1c1c;
   border: none;
-  font-size: 10px;
+  border-radius: 4px;
   padding: 4px 8px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  margin-left: 8px;
 }
 
-.edit-button:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 6px rgba(46, 204, 113, 0.6);
+.bench-button:hover {
+  background: #27ae60;
+}
+
+.bench-button:disabled {
+  background: #666666;
+  cursor: not-allowed;
+}
+
+.empty-slot {
+  color: #b0b0b0;
+  font-size: 12px;
+  text-align: center;
+  padding: 8px;
+  background: #2e2e2e;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px; /* Match PlayerCard height */
 }
 
 @media (max-width: 768px) {
-  .roster-table-container {
-    padding: 8px;
+  .fantasy-roster-container {
+    padding: 10px;
+    max-width: 100%;
   }
+
+  .roster-title {
+    font-size: 1.2rem;
+  }
+
+  .roster-table {
+    font-size: 12px;
+  }
+
   .roster-table th,
   .roster-table td {
     padding: 6px;
+  }
+
+  .slot-cell {
+    width: 70px;
+    height: 70px;
     font-size: 11px;
   }
-  .roster-position-cell {
-    width: 36px;
-    height: 36px;
-    line-height: 36px;
-    font-size: 10px;
+
+  .roster-table th:first-child {
+    width: 70px;
   }
-  .edit-button {
-    font-size: 9px;
+
+  .roster-row {
+    height: 70px; /* Consistent row height for mobile */
+  }
+
+  .table-responsive {
+    max-width: 100%;
+  }
+
+  .bench-button {
+    font-size: 10px;
     padding: 3px 6px;
+  }
+
+  .empty-slot {
+    font-size: 11px;
+    min-height: 50px; /* Match PlayerCard height for mobile */
   }
 }

@@ -1,201 +1,250 @@
-import React, { useState } from 'react';
-import { Table, Container, Dropdown, Button } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import PlayerCard from '../PlayerCard/PlayerCard';
 import './RosterTableComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const rosterStructure = [  { position: 'QB', count: 1 },  { position: 'RB', count: 2 },  { position: 'WR', count: 3 },  { position: 'TE', count: 1 },  { position: 'FLEX', count: 1 },  { position: 'DEF', count: 1 },  { position: 'K', count: 1 },  { position: 'BENCH', count: 6 }];
+const RosterTableComponent = ({ initialRoster, rosterStructure }) => {
+  const [updatedRosterArray, setUpdatedRosterArray] = useState([]);
+  const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(null);
+  const minBenchCount = rosterStructure?.find(r => r.position === 'BENCH')?.count || 6;
 
-const initialUserTeam = [  { name: 'Patrick Mahomes', playingPosition: 'QB', slot: 'QB1', team: 'Chiefs' },  { name: 'Christian McCaffrey', playingPosition: 'RB', slot: 'RB1', team: '49ers' },  { name: 'Saquon Barkley', playingPosition: 'RB', slot: 'RB2', team: 'Eagles' },  { name: 'Tyreek Hill', playingPosition: 'WR', slot: 'WR1', team: 'Dolphins' },  { name: 'Justin Jefferson', playingPosition: 'WR', slot: 'WR2', team: 'Vikings' },  { name: 'CeeDee Lamb', playingPosition: 'WR', slot: 'WR3', team: 'Cowboys' },  { name: 'Travis Kelce', playingPosition: 'TE', slot: 'TE1', team: 'Chiefs' },  { name: 'Davante Adams', playingPosition: 'WR', slot: 'FLEX1', team: 'Raiders' },  { name: 'Buffalo Bills', playingPosition: 'DEF', slot: 'DEF1', team: 'Bills' },  { name: 'Justin Tucker', playingPosition: 'K', slot: 'K1', team: 'Ravens' },  { name: 'Josh Allen', playingPosition: 'QB', slot: 'BENCH1', team: 'Bills' },  { name: 'Derrick Henry', playingPosition: 'RB', slot: 'BENCH2', team: 'Ravens' },  { name: 'A.J. Brown', playingPosition: 'WR', slot: 'BENCH3', team: 'Eagles' },  { name: 'Sam LaPorta', playingPosition: 'TE', slot: 'BENCH4', team: 'Lions' },  { name: 'Pittsburgh Steelers', playingPosition: 'DEF', slot: 'BENCH5', team: 'Steelers' },  { name: 'Jake Elliott', playingPosition: 'K', slot: 'BENCH6', team: 'Eagles' }];
+  // Construct updatedRosterArray
+  useEffect(() => {
+    const rosterArray = [];
 
-const RosterTableComponent = ({ editable = false }) => {
-  const [userTeam, setUserTeam] = useState(initialUserTeam);
+    // Add non-BENCH slots
+    if (rosterStructure && Array.isArray(rosterStructure)) {
+      rosterStructure.forEach(({ position, count }) => {
+        if (position !== 'BENCH' && typeof count === 'number' && count > 0) {
+          for (let i = 1; i <= count; i++) {
+            rosterArray.push({ sPosition: `${position}${i}`, position, player: null });
+          }
+        }
+      });
+    }
 
-  // Generate slot identifiers (e.g., QB1, RB1, RB2, BENCH1, ...)
-  const slots = rosterStructure.flatMap(s => 
-    Array.from({ length: s.count }, (_, i) => ({
-      slot: `${s.position}${i + 1}`,
-      position: s.position
-    }))
-  );
+    // Add BENCH slots
+    if (initialRoster && Array.isArray(initialRoster)) {
+      const benchPlayers = initialRoster.filter(
+        player => player && player.slot && player.slot.startsWith('BENCH')
+      );
+      const benchCount = Math.max(minBenchCount, benchPlayers.length);
+      for (let i = 1; i <= benchCount; i++) {
+        rosterArray.push({ sPosition: `BENCH${i}`, position: 'BENCH', player: null });
+      }
+    }
 
-  // Get valid slots for a player's playingPosition
-  const getValidSlots = (playingPosition) => {
-    const validSlots = slots.map(s => s.slot); // All slots, including BENCH1-6
-    if (playingPosition === 'QB') return validSlots.filter(s => s === 'QB1' || s.startsWith('BENCH'));
-    if (playingPosition === 'RB') return validSlots.filter(s => s.startsWith('RB') || s === 'FLEX1' || s.startsWith('BENCH'));
-    if (playingPosition === 'WR') return validSlots.filter(s => s.startsWith('WR') || s === 'FLEX1' || s.startsWith('BENCH'));
-    if (playingPosition === 'TE') return validSlots.filter(s => s === 'TE1' || s === 'FLEX1' || s.startsWith('BENCH'));
-    if (playingPosition === 'DEF') return validSlots.filter(s => s === 'DEF1' || s.startsWith('BENCH'));
-    if (playingPosition === 'K') return validSlots.filter(s => s === 'K1' || s.startsWith('BENCH'));
-    return validSlots.filter(s => s.startsWith('BENCH')); // Default for empty slots
+    // Populate players
+    if (initialRoster && Array.isArray(initialRoster)) {
+      initialRoster.forEach(teamPlayer => {
+        if (teamPlayer && teamPlayer.slot) {
+          const rosterEntry = rosterArray.find(entry => entry.sPosition === teamPlayer.slot);
+          if (rosterEntry) {
+            rosterEntry.player = { ...teamPlayer };
+          }
+        }
+      });
+    }
+
+    console.log('Constructed updatedRosterArray:', rosterArray.map(e => ({
+      sPosition: e.sPosition,
+      player: e.player?.name || null
+    })));
+    setUpdatedRosterArray(rosterArray);
+  }, [rosterStructure, initialRoster, minBenchCount]);
+
+  // Get eligible slots for a player
+  const getEligibleSlots = (playerIndex) => {
+    if (playerIndex == null || !updatedRosterArray[playerIndex]?.player) return [];
+    const { playingPosition } = updatedRosterArray[playerIndex].player;
+    return updatedRosterArray.reduce((eligible, slot, index) => {
+      const allowedPositions = slot.position === 'FLEX' ? ['RB', 'WR', 'TE'] :
+                              slot.position === 'BENCH' ? ['QB', 'RB', 'WR', 'TE', 'DEF', 'K'] :
+                              [slot.position];
+      if (allowedPositions.includes(playingPosition)) {
+        if (slot.position === 'BENCH' && slot.player && 
+            slot.player.playingPosition !== playingPosition) {
+          return eligible;
+        }
+        eligible.push(index);
+      }
+      return eligible;
+    }, []);
   };
 
-  // Check if a slot is available or swappable
-  const isSlotAvailable = (slot, excludePlayerName = null) => {
-    const currentPlayer = userTeam.find(
-      p => p.slot === slot && p.name !== excludePlayerName
-    );
-    return !currentPlayer;
+  // Normalize roster array (clean BENCH, deduplicate, reindex)
+  const normalizeRosterArray = (rosterArray) => {
+    // Deduplicate sPosition, keeping non-null players
+    const seenPositions = new Map();
+    const deduplicated = rosterArray.filter((entry, index) => {
+      if (seenPositions.has(entry.sPosition)) {
+        const firstIndex = seenPositions.get(entry.sPosition);
+        const firstEntry = rosterArray[firstIndex];
+        if (!entry.player && firstEntry.player) return false;
+        if (entry.player && !firstEntry.player) {
+          seenPositions.set(entry.sPosition, index);
+          return false;
+        }
+        return false;
+      }
+      seenPositions.set(entry.sPosition, index);
+      return true;
+    });
+
+    // Clean BENCH slots
+    const benchEntries = deduplicated.filter(e => e.position === 'BENCH');
+    const occupiedBenchCount = benchEntries.filter(e => e.player).length;
+    let cleaned = deduplicated;
+    if (occupiedBenchCount <= minBenchCount) {
+      const occupiedBench = benchEntries.filter(e => e.player);
+      const emptyBench = benchEntries.filter(e => !e.player).slice(0, minBenchCount - occupiedBenchCount);
+      cleaned = deduplicated.filter(e => 
+        e.position !== 'BENCH' || 
+        occupiedBench.some(b => b.sPosition === e.sPosition) ||
+        emptyBench.some(b => b.sPosition === e.sPosition)
+      );
+    }
+
+    // Reindex BENCH slots
+    const nonBench = cleaned.filter(e => e.position !== 'BENCH');
+    const bench = cleaned.filter(e => e.position === 'BENCH').map((entry, idx) => {
+      const newSPosition = `BENCH${idx + 1}`;
+      return {
+        ...entry,
+        sPosition: newSPosition,
+        player: entry.player ? { ...entry.player, slot: newSPosition } : null
+      };
+    });
+
+    const normalizedArray = [...nonBench, ...bench];
+    console.log('Normalized updatedRosterArray:', normalizedArray.map(e => ({
+      sPosition: e.sPosition,
+      player: e.player?.name || null
+    })));
+    return normalizedArray;
   };
 
-  // Handle moving a player to a new slot
-  const handleMovePlayer = (playerName, newSlot) => {
-    const player = userTeam.find(p => p.name === playerName);
-    if (!player) return;
-
-    const validSlots = getValidSlots(player.playingPosition);
-    if (!validSlots.includes(newSlot)) {
-      console.log(`Invalid move: ${player.name} (${player.playingPosition}) cannot move to ${newSlot}`);
+  // Handle player click to select or move
+  const handlePlayerClick = (index) => {
+    if (selectedPlayerIndex == null) {
+      if (updatedRosterArray[index]?.player) {
+        setSelectedPlayerIndex(index);
+      }
       return;
     }
 
-    // Check if the target slot is available or swappable
-    const currentPlayerInSlot = userTeam.find(
-      p => p.slot === newSlot && p.playingPosition === player.playingPosition
-    );
+    const sourcePlayer = updatedRosterArray[selectedPlayerIndex].player;
+    const targetPlayer = updatedRosterArray[index]?.player;
+    const eligibleSlots = getEligibleSlots(selectedPlayerIndex);
 
-    if (!isSlotAvailable(newSlot, player.name) && !currentPlayerInSlot) {
-      console.log(`No available slot for ${newSlot}`);
+    console.log('Move attempt:', {
+      source: sourcePlayer?.name,
+      sourceIndex: selectedPlayerIndex,
+      target: targetPlayer?.name || 'empty',
+      targetIndex: index,
+      eligibleSlots
+    });
+
+    if (!eligibleSlots.includes(index)) {
+      setSelectedPlayerIndex(null);
       return;
     }
 
-    const newUserTeam = [...userTeam];
-    const playerIndex = newUserTeam.findIndex(p => p.name === playerName);
+    const newRosterArray = [...updatedRosterArray];
+    const sourcePlayerCopy = { ...sourcePlayer };
+    const targetPlayerCopy = targetPlayer ? { ...targetPlayer } : null;
 
-    // Move the player
-    newUserTeam[playerIndex].slot = newSlot;
-
-    // If swapping, move the current player in the slot to BENCH
-    if (currentPlayerInSlot) {
-      const currentPlayerIndex = newUserTeam.findIndex(p => p.name === currentPlayerInSlot.name);
-      // Find an available BENCH slot
-      const availableBenchSlot = slots.find(s => s.slot.startsWith('BENCH') && isSlotAvailable(s.slot));
-      newUserTeam[currentPlayerIndex].slot = availableBenchSlot ? availableBenchSlot.slot : 'BENCH1';
+    if (!targetPlayer) {
+      newRosterArray[index] = {
+        ...newRosterArray[index],
+        player: { ...sourcePlayerCopy, slot: newRosterArray[index].sPosition }
+      };
+      newRosterArray[selectedPlayerIndex] = {
+        ...newRosterArray[selectedPlayerIndex],
+        player: null
+      };
+    } else if (sourcePlayer.playingPosition === targetPlayer.playingPosition) {
+      newRosterArray[index] = {
+        ...newRosterArray[index],
+        player: { ...sourcePlayerCopy, slot: newRosterArray[index].sPosition }
+      };
+      newRosterArray[selectedPlayerIndex] = {
+        ...newRosterArray[selectedPlayerIndex],
+        player: { ...targetPlayerCopy, slot: newRosterArray[selectedPlayerIndex].sPosition }
+      };
+    } else {
+      let benchIndex = newRosterArray.findIndex(e => e.position === 'BENCH' && !e.player);
+      if (benchIndex === -1) {
+        const benchCount = newRosterArray.filter(e => e.position === 'BENCH').length;
+        const newBenchSlot = `BENCH${benchCount + 1}`;
+        benchIndex = newRosterArray.length;
+        newRosterArray.push({
+          sPosition: newBenchSlot,
+          position: 'BENCH',
+          player: null
+        });
+      }
+      newRosterArray[benchIndex] = {
+        ...newRosterArray[benchIndex],
+        player: { ...targetPlayerCopy, slot: newRosterArray[benchIndex].sPosition }
+      };
+      newRosterArray[index] = {
+        ...newRosterArray[index],
+        player: { ...sourcePlayerCopy, slot: newRosterArray[index].sPosition }
+      };
+      newRosterArray[selectedPlayerIndex] = {
+        ...newRosterArray[selectedPlayerIndex],
+        player: null
+      };
     }
 
-    setUserTeam(newUserTeam);
-    console.log(`Moved ${player.name} to ${newSlot}`);
+    setUpdatedRosterArray(normalizeRosterArray(newRosterArray));
+    setSelectedPlayerIndex(null);
   };
 
-  // Get player for a specific slot
-  const getPlayerForSlot = (slot) => {
-    return userTeam.find(p => p.slot === slot);
-  };
+  if (!rosterStructure || !Array.isArray(rosterStructure) || !updatedRosterArray.length) {
+    return <div className="error-message">Error: Invalid roster structure.</div>;
+  }
 
-  // Split slots into active and bench
-  const activeSlots = slots.filter(s => !s.slot.startsWith('BENCH'));
-  const benchSlots = slots.filter(s => s.slot.startsWith('BENCH'));
+  const eligibleSlots = getEligibleSlots(selectedPlayerIndex);
 
   return (
-    <Container className="roster-table-container animate__animated animate__fadeIn">
-      <h3 className="text-center mb-3">Active Roster</h3>
-      <Table responsive striped bordered hover className="roster-table mb-4">
-        <thead>
-          <tr>
-            <th>Roster Position</th>
-            <th>Name</th>
-            <th>Team</th>
-            {editable && <th>Actions</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {activeSlots.map(({ slot, position }, index) => {
-            const player = getPlayerForSlot(slot);
-            return (
-              <tr key={index}>
-                <td className="roster-position-cell">{slot}</td>
-                <td>{player ? player.name : 'Empty'}</td>
-                <td>{player ? player.team : '-'}</td>
-                {editable && (
-                  <td>
-                    <Dropdown>
-                      <Dropdown.Toggle variant="success" size="sm" className="edit-button">
-                        Edit
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        {getValidSlots(player ? player.playingPosition : 'ANY').map(s => (
-                          <Dropdown.Item
-                            key={s}
-                            onClick={() => handleMovePlayer(player ? player.name : null, s)}
-                            disabled={
-                              !player ||
-                              (s !== 'BENCH' &&
-                                !isSlotAvailable(s, player.name) &&
-                                !userTeam.some(p => p.slot === s && p.playingPosition === player.playingPosition))
-                            }
-                          >
-                            {s}
-                          </Dropdown.Item>
-                        ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </td>
-                )}
-              </tr>
-            );
-          })}
-          {activeSlots.length === 0 && (
+    <div className="fantasy-roster-container animate__animated animate__fadeIn">
+      <h2 className="roster-title">Team Roster</h2>
+      <div className="table-responsive">
+        <table className="roster-table">
+          <thead>
             <tr>
-              <td colSpan={editable ? 4 : 3}>No active roster slots</td>
+              <th>Slot</th>
+              <th>Player</th>
             </tr>
-          )}
-        </tbody>
-      </Table>
-
-      <h3 className="text-center mb-3">Bench</h3>
-      <Table responsive striped bordered hover className="roster-table">
-        <thead>
-          <tr>
-            <th>Roster Position</th>
-            <th>Name</th>
-            <th>Team</th>
-            {editable && <th>Actions</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {benchSlots.map(({ slot, position }, index) => {
-            const player = getPlayerForSlot(slot);
-            return (
-              <tr key={index}>
-                <td className="roster-position-cell">{slot}</td>
-                <td>{player ? player.name : 'Empty'}</td>
-                <td>{player ? player.team : '-'}</td>
-                {editable && (
-                  <td>
-                    <Dropdown>
-                      <Dropdown.Toggle variant="success" size="sm" className="edit-button">
-                        Edit
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        {getValidSlots(player ? player.playingPosition : 'ANY').map(s => (
-                          <Dropdown.Item
-                            key={s}
-                            onClick={() => handleMovePlayer(player ? player.name : null, s)}
-                            disabled={
-                              !player ||
-                              (s !== 'BENCH' &&
-                                !isSlotAvailable(s, player.name) &&
-                                !userTeam.some(p => p.slot === s && p.playingPosition === player.playingPosition))
-                            }
-                          >
-                            {s}
-                          </Dropdown.Item>
-                        ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </td>
-                )}
+          </thead>
+          <tbody>
+            {updatedRosterArray.map((rosterEntry, index) => (
+              <tr key={rosterEntry.sPosition} className="roster-row">
+                <td className="slot-cell">{rosterEntry.position}</td>
+                <td className={`player-cell ${eligibleSlots.includes(index) ? 'slot-eligible' : ''}`}>
+                  {rosterEntry.player ? (
+                    <PlayerCard
+                      player={rosterEntry.player}
+                      index={index}
+                      onClick={handlePlayerClick}
+                    />
+                  ) : (
+                    <div
+                      className="empty-slot"
+                      onClick={() => handlePlayerClick(index)}
+                    >
+                      Empty
+                    </div>
+                  )}
+                </td>
               </tr>
-            );
-          })}
-          {benchSlots.length === 0 && (
-            <tr>
-              <td colSpan={editable ? 4 : 3}>No bench slots</td>
-            </tr>
-          )}
-        </tbody>
-      </Table>
-    </Container>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 

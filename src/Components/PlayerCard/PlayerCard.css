@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+.player-card {
+  background: #222222;
+  border: 1px solid #2ecc71;
+  border-radius: 4px;
+  padding: 8px;
+  cursor: move;
+  font-family: 'Poppins', sans-serif;
+  color: #e0e0e0;
+  font-size: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.player-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.5);
+}
+
+.player-card-dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+}
+
+.player-card.selected {
+  border: 2px solid #2ecc71;
+  box-shadow: 0 0 8px rgba(46, 204, 113, 0.7);
+  transform: scale(1.03);
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.player-name {
+  font-weight: 700;
+  color: #2ecc71;
+}
+
+.player-details {
+  font-size: 11px;
+  color: #e0e0e0;
+}
+
+@media (max-width: 768px) {
+  .player-card {
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .player-details {
+    font-size: 10px;
+  }
+}
