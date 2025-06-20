@@ -3,10 +3,13 @@ import PlayerCard from '../PlayerCard/PlayerCard';
 import './RosterTableComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const RosterTableComponent = ({ initialRoster, rosterStructure }) => {
+const RosterTableComponent = ({ teamRoster, rosterStructure, teamInfo, onRosterSubmit }) => {
   const [updatedRosterArray, setUpdatedRosterArray] = useState([]);
   const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(null);
   const minBenchCount = rosterStructure?.find(r => r.position === 'BENCH')?.count || 6;
+
+  // Debug teamInfo
+  console.log('RosterTableComponent props:', { teamRoster, rosterStructure, teamInfo });
 
   // Construct updatedRosterArray
   useEffect(() => {
@@ -24,8 +27,8 @@ const RosterTableComponent = ({ initialRoster, rosterStructure }) => {
     }
 
     // Add BENCH slots
-    if (initialRoster && Array.isArray(initialRoster)) {
-      const benchPlayers = initialRoster.filter(
+    if (teamRoster && Array.isArray(teamRoster)) {
+      const benchPlayers = teamRoster.filter(
         player => player && player.slot && player.slot.startsWith('BENCH')
       );
       const benchCount = Math.max(minBenchCount, benchPlayers.length);
@@ -34,13 +37,18 @@ const RosterTableComponent = ({ initialRoster, rosterStructure }) => {
       }
     }
 
-    // Populate players
-    if (initialRoster && Array.isArray(initialRoster)) {
-      initialRoster.forEach(teamPlayer => {
+    // Populate players from teamRoster (leagueTeams format)
+    if (teamRoster && Array.isArray(teamRoster)) {
+      teamRoster.forEach(teamPlayer => {
         if (teamPlayer && teamPlayer.slot) {
           const rosterEntry = rosterArray.find(entry => entry.sPosition === teamPlayer.slot);
           if (rosterEntry) {
-            rosterEntry.player = { ...teamPlayer };
+            rosterEntry.player = {
+              name: teamPlayer.name,
+              playingPosition: teamPlayer.playingPosition,
+              slot: teamPlayer.slot,
+              team: teamPlayer.team
+            };
           }
         }
       });
@@ -51,7 +59,7 @@ const RosterTableComponent = ({ initialRoster, rosterStructure }) => {
       player: e.player?.name || null
     })));
     setUpdatedRosterArray(rosterArray);
-  }, [rosterStructure, initialRoster, minBenchCount]);
+  }, [rosterStructure, teamRoster, minBenchCount]);
 
   // Get eligible slots for a player
   const getEligibleSlots = (playerIndex) => {
@@ -202,6 +210,26 @@ const RosterTableComponent = ({ initialRoster, rosterStructure }) => {
     setSelectedPlayerIndex(null);
   };
 
+  // Handle roster submission
+  const handleRosterSubmit = () => {
+    if (onRosterSubmit) {
+      // Format updatedRosterArray to match teamRoster prop (leagueTeams format)
+      const formattedRoster = updatedRosterArray
+        .filter(entry => entry.player) // Only include slots with players
+        .map(entry => ({
+          name: entry.player.name,
+          playingPosition: entry.player.playingPosition,
+          slot: entry.sPosition,
+          team: entry.player.team
+        }));
+      console.log('Submitted Roster (leagueTeams format):', formattedRoster.map(player => ({
+        name: player.name,
+        slot: player.slot
+      })));
+      onRosterSubmit(formattedRoster);
+    }
+  };
+
   if (!rosterStructure || !Array.isArray(rosterStructure) || !updatedRosterArray.length) {
     return <div className="error-message">Error: Invalid roster structure.</div>;
   }
@@ -210,7 +238,7 @@ const RosterTableComponent = ({ initialRoster, rosterStructure }) => {
 
   return (
     <div className="fantasy-roster-container animate__animated animate__fadeIn">
-      <h2 className="roster-title">Team Roster</h2>
+      <h2 className="roster-title">{teamInfo?.team_name ? `${teamInfo.team_name}'s Roster` : 'Team Roster'}</h2>
       <div className="table-responsive">
         <table className="roster-table">
           <thead>
@@ -243,6 +271,14 @@ const RosterTableComponent = ({ initialRoster, rosterStructure }) => {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="submit-roster-container">
+        <button
+          className="btn btn-primary submit-roster-btn"
+          onClick={handleRosterSubmit}
+        >
+          Submit Roster
+        </button>
       </div>
     </div>
   );

@@ -1,0 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+.waivers-container {
+  padding: 12px;
+  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
+  border-radius: 6px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  font-family: 'Poppins', sans-serif;
+}
+
+.waivers-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2ecc71;
+  letter-spacing: 0.5px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.waivers-tables-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.table-wrapper {
+  max-width: 900px; /* Free Agents expands */
+}
+
+.roster-table-wrapper {
+  flex: 0.33; /* 1/3 the size of Free Agents */
+  max-width: 240px; /* Tighter for PlayerCard */
+}
+
+.free-agents-table-wrapper {
+  flex: 1; /* Fills remaining space */
+}
+
+.table-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2ecc71;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.waivers-table {
+  background-color: #333333;
+  color: #e0e0e0;
+  font-size: 13px;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.waivers-table th,
+.waivers-table td {
+  border: 0.5px solid #27ae60;
+  padding: 1px; /* Minimal padding */
+  vertical-align: middle;
+}
+
+.waivers-table th {
+  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+  color: #1c1c1c;
+  font-weight: 700;
+  text-align: left;
+}
+
+.waivers-row {
+  height: 42px; /* PlayerCard (40px) + 2px padding (1px top/bottom) */
+}
+
+.waivers-row:hover {
+  background-color: #3a3a3a;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.player-cell {
+  background: #2e2e2e;
+  padding: 1px; /* Matches table padding */
+  width: auto; /* Let PlayerCard dictate width */
+  height: 42px; /* Match row height */
+}
+
+.empty-message {
+  color: #b0b0b0;
+  font-size: 12px;
+  text-align: center;
+  padding: 8px;
+  background: #2e2e2e;
+  border-radius: 4px;
+  min-height: 40px; /* Match PlayerCard */
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+.pagination-btn {
+  background: #2ecc71;
+  color: #1c1c1c;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.pagination-btn:hover {
+  background: #27ae60;
+}
+
+.pagination-btn:disabled {
+  background: #666666;
+  cursor: not-allowed;
+}
+
+.pagination-btn.active {
+  background: #27ae60;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.5);
+}
+
+@media (max-width: 768px) {
+  .waivers-container {
+    padding: 10px;
+    max-width: 100%;
+  }
+
+  .waivers-title {
+    font-size: 1.2rem;
+  }
+
+  .waivers-tables-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .table-wrapper,
+  .roster-table-wrapper,
+  .free-agents-table-wrapper {
+    max-width: 100%;
+    flex: none; /* Stack vertically */
+  }
+
+  .roster-table-wrapper {
+    max-width: 100%;
+  }
+
+  .table-title {
+    font-size: 1rem;
+  }
+
+  .waivers-table {
+    font-size: 12px;
+  }
+
+  .waivers-table th,
+  .waivers-table td {
+    padding: 0px; /* No padding on mobile */
+  }
+
+  .waivers-row {
+    height: 37px; /* PlayerCard (35px) + 2px padding */
+  }
+
+  .player-cell {
+    padding: 0px;
+    height: 37px;
+  }
+
+  .empty-message {
+    font-size: 11px;
+    min-height: 35px;
+  }
+
+  .pagination-container {
+    gap: 6px;
+    margin-top: 0.8rem;
+  }
+
+  .pagination-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+}

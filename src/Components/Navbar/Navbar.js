@@ -4,34 +4,27 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 import './Navbar.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const NavBar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('authToken'));
+const NavBar = ({ currentUser, setCurrentUser }) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('user'));
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('authToken');
-      console.log('NavBar: isLoggedIn=', !!token);
-      setIsLoggedIn(!!token);
-    };
-
-    checkAuth();
-    const interval = setInterval(checkAuth, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+    // Sync isLoggedIn with currentUser from App.js
+    setIsLoggedIn(!!currentUser);
+  }, [currentUser]);
 
   const handleLogout = () => {
     console.log('NavBar: Logging out');
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
     setIsLoggedIn(false);
+    setCurrentUser(null);
     navigate('/login');
   };
 
   return (
     <Navbar expand="lg" className="navbar-custom animate__animated animate__fadeIn" variant="dark">
       <Container>
-        <NavLink className="navbar-brand-custom" to="/">
+        <NavLink className="navbar-brand-custom" to={isLoggedIn ? "/dashboard" : "/login"}>
           Vampire Football
         </NavLink>
         <Navbar.Toggle aria-controls="navbarNav" />
@@ -55,10 +48,17 @@ const NavBar = () => {
                 </Nav.Link>
                 <Nav.Link
                   as={NavLink}
-                  to="/trade"   
+                  to="/trade"
                   className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
                 >
                   Trade
+                </Nav.Link>
+                <Nav.Link
+                  as={NavLink}
+                  to="/waivers"
+                  className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
+                >
+                  Waivers
                 </Nav.Link>
                 <Nav.Link onClick={handleLogout} className="nav-link-custom">
                   Logout

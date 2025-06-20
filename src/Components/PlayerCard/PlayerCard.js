@@ -7,10 +7,7 @@ const PlayerCard = ({ player, index, onClick }) => {
   return (
     <div className="player-card" onClick={() => onClick(index)}>
       <div className="player-info">
-        <span className="player-name">{player.name}</span>
-        <span className="player-details">
-          {player.playingPosition} - {player.team}
-        </span>
+        <span>{player.name} - {player.playingPosition} - {player.team}</span>
       </div>
     </div>
   );

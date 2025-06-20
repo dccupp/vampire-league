@@ -1,77 +1,89 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Login from './Components/Login/Login';
 import Registration from './Components/Registration/Registration';
 import Dashboard from './Components/Dashboard/Dashboard';
-import OfferTradeComponent from './Components/OffterTradeComponent/OfferTradeComponent';  
+import OfferTradeComponent from './Components/OfferTradeComponent/OfferTradeComponent';
 import RosterTableComponent from './Components/RosterTableComponent/RosterTableComponent';
+import AddPlayerFromWaiversComponent from './Components/AddPlayerFromWaiversComponent/AddPlayerFromWaiversComponent';
 import PrivateRoute from './Components/PrivateRoute/PrivateRoute';
 import Layout from './Components/Layout/Layout';
+import axios from 'axios';
 
+// Mock roster structure (replace with API call in production)
 const rosterStructure = [
   { position: 'QB', count: 1 },
   { position: 'RB', count: 2 },
-  { position: 'WR', count: 3 },
+  { position: 'WR', count: 2 },
   { position: 'TE', count: 1 },
   { position: 'FLEX', count: 1 },
-  { position: 'DEF', count: 1 },
-  { position: 'K', count: 1 },
-  { position: 'BENCH', count: 6 },
-];
-
-const initialUserTeam = [
-  { name: 'Patrick Mahomes', playingPosition: 'QB', slot: 'QB1', team: 'Chiefs' },
-  { name: 'Christian McCaffrey', playingPosition: 'RB', slot: 'RB1', team: '49ers' },
-  { name: 'Saquon Barkley', playingPosition: 'RB', slot: 'RB2', team: 'Eagles' },
-  { name: 'Tyreek Hill', playingPosition: 'WR', slot: 'WR1', team: 'Dolphins' },
-  { name: 'Justin Jefferson', playingPosition: 'WR', slot: 'WR2', team: 'Vikings' },
-  { name: 'CeeDee Lamb', playingPosition: 'WR', slot: 'BENCH7', team: 'Cowboys' },
-  { name: 'Travis Kelce', playingPosition: 'TE', slot: 'TE1', team: 'Chiefs' },
-  { name: 'Davante Adams', playingPosition: 'WR', slot: 'FLEX1', team: 'Raiders' },
-  { name: 'Buffalo Bills', playingPosition: 'DEF', slot: 'DEF1', team: 'Bills' },
-  { name: 'Justin Tucker', playingPosition: 'K', slot: 'K1', team: 'Ravens' },
-  { name: 'Josh Allen', playingPosition: 'QB', slot: 'BENCH1', team: 'Bills' },
-  { name: 'Derrick Henry', playingPosition: 'RB', slot: 'BENCH2', team: 'Ravens' },
-  { name: 'A.J. Brown', playingPosition: 'WR', slot: 'BENCH3', team: 'Eagles' },
-  { name: 'Sam LaPorta', playingPosition: 'TE', slot: 'BENCH4', team: 'Lions' },
-  { name: 'Pittsburgh Steelers', playingPosition: 'DEF', slot: 'BENCH5', team: 'Steelers' },
-  { name: 'Jake Elliott', playingPosition: 'K', slot: 'BENCH6', team: 'Eagles' },
+  { position: 'BENCH', count: 6 }
 ];
 
 const maxRosterSize = rosterStructure.reduce((total, { count }) => total + count, 0);
 const minBenchCount = rosterStructure.find(r => r.position === 'BENCH')?.count || 6;
 
-console.log('Max Roster Size:', maxRosterSize);
-console.log('Min Bench Count:', minBenchCount);
-
 function App() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userTeamRoster, setUserTeamRoster] = useState(null);
+  const [teamInfo, setTeamInfo] = useState(null);
+
+  // Initialize currentUser from localStorage
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    if (storedUser) {
+      setCurrentUser(storedUser);
+    }
+  }, []);
+
+  // Fetch user team roster and team info when currentUser changes
+  useEffect(() => {
+    if (currentUser) {
+      const fetchTeamData = async () => {
+        try {
+          // Placeholder API call for team info and roster
+          const teamResponse = await axios.get(`/teams/${currentUser.id}`);
+          setTeamInfo(teamResponse.data);
+
+          const rosterResponse = await axios.get(`/teams/roster/${currentUser.id}`);
+          setUserTeamRoster(rosterResponse.data.roster);
+          console.log('Fetched User Team Roster:', rosterResponse.data.roster);
+        } catch (error) {
+          console.error('Error fetching team data:', error);
+        }
+      };
+      fetchTeamData();
+    }
+  }, [currentUser]);
+
+  // Handle roster submission
+  const handleRosterSubmit = (rosterArray) => {
+    console.log('Submitted Roster:', rosterArray);
+    setUserTeamRoster([...rosterArray]);
+  };
+
   return (
     <div className="app-wrapper">
       <Router>
-        <Layout>
+        <Layout currentUser={currentUser} setCurrentUser={setCurrentUser}>
           <Routes>
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<Login setCurrentUser={setCurrentUser} />} />
             <Route path="/register" element={<Registration />} />
-            <Route
-              path="/"
-              element={
-                <PrivateRoute>
-                  <Dashboard
-                    initialRoster={initialUserTeam}
-                    rosterStructure={rosterStructure}
-                  />
-                </PrivateRoute>
-              }
-            />
             <Route
               path="/dashboard"
               element={
                 <PrivateRoute>
-                  <Dashboard
-                    initialRoster={initialUserTeam}
-                    rosterStructure={rosterStructure}
-                  />
+                  {currentUser ? (
+                    <Dashboard
+                      teamRoster={userTeamRoster}
+                      rosterStructure={rosterStructure}
+                      currentUser={currentUser}
+                      teamInfo={teamInfo}
+                    />
+                  ) : (
+                    <Navigate to="/login" />
+                  )}
                 </PrivateRoute>
               }
             />
@@ -79,10 +91,16 @@ function App() {
               path="/roster"
               element={
                 <PrivateRoute>
-                  <RosterTableComponent
-                    initialRoster={initialUserTeam}
-                    rosterStructure={rosterStructure}
-                  />
+                  {currentUser ? (
+                    <RosterTableComponent
+                      teamRoster={userTeamRoster}
+                      rosterStructure={rosterStructure}
+                      teamInfo={teamInfo}
+                      onRosterSubmit={handleRosterSubmit}
+                    />
+                  ) : (
+                    <Navigate to="/login" />
+                  )}
                 </PrivateRoute>
               }
             />
@@ -90,12 +108,33 @@ function App() {
               path="/trade"
               element={
                 <PrivateRoute>
-                  <OfferTradeComponent
-                    user1Roster={initialUserTeam}
-                  />
+                  {currentUser ? (
+                    <OfferTradeComponent
+                      teamRoster={userTeamRoster}
+                      leagueTeams={[]} // Replace with API call
+                      leagueTeamsInfo={[]} // Replace with API call
+                    />
+                  ) : (
+                    <Navigate to="/login" />
+                  )}
                 </PrivateRoute>
               }
             />
+            <Route
+              path="/waivers"
+              element={
+                <PrivateRoute>
+                  {currentUser ? (
+                    <AddPlayerFromWaiversComponent
+                      currentUser={currentUser}
+                    />
+                  ) : (
+                    <Navigate to="/login" />
+                  )}
+                </PrivateRoute>
+              }
+            />
+            <Route path="/" element={<Navigate to="/login" />} />
           </Routes>
         </Layout>
       </Router>

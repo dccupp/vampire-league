@@ -135,6 +135,35 @@
   min-height: 60px; /* Match PlayerCard height */
 }
 
+.submit-roster-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.submit-roster-btn {
+  background: #2ecc71;
+  color: #1c1c1c;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.submit-roster-btn:hover {
+  background: #27ae60;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.5);
+}
+
+.submit-roster-btn:disabled {
+  background: #666666;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .fantasy-roster-container {
     padding: 10px;
@@ -180,5 +209,14 @@
   .empty-slot {
     font-size: 11px;
     min-height: 50px; /* Match PlayerCard height for mobile */
+  }
+
+  .submit-roster-container {
+    margin-top: 1rem;
+  }
+
+  .submit-roster-btn {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }
