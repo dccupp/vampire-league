@@ -15,10 +15,7 @@ const rosterStructure = [
   { position: 'QB', count: 1 },
   { position: 'RB', count: 2 },
   { position: 'WR', count: 3 },
-  { position: 'TE', count: 1 },
-  { position: 'FLEX', count: 1 },
-  { position: 'DEF', count: 1 },
-  { position: 'K', count: 1 },
+  { position: 'FLEX', count: 2 },
   { position: 'BENCH', count: 6 },
 ];
 

@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import './Login.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Login = ({ setCurrentUser }) => {
+const Login = ({ setCurrentUser, currentUser }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -33,8 +33,9 @@ const Login = ({ setCurrentUser }) => {
           last_name: data.last_name,
         };
         localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.removeItem('league'); // Ensure no stale league data
         setCurrentUser(userData);
-        setIsAuthenticated(true);
+        navigate('/landing');
       } else {
         if (message === 'Email not found') {
           setMessage('Email address not found. Please register or try another email.');
@@ -52,8 +53,8 @@ const Login = ({ setCurrentUser }) => {
     }
   };
 
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" />;
+  if (currentUser) {
+    return <Navigate to="/landing" />;
   }
 
   return (

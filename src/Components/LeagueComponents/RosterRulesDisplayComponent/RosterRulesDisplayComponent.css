@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+.roster-rules-container {
+  padding: 16px;
+  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
+  border-radius: 6px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  max-width: 800px;
+  width: 100%;
+  margin: 2rem auto 0 auto;
+  font-family: 'Poppins', sans-serif;
+}
+
+.roster-rules-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #2ecc71;
+  letter-spacing: 0.5px;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.roster-rules-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.roster-rules-category {
+  background: #333333;
+  border-radius: 4px;
+  padding: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.roster-rules-category:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3);
+}
+
+.roster-rules-category-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2ecc71;
+  letter-spacing: 0.5px;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.roster-rules-table {
+  width: 100%;
+  background-color: #333333;
+  color: #e0e0e0;
+  font-size: 14px;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.roster-rules-table th,
+.roster-rules-table td {
+  border: 0.5px solid #27ae60;
+  padding: 8px;
+  vertical-align: middle;
+}
+
+.roster-rules-table th {
+  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+  color: #1c1c1c;
+  font-weight: 700;
+  text-align: left;
+}
+
+.roster-rules-table th:first-child {
+  width: 70%;
+}
+
+.roster-rules-row:hover {
+  background-color: #3a3a3a;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.roster-rules-info {
+  font-size: 14px;
+  font-weight: 400;
+  color: #b0b0b0;
+  text-align: left;
+}
+
+.error-message {
+  color: #ff4444;
+  text-align: center;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .roster-rules-container {
+    padding: 12px;
+    max-width: 100%;
+    margin: 1.5rem auto 0 auto;
+  }
+
+  .roster-rules-title {
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .roster-rules-categories {
+    gap: 16px;
+  }
+
+  .roster-rules-category {
+    padding: 10px;
+  }
+
+  .roster-rules-category-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .roster-rules-table {
+    font-size: 13px;
+  }
+
+  .roster-rules-table th,
+  .roster-rules-table td {
+    padding: 6px;
+  }
+
+  .roster-rules-info {
+    font-size: 13px;
+  }
+
+  .error-message {
+    font-size: 13px;
+  }
+}
