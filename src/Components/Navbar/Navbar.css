@@ -6,6 +6,8 @@
   padding: 8px 0;
   font-family: 'Poppins', sans-serif;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  position: relative; /* Establish stacking context */
+  z-index: 1100; /* Higher than other components */
 }
 
 .navbar-brand-custom {
@@ -52,7 +54,8 @@
   border-radius: 4px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   margin-top: 4px;
-  z-index: 1000;
+  z-index: 1150; /* Increased to ensure dropdowns are above all content */
+  position: absolute;
 }
 
 .dropdown-item {
@@ -95,6 +98,7 @@
 @media (max-width: 768px) {
   .navbar-custom {
     padding: 6px 0;
+    z-index: 1100; /* Ensure mobile navbar is above content */
   }
   .navbar-expand-lg .navbar-nav .nav-link-custom {
     margin-left: 0;
@@ -105,7 +109,8 @@
     background: #333333;
     border: 0.5px solid #27ae60;
     margin-top: 2px;
-    z-index: 1000;
+    z-index: 1150; /* Ensure mobile dropdowns are above content */
+    position: absolute;
   }
   .dropdown-item {
     text-align: center;

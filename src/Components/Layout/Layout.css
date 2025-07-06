@@ -1,6 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 
+.layout-container {
+  position: relative; /* Ensure navbar and content have proper stacking context */
+  z-index: 1000; /* Lower than navbar to avoid overlap */
+}
+
+.layout-content {
+  z-index: 1000; /* Ensure content is below navbar dropdowns */
+}
+
 .fantasy-roster-container {
   padding: 12px;
   background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
@@ -9,6 +18,8 @@
   max-width: 700px;
   width: 100%;
   margin: 0 auto;
+  position: relative; /* Ensure stacking context for child elements */
+  z-index: 1000; /* Below navbar dropdowns */
 }
 
 .roster-title {
@@ -88,12 +99,14 @@
   margin: 0 auto;
   border-radius: 6px;
   overflow-x: auto;
+  z-index: 1000; /* Below navbar dropdowns */
 }
 
 @media (max-width: 768px) {
   .fantasy-roster-container {
     padding: 10px;
     max-width: 100%;
+    z-index: 1000; /* Below navbar dropdowns */
   }
 
   .roster-title {
@@ -121,5 +134,6 @@
 
   .table-responsive {
     max-width: 100%;
+    z-index: 1000; /* Below navbar dropdowns */
   }
 }

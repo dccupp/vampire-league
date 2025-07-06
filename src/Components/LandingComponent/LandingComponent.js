@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Modal, Button } from 'react-bootstrap';
 import './LandingComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const LandingComponent = ({ currentUser, setCurrentLeague }) => {
   const [leagues, setLeagues] = useState([]);
   const [invitations, setInvitations] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedInvite, setSelectedInvite] = useState(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -18,10 +15,11 @@ const LandingComponent = ({ currentUser, setCurrentLeague }) => {
     if (currentUser?.id) {
       const fetchLeagues = async () => {
         try {
-          console.log('Fetching leagues for user_id:', currentUser.id);
+          console.log('Fetching league memberships for user_id:', currentUser.id);
           const response = await axios.get(`http://localhost/vampire_project/vamp_api/league_members/getLeagueMembersByUserId/${currentUser.id}`);
           console.log('GET /league_members/getLeagueMembersByUserId response:', response.data);
           const memberships = Array.isArray(response.data) ? response.data : [];
+
           setLeagues(memberships.filter(m => m.role === 'player' || m.role === 'commish'));
           setInvitations(memberships.filter(m => m.role === 'invited'));
           setError(''); // Clear error on success
@@ -60,45 +58,26 @@ const LandingComponent = ({ currentUser, setCurrentLeague }) => {
     navigate('/dashboard');
   };
 
-  // Handle opening the modal
-  const handleOpenModal = (league) => {
-    setSelectedInvite(league);
-    setShowModal(true);
-  };
-
-  // Handle closing the modal
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedInvite(null);
-  };
-
-  // Handle accepting or declining an invite
-  const handleInviteAction = async (action) => {
-    if (!selectedInvite) return;
+  // Handle accepting an invitation
+  const handleAcceptInvitation = async (league) => {
     try {
-      const role = action === 'accept' ? 'member' : 'declined';
-      const response = await axios.put(`http://localhost/vampire_project/vamp_api/league_members/updateRole/${selectedInvite.league_id}/${currentUser.id}`, { role });
-      console.log(`PUT /league_members/updateRole/${selectedInvite.league_id}/${currentUser.id} response:`, response.data);
+      const response = await axios.put(`http://localhost/vampire_project/vamp_api/league_members/updateRole/${league.league_id}/${currentUser.id}`, { role: 'player' });
+      console.log(`PUT /league_members/updateRole/${league.league_id}/${currentUser.id} response:`, response.data);
       if (response.data.status === 'success') {
         // Update local state
-        if (action === 'accept') {
-          const updatedLeagues = [...leagues, { ...selectedInvite, role: 'member' }];
-          setLeagues(updatedLeagues);
-          setInvitations(invitations.filter(i => i.league_id !== selectedInvite.league_id));
-        } else {
-          setInvitations(invitations.filter(i => i.league_id !== selectedInvite.league_id));
-        }
-        handleCloseModal();
+        setLeagues([...leagues, { ...league, role: 'player' }]);
+        setInvitations(invitations.filter(i => i.league_id !== league.league_id));
+        setError('');
       } else {
-        setError(response.data.message || 'Failed to process invitation');
+        setError(response.data.message || 'Failed to accept invitation');
       }
     } catch (err) {
-      console.error(`Error processing ${action} invite:`, {
+      console.error('Error accepting invitation:', {
         message: err.message,
         status: err.response?.status,
         data: err.response?.data
       });
-      setError(err.response?.data?.message || `Failed to ${action} invitation`);
+      setError(err.response?.data?.message || 'Failed to accept invitation');
     }
   };
 
@@ -119,7 +98,7 @@ const LandingComponent = ({ currentUser, setCurrentLeague }) => {
                     style={{ cursor: 'pointer' }}
                     onClick={() => handleSelectLeague(league)}
                   >
-                    {league.name} ({league.role === 'commish' ? 'Commissioner' : 'Member'})
+                    {league.name} ({league.role === 'commish' ? 'Commissioner' : 'Member'}{league.is_vamp ? ', Vampire Player' : ''})
                   </span>
                 </li>
               ))}
@@ -135,13 +114,16 @@ const LandingComponent = ({ currentUser, setCurrentLeague }) => {
             <ul className="league-list">
               {invitations.map((invitation) => (
                 <li key={invitation.league_id} className="league-item">
-                  <span
+                  <a
+                    href="#"
                     className="league-link"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => handleOpenModal(invitation)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleAcceptInvitation(invitation);
+                    }}
                   >
                     {invitation.name}
-                  </span>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -162,31 +144,6 @@ const LandingComponent = ({ currentUser, setCurrentLeague }) => {
             </Link>
           </div>
         )}
-
-        {/* Bootstrap Modal for Invite Actions */}
-        <Modal show={showModal} onHide={handleCloseModal} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>League Invitation</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {selectedInvite ? (
-              <p>Do you want to accept or decline the invitation to join <strong>{selectedInvite.name}</strong>?</p>
-            ) : (
-              <p>No invitation selected.</p>
-            )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Cancel
-            </Button>
-            <Button variant="success" onClick={() => handleInviteAction('accept')}>
-              Accept
-            </Button>
-            <Button variant="danger" onClick={() => handleInviteAction('decline')}>
-              Decline
-            </Button>
-          </Modal.Footer>
-        </Modal>
       </div>
     </div>
   );

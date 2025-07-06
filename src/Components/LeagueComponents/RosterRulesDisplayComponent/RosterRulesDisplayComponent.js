@@ -80,6 +80,7 @@ const RosterRulesDisplayComponent = ({ currentUser, currentLeague }) => {
       { label: 'Max Running Backs', value: rules.max_rb_count },
       { label: 'Max Wide Receivers', value: rules.max_wr_count },
       { label: 'Max Tight Ends', value: rules.max_te_count },
+      { label: 'Beginning FAAB Budget', value: rules.beginning_faab }
     ];
 
     return (
