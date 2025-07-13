@@ -1,0 +1,11 @@
+The second point is for how PlayerCard components are allowed to move around the roster table, I want you to keep track of what roster row all the PlayerCard components are currently located on the Roster Table. Each roster row should have property data that contains the exact roster row information (RB1, RB2, WR1, FLEX1, etc) and then just the general player position data the roster row allows to inhabit their row:
+
+If a PlayerCard component is moved to a new roster row location that is not inhabited by another PlayerCard component, allow the PlayerCard component to be moved there.
+
+If a PlayerCard component is moved to a new roster row that is already inhabited by another PlayerCard component, and both of the PlayerCards have the same Player Position value, (ex: both are RBs, both are WRs, etc), have them switch places on the table.
+
+If a PlayerCard component is moved to a new roster row that is already inhabited by another PlayerCard component, but these PlayerCard components are not of the same player position, I will need you to do a couple of checks:
+- Check the player position information of the PlayerCard that currently inhabits the roster row that the other is trying move to.  (Ex, I want to move Derrick Henry, an RB who currently inhabits an RB slot, to the FLEX position, which is inhabited by Justin Jefferson, a WR.  I want you to retrieve Justin Jefferson's player position data in this case.)
+- Check the player position of the roster row that the PlayerCard component that we have originally selected to move (Ex, I want to move Derrick Henry, an RB who currently inhabits an RB slot, to the FLEX position, which is inhabited by Justin Jefferson, a WR. I want you to retrieve Derrick Henry's roster row player position data in this case.  From the row table element, not the PlayerComponent element, to be more precise)
+-If the roster row position allows the player position value in that roster row... switch the two PlayerComponent components' places with each other ( This is to accommodate for future player positions that I will add as options for when a roster rules record is constructed that allow for multiple types of player positions to inhabit them)
+-If the roster row position does not allow the player position value in that roster row... have two things happen, move 

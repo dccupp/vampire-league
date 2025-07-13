@@ -83,3 +83,7 @@
   transform: scale(1.05);
   box-shadow: 0 0 10px rgba(46, 204, 113, 0.7);
 }
+
+.league-link.disabled {
+  opacity: 0.5;
+}

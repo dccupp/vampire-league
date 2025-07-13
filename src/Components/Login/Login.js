@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 
 // Configure Axios instance to ensure correct backend port
+// Ensure HTTPS is used in production to secure password transmission
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:3000'
 });
@@ -30,30 +31,9 @@ const Login = ({ setCurrentUser, currentUser }) => {
 
     try {
       const apiUrl = '/users/login';
-      console.log(`Login: Preparing POST request to http://localhost:3000${apiUrl}`);
-      console.log('Login: Request config:', {
-        method: 'POST',
-        url: apiUrl,
-        baseURL: 'http://localhost:3000',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        data: {
-          username: trimmedUsername,
-          password: '******' // Masked for security
-        },
-        globalBaseURL: axios.defaults.baseURL
-      });
       const response = await axiosInstance.post(apiUrl, {
         username: trimmedUsername,
         password
-      });
-      console.log('Login: Full response from login:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers,
-        data: response.data
       });
 
       if (response.data.status === 'success') {
@@ -68,9 +48,10 @@ const Login = ({ setCurrentUser, currentUser }) => {
         localStorage.removeItem('league'); // Clear stale league data
         setCurrentUser(userData);
         setMessage('Login successful! Redirecting to landing...');
+        // Reduced delay to 500ms to improve UX while ensuring currentUser is set
         setTimeout(() => {
           navigate('/landing');
-        }, 2000);
+        }, 500);
       } else {
         if (response.data.message === 'Username and password are required') {
           setMessage('Username and password are required.');
@@ -81,18 +62,7 @@ const Login = ({ setCurrentUser, currentUser }) => {
         }
       }
     } catch (error) {
-      console.error('Login: Error logging in:', error);
-      console.log('Login: Detailed error info:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        headers: error.response?.headers,
-        message: error.message,
-        config: error.config,
-        requestUrl: error.config?.url,
-        baseURL: error.config?.baseURL,
-        globalBaseURL: axios.defaults.baseURL
-      });
+      console.error('Error logging in:', error);
       if (error.response && error.response.status === 404) {
         setMessage(`Error: Endpoint not found. Please verify the backend server is running at http://localhost:3000 and the endpoint /users/login is accessible.`);
       } else if (error.response && error.response.status === 401) {

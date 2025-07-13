@@ -5,6 +5,8 @@
   "proxy": "http://localhost/vampire_project/vamp_api",
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
+    "@sentry/react": "^9.35.0",
+    "@sentry/tracing": "^7.120.3",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",

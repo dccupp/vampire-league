@@ -2,73 +2,94 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 
 .dashboard-container {
-  padding: 8px;
-  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
-  border-radius: 5px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  margin: 0 auto;
-  font-family: 'Poppins', sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #1c1c1c 0%, #111111 100%);
+  padding: 20px 0;
 }
 
 .dashboard-title {
-  font-size: 1.2rem;
+  font-family: 'Poppins', sans-serif;
+  font-size: 2rem;
   font-weight: 700;
   color: #2ecc71;
   letter-spacing: 0.5px;
 }
 
 .dashboard-subtitle {
-  font-size: 0.8rem;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.2rem;
   font-weight: 400;
-  color: #b0b0b0;
+  color: #e0e0e0;
+}
+
+.team-info-card {
+  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
 }
 
 .dashboard-team-info {
-  font-size: 0.8rem;
-  font-weight: 400;
-  color: #b0b0b0;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  color: #e0e0e0;
 }
 
 .dashboard-link {
   color: #2ecc71;
   text-decoration: none;
-  transition: color 0.2s, transform 0.2s;
+  transition: color 0.3s, transform 0.3s;
 }
 
 .dashboard-link:hover {
   color: #27ae60;
-  transform: scale(1.03);
+  transform: scale(1.05);
 }
 
-.dashboard-content {
-  padding: 6px;
-  background: #333333;
-  border-radius: 3px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+.team-info-divider {
+  color: #b0b0b0;
+  margin: 0 10px;
 }
 
-.dashboard-roster-title {
-  font-size: 1rem;
+.team-owner {
+  color: #e0e0e0;
+}
+
+.dashboard-content .card {
+  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+}
+
+.dashboard-content .card-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #2ecc71;
-  letter-spacing: 0.5px;
 }
 
-@media (max-width: 768px) {
-  .dashboard-container {
-    padding: 6px;
-  }
-  .dashboard-title {
-    font-size: 1.1rem;
-  }
-  .dashboard-subtitle,
-  .dashboard-team-info {
-    font-size: 0.75rem;
-  }
-  .dashboard-roster-title {
-    font-size: 0.9rem;
-  }
-  .dashboard-content {
-    padding: 4px;
-  }
+.dashboard-content .card-text {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  color: #e0e0e0;
+}
+
+.table {
+  background-color: #333333;
+  color: #e0e0e0;
+}
+
+.table th, .table td {
+  border-color: #27ae60;
+}
+
+.table thead th {
+  background-color: #2ecc71;
+  color: #1c1c1c;
+}
+
+.table tbody tr:hover {
+  background-color: #27ae60;
+  color: #fff;
 }

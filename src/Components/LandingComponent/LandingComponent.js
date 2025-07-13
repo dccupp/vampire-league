@@ -4,82 +4,119 @@ import axios from 'axios';
 import './LandingComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const LandingComponent = ({ currentUser, setCurrentLeague }) => {
+// Configure Axios instance
+const axiosInstance = axios.create({
+  baseURL: 'http://localhost:3000'
+});
+
+const LandingComponent = ({ currentUser, setCurrentLeague, setIsCommissioner, getCachedMembership, getCachedLeague }) => {
   const [leagues, setLeagues] = useState([]);
   const [invitations, setInvitations] = useState([]);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDataLoading, setIsDataLoading] = useState(true);
   const navigate = useNavigate();
 
   // Fetch user's league memberships
   useEffect(() => {
     if (currentUser?.id) {
       const fetchLeagues = async () => {
+        setIsDataLoading(true);
         try {
-          console.log('Fetching league memberships for user_id:', currentUser.id);
-          const response = await axios.get(`http://localhost/vampire_project/vamp_api/league_members/getLeagueMembersByUserId/${currentUser.id}`);
-          console.log('GET /league_members/getLeagueMembersByUserId response:', response.data);
-          const memberships = Array.isArray(response.data) ? response.data : [];
-
+          const response = await getCachedMembership(currentUser.id);
+          const memberships = Array.isArray(response) ? response : [];
           setLeagues(memberships.filter(m => m.role === 'player' || m.role === 'commish'));
           setInvitations(memberships.filter(m => m.role === 'invited'));
-          setError(''); // Clear error on success
+          setError('');
         } catch (err) {
-          console.error('Error fetching league memberships:', {
-            message: err.message,
-            status: err.response?.status,
-            data: err.response?.data
-          });
+          console.error('Error fetching league memberships:', err);
           if (err.response?.status === 404) {
             setLeagues([]);
             setInvitations([]);
-            setError(''); // No memberships is not an error
+            setError('');
           } else {
             setError(err.response?.data?.message || 'Failed to load leagues. Please try again.');
           }
+        } finally {
+          setIsDataLoading(false);
         }
       };
       fetchLeagues();
     } else {
-      console.warn('No currentUser.id available');
       setError('User not logged in. Please log in to view leagues.');
       setLeagues([]);
+      setIsDataLoading(false);
     }
-  }, [currentUser]);
+  }, [currentUser, getCachedMembership]);
 
   // Handle league selection
-  const handleSelectLeague = (league) => {
-    const selectedLeague = {
-      league_id: league.league_id,
-      name: league.name,
-      role: league.role
-    };
-    localStorage.setItem('league', JSON.stringify(selectedLeague));
-    setCurrentLeague(selectedLeague);
-    navigate('/dashboard');
+  const handleSelectLeague = async (league) => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const [leagueResponse, membershipResponse] = await Promise.all([
+        getCachedLeague(league.league_id),
+        getCachedMembership(currentUser.id)
+      ]);
+      const membership = membershipResponse.find(m => m.league_id === league.league_id);
+      const selectedLeague = {
+        league_id: leagueResponse.league_id,
+        name: leagueResponse.name,
+        role: membership?.role || 'player',
+        is_active: leagueResponse.is_active || 0
+      };
+      const isCommish = membership && membership.role === 'commish';
+      localStorage.setItem('league', JSON.stringify(selectedLeague));
+      setCurrentLeague(selectedLeague);
+      setIsCommissioner(isCommish);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Error selecting league:', err);
+      setError('Failed to select league. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Handle accepting an invitation
   const handleAcceptInvitation = async (league) => {
+    setIsLoading(true);
+    setError('');
     try {
-      const response = await axios.put(`http://localhost/vampire_project/vamp_api/league_members/updateRole/${league.league_id}/${currentUser.id}`, { role: 'player' });
-      console.log(`PUT /league_members/updateRole/${league.league_id}/${currentUser.id} response:`, response.data);
-      if (response.data.status === 'success') {
-        // Update local state
-        setLeagues([...leagues, { ...league, role: 'player' }]);
-        setInvitations(invitations.filter(i => i.league_id !== league.league_id));
-        setError('');
-      } else {
-        setError(response.data.message || 'Failed to accept invitation');
+      // Update role to 'player'
+      const roleResponse = await axiosInstance.put(`/league_members/updateRole/${league.league_id}/${currentUser.id}`, { role: 'player' });
+      if (roleResponse.data.status !== 'success') {
+        throw new Error(roleResponse.data.message || 'Failed to accept invitation');
       }
+
+      // Update team name to "<First Name>'s Team"
+      const teamName = currentUser.first_name ? `${currentUser.first_name}'s Team` : 'Default Team';
+      const teamNameResponse = await axiosInstance.put(`/league_members/updateTeamName/${league.league_id}/${currentUser.id}`, { team_name: teamName });
+      if (teamNameResponse.data.status !== 'success') {
+        throw new Error(teamNameResponse.data.message || 'Failed to set team name');
+      }
+
+      // Update state if both requests succeed
+      setLeagues([...leagues, { ...league, role: 'player', team_name: teamName }]);
+      setInvitations(invitations.filter(i => i.league_id !== league.league_id));
+      setError('');
     } catch (err) {
-      console.error('Error accepting invitation:', {
-        message: err.message,
-        status: err.response?.status,
-        data: err.response?.data
-      });
-      setError(err.response?.data?.message || 'Failed to accept invitation');
+      console.error('Error accepting invitation:', err);
+      setError(err.message || 'Failed to accept invitation');
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isDataLoading) {
+    return (
+      <div className="landing-container">
+        <div className="landing-content animate__animated animate__fadeIn">
+          <p className="text-center">Loading leagues...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="landing-container">
@@ -94,9 +131,9 @@ const LandingComponent = ({ currentUser, setCurrentLeague }) => {
               {leagues.map((league) => (
                 <li key={league.league_id} className="league-item">
                   <span
-                    className="league-link"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => handleSelectLeague(league)}
+                    className={`league-link ${isLoading ? 'disabled' : ''}`}
+                    style={{ cursor: isLoading ? 'not-allowed' : 'pointer' }}
+                    onClick={() => !isLoading && handleSelectLeague(league)}
                   >
                     {league.name} ({league.role === 'commish' ? 'Commissioner' : 'Member'}{league.is_vamp ? ', Vampire Player' : ''})
                   </span>
@@ -116,10 +153,11 @@ const LandingComponent = ({ currentUser, setCurrentLeague }) => {
                 <li key={invitation.league_id} className="league-item">
                   <a
                     href="#"
-                    className="league-link"
+                    className={`league-link ${isLoading ? 'disabled' : ''}`}
+                    style={{ cursor: isLoading ? 'not-allowed' : 'pointer' }}
                     onClick={(e) => {
                       e.preventDefault();
-                      handleAcceptInvitation(invitation);
+                      if (!isLoading) handleAcceptInvitation(invitation);
                     }}
                   >
                     {invitation.name}
@@ -138,7 +176,7 @@ const LandingComponent = ({ currentUser, setCurrentLeague }) => {
             <Link
               to="/create-league"
               state={{ currentUser }}
-              className="btn btn-success w-100"
+              className={`btn btn-success w-100 ${isLoading ? 'disabled' : ''}`}
             >
               Create League
             </Link>
