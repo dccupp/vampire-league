@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../../api'; // Use centralized axiosInstance
 import './AddMemberToLeagueComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from 'axios';
-
-// Configure Axios instance to ensure correct backend port
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3000'
-});
 
 const AddMemberToLeagueComponent = ({ currentUser, currentLeague }) => {
   const [username, setUsername] = useState('');
@@ -23,6 +18,7 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }) => {
     const fetchLeagueMembersCount = async () => {
       if (currentLeague?.league_id) {
         try {
+          console.log('AddMemberToLeague: Fetching league members for league:', currentLeague.league_id);
           const response = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
           console.log('AddMemberToLeague: Response from getLeagueMembersByLeagueId:', {
             status: response.status,
@@ -31,12 +27,7 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }) => {
           const memberCount = response.data.length;
           setRemainingSpots(10 - memberCount);
         } catch (error) {
-          console.error('AddMemberToLeague: Error fetching league members count:', error);
-          console.log('AddMemberToLeague: Detailed error info:', {
-            status: error.response?.status,
-            data: error.response?.data,
-            message: error.message
-          });
+          console.error('AddMemberToLeague: Error fetching league members count:', error.response || error);
           setRemainingSpots(null);
           setMessage('Error fetching league member count. Please try again.');
         }
@@ -72,28 +63,10 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }) => {
       // Step 1: Check username
       try {
         const apiUrl = `/users/getUserByUsername/${trimmedUsername}`;
-        console.log(`AddMemberToLeague: Preparing GET request to http://localhost:3000${apiUrl}`);
-        console.log('AddMemberToLeague: Request config:', {
-          method: 'GET',
-          url: apiUrl,
-          baseURL: 'http://localhost:3000',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          usernameSent: trimmedUsername,
-          globalBaseURL: axios.defaults.baseURL
-        });
-        const response = await axiosInstance.get(apiUrl, {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
-        });
-        console.log('AddMemberToLeague: Full response from getUserByUsername:', {
+        console.log(`AddMemberToLeague: Sending GET request to ${axiosInstance.defaults.baseURL}${apiUrl}`);
+        const response = await axiosInstance.get(apiUrl);
+        console.log('AddMemberToLeague: Response from getUserByUsername:', {
           status: response.status,
-          statusText: response.statusText,
-          headers: response.headers,
           data: response.data
         });
 
@@ -102,33 +75,20 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }) => {
           setMessage(`User found: ${response.data.first_name} ${response.data.last_name} (${response.data.username}). Click "Add to League" to invite.`);
         } else {
           setMessage('No user found with this username.');
-          console.log('AddMemberToLeague: No user data returned, response:', response.data);
         }
       } catch (error) {
-        console.error('AddMemberToLeague: Error fetching user:', error);
-        console.log('AddMemberToLeague: Detailed error info:', {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          headers: error.response?.headers,
-          message: error.message,
-          config: error.config,
-          requestUrl: error.config?.url,
-          baseURL: error.config?.baseURL,
-          globalBaseURL: axios.defaults.baseURL
-        });
-        if (error.response && error.response.status === 404) {
-          setMessage('No user found with this username.');
-        } else {
-          setMessage(`Error checking username. Please verify the backend server is running at http://localhost:3000 and the endpoint /users/getUserByUsername is accessible.`);
-        }
+        console.error('AddMemberToLeague: Error fetching user:', error.response || error);
+        setMessage(error.response?.status === 404 
+          ? 'No user found with this username.'
+          : `Error checking username. Please verify the backend server is running at ${axiosInstance.defaults.baseURL}.`);
+        setIsLoading(false);
       } finally {
         setIsLoading(false);
       }
     } else {
       // Step 2: Add to league
       try {
-        console.log('AddMemberToLeague: Calling POST /league_members/create with data:', {
+        console.log('AddMemberToLeague: Sending POST to /league_members/create with data:', {
           league_id: currentLeague.league_id,
           user_id: foundUser.id,
           role: 'invited',
@@ -156,33 +116,11 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }) => {
             navigate('/dashboard');
           }, 2000);
         } else {
-          if (response.data.message === 'League has reached the maximum of 10 members') {
-            setMessage('Cannot add user: League has reached the maximum of 10 members.');
-          } else if (response.data.message === 'User is already a member of this league') {
-            setMessage('Cannot add user: They are already a member of this league.');
-          } else if (response.data.message === 'A vampire player is already set for this league') {
-            setMessage('Cannot add user: A vampire player is already set for this league.');
-          } else {
-            setMessage(response.data.message || 'Error adding user to league. Please try again.');
-          }
+          setMessage(response.data.message || 'Error adding user to league. Please try again.');
         }
       } catch (error) {
-        console.error('AddMemberToLeague: Error adding user to league:', error);
-        console.log('AddMemberToLeague: Error details:', {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          message: error.message
-        });
-        if (error.response && error.response.status === 400 && error.response.data.message === 'League has reached the maximum of 10 members') {
-          setMessage('Cannot add user: League has reached the maximum of 10 members.');
-        } else if (error.response && error.response.status === 400 && error.response.data.message === 'User is already a member of this league') {
-          setMessage('Cannot add user: They are already a member of this league.');
-        } else if (error.response && error.response.status === 400 && error.response.data.message === 'A vampire player is already set for this league') {
-          setMessage('Cannot add user: A vampire player is already set for this league.');
-        } else {
-          setMessage(`Error adding user to league. Please verify the backend server is running at http://localhost:3000.`);
-        }
+        console.error('AddMemberToLeague: Error adding user to league:', error.response || error);
+        setMessage(error.response?.data?.message || `Error adding user to league. Please verify the backend server is running at ${axiosInstance.defaults.baseURL}.`);
       } finally {
         setIsLoading(false);
       }

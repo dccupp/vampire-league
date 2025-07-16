@@ -2,13 +2,7 @@ import React, { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import './Login.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from 'axios';
-
-// Configure Axios instance to ensure correct backend port
-// Ensure HTTPS is used in production to secure password transmission
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3000'
-});
+import axiosInstance from '../../api';
 
 const Login = ({ setCurrentUser, currentUser }) => {
   const [username, setUsername] = useState('');
@@ -30,8 +24,7 @@ const Login = ({ setCurrentUser, currentUser }) => {
     }
 
     try {
-      const apiUrl = '/users/login';
-      const response = await axiosInstance.post(apiUrl, {
+      const response = await axiosInstance.post('/users/login', {
         username: trimmedUsername,
         password
       });
@@ -45,30 +38,31 @@ const Login = ({ setCurrentUser, currentUser }) => {
           last_name: response.data.data.last_name
         };
         localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.removeItem('league'); // Clear stale league data
+        localStorage.removeItem('league');
         setCurrentUser(userData);
         setMessage('Login successful! Redirecting to landing...');
-        // Reduced delay to 500ms to improve UX while ensuring currentUser is set
         setTimeout(() => {
           navigate('/landing');
         }, 500);
       } else {
-        if (response.data.message === 'Username and password are required') {
-          setMessage('Username and password are required.');
-        } else if (response.data.message === 'Invalid credentials') {
-          setMessage('Invalid username or password. Please try again.');
-        } else {
-          setMessage('Error logging in. Please try again.');
-        }
+        setMessage(response.data.message || 'Error logging in. Please try again.');
       }
     } catch (error) {
-      console.error('Error logging in:', error);
-      if (error.response && error.response.status === 404) {
-        setMessage(`Error: Endpoint not found. Please verify the backend server is running at http://localhost:3000 and the endpoint /users/login is accessible.`);
-      } else if (error.response && error.response.status === 401) {
-        setMessage('Invalid username or password. Please try again.');
+      console.error('Login error:', error);
+      if (error.response) {
+        if (error.response.status === 404) {
+          setMessage(`Error: API endpoint not found. Ensure the backend server is running at ${axiosInstance.defaults.baseURL}.`);
+        } else if (error.response.status === 401) {
+          setMessage('Invalid username or password.');
+        } else if (error.response.status === 500) {
+          setMessage('Server error: ' + (error.response.data.message || 'Unknown server issue.'));
+        } else {
+          setMessage('Error: ' + (error.response.data.message || 'Failed to connect to the server.'));
+        }
+      } else if (error.request) {
+        setMessage(`No response from server. Ensure the backend is running at ${axiosInstance.defaults.baseURL}.`);
       } else {
-        setMessage(`Error logging in. Please verify the backend server is running at http://localhost:3000 or check your network connection.`);
+        setMessage('Error: ' + error.message);
       }
     } finally {
       setIsLoading(false);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../api'; // Use centralized axiosInstance
 import PlayerCard from '../PlayerCard/PlayerCard';
 import './RosterTableComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -24,7 +24,9 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
         return;
       }
       try {
-        const response = await axios.get(`http://localhost:3000/league_members/getLeagueMembersByUserId/${currentUser.id}`);
+        console.log('Fetching league member ID for user:', currentUser.id);
+        const response = await axiosInstance.get(`/league_members/getLeagueMembersByUserId/${currentUser.id}`);
+        console.log('League members response:', response.data);
         const member = response.data.find(m => m.league_id === currentLeague.league_id);
         if (member) {
           setLeagueMemberId(member.id);
@@ -33,7 +35,7 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
           setMessageType('error');
         }
       } catch (error) {
-        console.error('Error fetching league member ID:', error);
+        console.error('Error fetching league member ID:', error.response || error);
         setMessage('Failed to load league member data.');
         setMessageType('error');
       }
@@ -47,10 +49,12 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
     const fetchRosterRules = async () => {
       if (currentLeague?.league_id) {
         try {
-          const response = await axios.get(`http://localhost:3000/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/1`);
+          console.log('Fetching roster rules for league:', currentLeague.league_id);
+          const response = await axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/1`);
+          console.log('Roster rules response:', response.data);
           setRosterRules(response.data);
         } catch (error) {
-          console.error('Error fetching roster rules:', error);
+          console.error('Error fetching roster rules:', error.response || error);
           setMessage('Failed to load roster rules.');
           setMessageType('error');
         }
@@ -64,7 +68,9 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
     const fetchRosteredPlayers = async () => {
       if (leagueMemberId && rosterRules) {
         try {
-          const response = await axios.get(`http://localhost:3000/rostered_players/getRosteredPlayersByLeagueMemberId/${leagueMemberId}`);
+          console.log('Fetching rostered players for league member:', leagueMemberId);
+          const response = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${leagueMemberId}`);
+          console.log('Rostered players response:', response.data);
           setRosteredPlayers(response.data);
           if (response.data.length === 0) {
             setMessage('No players rostered yet.');
@@ -75,7 +81,7 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
           const slots = constructRosterSlots(rosterRules, response.data);
           setRosterSlots(slots);
         } catch (error) {
-          console.error('Error fetching rostered players:', error);
+          console.error('Error fetching rostered players:', error.response || error);
           setMessage('Failed to load rostered players.');
           setMessageType('error');
         }
@@ -175,7 +181,7 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
 
       if (!targetPlayer) {
         // Move to empty slot
-        await axios.put(`http://localhost:3000/rostered_players/update/${rosteredPlayers.find(p => p.player_id === sourcePlayerId).id}`, {
+        await axiosInstance.put(`/rostered_players/update/${rosteredPlayers.find(p => p.player_id === sourcePlayerId).id}`, {
           league_member_id: leagueMemberId,
           player_id: sourcePlayerId,
           roster_position: rosterSlots[index].position === 'BENCH' ? 'BENCH' : rosterSlots[index].sPosition,
@@ -190,13 +196,13 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
 
         if (sourcePosition === targetPosition || (targetRowAllowed.includes(sourcePosition) && sourceRowAllowed.includes(targetPosition))) {
           // Swap players
-          await axios.put(`http://localhost:3000/rostered_players/update/${rosteredPlayers.find(p => p.player_id === sourcePlayerId).id}`, {
+          await axiosInstance.put(`/rostered_players/update/${rosteredPlayers.find(p => p.player_id === sourcePlayerId).id}`, {
             league_member_id: leagueMemberId,
             player_id: sourcePlayerId,
             roster_position: rosterSlots[index].position === 'BENCH' ? 'BENCH' : rosterSlots[index].sPosition,
             is_rostered: 1
           });
-          await axios.put(`http://localhost:3000/rostered_players/update/${rosteredPlayers.find(p => p.player_id === targetPlayerId).id}`, {
+          await axiosInstance.put(`/rostered_players/update/${rosteredPlayers.find(p => p.player_id === targetPlayerId).id}`, {
             league_member_id: leagueMemberId,
             player_id: targetPlayerId,
             roster_position: rosterSlots[selectedPlayerIndex].position === 'BENCH' ? 'BENCH' : rosterSlots[selectedPlayerIndex].sPosition,
@@ -204,13 +210,13 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
           });
         } else {
           // Move source to target, target to BENCH
-          await axios.put(`http://localhost:3000/rostered_players/update/${rosteredPlayers.find(p => p.player_id === sourcePlayerId).id}`, {
+          await axiosInstance.put(`/rostered_players/update/${rosteredPlayers.find(p => p.player_id === sourcePlayerId).id}`, {
             league_member_id: leagueMemberId,
             player_id: sourcePlayerId,
             roster_position: rosterSlots[index].position === 'BENCH' ? 'BENCH' : rosterSlots[index].sPosition,
             is_rostered: 1
           });
-          await axios.put(`http://localhost:3000/rostered_players/update/${rosteredPlayers.find(p => p.player_id === targetPlayerId).id}`, {
+          await axiosInstance.put(`/rostered_players/update/${rosteredPlayers.find(p => p.player_id === targetPlayerId).id}`, {
             league_member_id: leagueMemberId,
             player_id: targetPlayerId,
             roster_position: 'BENCH',
@@ -220,13 +226,14 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
       }
 
       // Sync with backend
-      const response = await axios.get(`http://localhost:3000/rostered_players/getRosteredPlayersByLeagueMemberId/${leagueMemberId}`);
+      const response = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${leagueMemberId}`);
+      console.log('Sync rostered players response:', response.data);
       setRosteredPlayers(response.data);
       const updatedSlots = constructRosterSlots(rosterRules, response.data);
       setRosterSlots(updatedSlots);
       setSelectedPlayerIndex(null);
     } catch (error) {
-      console.error('Error moving player:', error);
+      console.error('Error moving player:', error.response || error);
       setMessage('Failed to move player.');
       setMessageType('error');
     }

@@ -92,13 +92,6 @@ const NavBar = ({ currentUser, setCurrentUser, currentLeague, setCurrentLeague, 
               >
                 <NavDropdown.Item
                   as={NavLink}
-                  to="/add-team-roster"
-                  className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
-                >
-                  Add Team Roster
-                </NavDropdown.Item>
-                <NavDropdown.Item
-                  as={NavLink}
                   to="/add-member-to-league"
                   className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
                 >

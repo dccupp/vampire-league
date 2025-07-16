@@ -1,39 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Container, Card, Table } from 'react-bootstrap';
-import axios from 'axios';
+import axiosInstance from '../../api'; // Use centralized axiosInstance
 import './Dashboard.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Dashboard = ({ teamRoster, rosterStructure, currentUser, teamInfo, currentLeague }) => {
+const Dashboard = ({ currentUser, currentLeague }) => {
   const [teamData, setTeamData] = useState({
     team_name: 'Team Name Here',
-    remaining_faab_budget: '$$',
+    remaining_faab_budget: '0'
   });
+  const [rosteredPlayers, setRosteredPlayers] = useState([]);
   const [error, setError] = useState('');
   const isLeagueActive = currentLeague?.is_active;
 
-  // Fetch team data from league_members
+  // Fetch team data and rostered players
   useEffect(() => {
     const fetchTeamData = async () => {
-      if (currentUser?.id && currentLeague?.league_id) {
-        try {
-          const response = await axios.get(`http://localhost:3000/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
-          const member = response.data.find(m => m.user_id === currentUser.id);
-          if (member) {
-            setTeamData({
-              team_name: member.team_name || 'Team Name Here',
-              remaining_faab_budget: member.remaining_faab_budget !== null ? member.remaining_faab_budget : '0',
-            });
-          } else {
-            setError('You are not a member of this league.');
-          }
-        } catch (error) {
-          console.error('Error fetching team data:', error.response || error);
-          setError(`Failed to load team information: ${error.response?.data?.message || error.message}`);
-        }
-      } else {
+      if (!currentUser?.id || !currentLeague?.league_id) {
         setError('Missing user or league information.');
+        return;
+      }
+      try {
+        console.log('Fetching league members for league:', currentLeague.league_id);
+        const memberResponse = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
+        console.log('League members response:', memberResponse.data);
+        const member = memberResponse.data.find(m => m.user_id === currentUser.id);
+        if (member) {
+          setTeamData({
+            team_name: member.team_name || 'Team Name Here',
+            remaining_faab_budget: member.remaining_faab_budget !== null ? member.remaining_faab_budget : '0'
+          });
+
+          console.log('Fetching rostered players for league member:', member.id);
+          const rosterResponse = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${member.id}`);
+          console.log('Rostered players response:', rosterResponse.data);
+          setRosteredPlayers(rosterResponse.data);
+        } else {
+          setError('You are not a member of this league.');
+        }
+      } catch (error) {
+        console.error('Error fetching team data:', error.response || error);
+        setError(`Failed to load team information: ${error.response?.data?.message || error.message}`);
       }
     };
     fetchTeamData();
@@ -50,7 +58,7 @@ const Dashboard = ({ teamRoster, rosterStructure, currentUser, teamInfo, current
         <Card className="mb-4 team-info-card">
           <Card.Body>
             <Card.Title className="dashboard-title text-center mb-3">{teamData.team_name}</Card.Title>
-            <Card.Subtitle className="dashboard-subtitle text-center mb-3">{teamInfo?.record || 'Team Record Here'}</Card.Subtitle>
+            <Card.Subtitle className="dashboard-subtitle text-center mb-3">Team Record: N/A</Card.Subtitle>
             <div className="dashboard-team-info text-center">
               <NavLink to="/edit-team-info" className="dashboard-link me-3">Edit Team Info</NavLink>
               <span className="team-info-divider">|</span>
@@ -74,27 +82,25 @@ const Dashboard = ({ teamRoster, rosterStructure, currentUser, teamInfo, current
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>John Doe</td>
-                      <td>QB</td>
-                      <td>150</td>
-                    </tr>
-                    <tr>
-                      <td>Jane Smith</td>
-                      <td>RB</td>
-                      <td>120</td>
-                    </tr>
-                    <tr>
-                      <td>Mike Johnson</td>
-                      <td>WR</td>
-                      <td>100</td>
-                    </tr>
+                    {rosteredPlayers.length > 0 ? (
+                      rosteredPlayers.map(player => (
+                        <tr key={player.player_id}>
+                          <td>{player.player_name}</td>
+                          <td>{player.position}</td>
+                          <td>{player.season_points || 'N/A'}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="3">No players rostered yet.</td>
+                      </tr>
+                    )}
                   </tbody>
                 </Table>
                 <Card.Text>
                   League Status: Active<br />
-                  Next Match: Week 5 vs. Team Awesome<br />
-                  Current Standing: 3rd
+                  Next Match: N/A<br />
+                  Current Standing: N/A
                 </Card.Text>
               </Card.Body>
             </Card>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import axiosInstance from '../../../api'; // Use centralized axiosInstance
 import './RosterRulesDisplayComponent.css';
 
 const RosterRulesDisplayComponent = ({ currentUser, currentLeague }) => {
@@ -17,8 +17,9 @@ const RosterRulesDisplayComponent = ({ currentUser, currentLeague }) => {
       }
 
       try {
-        const regularResponse = await axios.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/1`);
-        const vampireResponse = await axios.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/2`);
+        console.log('Fetching roster rules for league:', currentLeague.league_id);
+        const regularResponse = await axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/1`);
+        const vampireResponse = await axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/2`);
         
         console.log('Regular Roster Rules Response:', regularResponse.data);
         console.log('Vampire Roster Rules Response:', vampireResponse.data);
@@ -38,8 +39,9 @@ const RosterRulesDisplayComponent = ({ currentUser, currentLeague }) => {
           setError(null);
         }
       } catch (err) {
-        setError(`Failed to fetch roster rules: ${err.message}`);
-        console.error('Error fetching roster rules:', err);
+        console.error('Error fetching roster rules:', err.response || err);
+        setError(`Failed to fetch roster rules: ${err.response?.data?.message || err.message}`);
+        setLoading(false);
       } finally {
         setLoading(false);
       }

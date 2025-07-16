@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 import Login from './Components/Login/Login';
 import Registration from './Components/Registration/Registration';
@@ -15,12 +15,7 @@ import RosterRulesDisplayComponent from './Components/LeagueComponents/RosterRul
 import AddMemberToLeagueComponent from './Components/LMToolsComponents/AddMemberToLeagueComponent/AddMemberToLeagueComponent';
 import AddPlayerToTeamComponent from './Components/LMToolsComponents/AddPlayerToTeamComponent/AddPlayerToTeamComponent';
 import EditTeamInfoComponent from './Components/LeagueComponents/EditTeamInfoComponent/EditTeamInfoComponent';
-import axios from 'axios';
-
-// Configure Axios instance
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3000'
-});
+import axiosInstance from './api';
 
 function AppContent() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -28,44 +23,45 @@ function AppContent() {
   const [isCommissioner, setIsCommissioner] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
-  const membershipCache = React.useRef({}); // Cache for membership data
-  const leagueCache = React.useRef({}); // Cache for league data
+  const location = useLocation();
 
-  // Cache helper for membership data
   const getCachedMembership = async (userId) => {
     const cached = membershipCache.current[userId];
     const now = Date.now();
-    if (cached && now - cached.timestamp < 30000) { // 30 seconds
+    if (cached && now - cached.timestamp < 30000) {
       return cached.data;
     }
     try {
       const response = await axiosInstance.get(`/league_members/getLeagueMembersByUserId/${userId}`);
-      membershipCache.current[userId] = { data: response.data, timestamp: now };
-      return response.data;
+      const data = Array.isArray(response.data) ? response.data : response.data.data || [];
+      membershipCache.current[userId] = { data, timestamp: now };
+      return data;
     } catch (error) {
       console.error('Error fetching membership data:', error);
       throw error;
     }
   };
 
-  // Cache helper for league data
   const getCachedLeague = async (leagueId) => {
     const cached = leagueCache.current[leagueId];
     const now = Date.now();
-    if (cached && now - cached.timestamp < 30000) { // 30 seconds
+    if (cached && now - cached.timestamp < 30000) {
       return cached.data;
     }
     try {
       const response = await axiosInstance.get(`/leagues/getLeagueById/${leagueId}`);
-      leagueCache.current[leagueId] = { data: response.data, timestamp: now };
-      return response.data;
+      const data = response.data.data || response.data;
+      leagueCache.current[leagueId] = { data, timestamp: now };
+      return data;
     } catch (error) {
       console.error('Error fetching league data:', error);
       throw error;
     }
   };
 
-  // Initialize currentUser and currentLeague from localStorage on mount
+  const membershipCache = React.useRef({});
+  const leagueCache = React.useRef({});
+
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const storedLeague = localStorage.getItem('league');
@@ -90,7 +86,6 @@ function AppContent() {
     }
   }, [navigate]);
 
-  // Periodically re-fetch user record
   useEffect(() => {
     if (currentUser?.id) {
       const fetchUser = async () => {
@@ -109,13 +104,12 @@ function AppContent() {
           console.error('Error fetching user data:', error);
         }
       };
-      fetchUser(); // Initial fetch
-      const interval = setInterval(fetchUser, 300000); // Every 5 minutes
+      fetchUser();
+      const interval = setInterval(fetchUser, 300000);
       return () => clearInterval(interval);
     }
   }, [currentUser?.id]);
 
-  // Refresh currentLeague data and role
   useEffect(() => {
     if (currentLeague?.league_id && currentUser?.id && !leagueCache.current[currentLeague.league_id]?.fresh) {
       const fetchLeagueData = async () => {
@@ -124,16 +118,18 @@ function AppContent() {
             getCachedLeague(currentLeague.league_id),
             getCachedMembership(currentUser.id)
           ]);
-          const membership = membershipResponse.find(m => m.league_id === currentLeague.league_id);
+          const membership = Array.isArray(membershipResponse) ? 
+            membershipResponse.find(m => m.league_id === currentLeague.league_id) : 
+            null;
           const updatedLeague = {
             league_id: leagueResponse.league_id,
             name: leagueResponse.name,
-            role: membership?.role || 'player', // Fetch role anew
+            role: membership?.role || 'player',
             is_active: leagueResponse.is_active || 0
           };
           localStorage.setItem('league', JSON.stringify(updatedLeague));
           setCurrentLeague(updatedLeague);
-          leagueCache.current[currentLeague.league_id].fresh = true; // Mark as fresh
+          leagueCache.current[currentLeague.league_id].fresh = true;
           setErrorMessage('');
         } catch (error) {
           console.error('Error fetching league data:', error);
@@ -145,13 +141,14 @@ function AppContent() {
     }
   }, [currentLeague?.league_id, currentUser?.id, navigate]);
 
-  // Check commissioner status periodically
   useEffect(() => {
     const checkCommissionerStatus = async () => {
       if (currentUser?.id && currentLeague?.league_id) {
         try {
           const membership = await getCachedMembership(currentUser.id);
-          const membershipRecord = membership.find(m => m.league_id === currentLeague.league_id);
+          const membershipRecord = Array.isArray(membership) ? 
+            membership.find(m => m.league_id === currentLeague.league_id) : 
+            null;
           const isCommish = membershipRecord && membershipRecord.role === 'commish';
           setIsCommissioner(isCommish);
         } catch (error) {
@@ -162,23 +159,22 @@ function AppContent() {
         setIsCommissioner(false);
       }
     };
-    checkCommissionerStatus(); // Initial check
-    const interval = setInterval(checkCommissionerStatus, 60000); // Every 1 minute
+    checkCommissionerStatus();
+    const interval = setInterval(checkCommissionerStatus, 60000);
     return () => clearInterval(interval);
   }, [currentUser?.id, currentLeague?.league_id]);
 
-  // Clear user and league data when navigating to /register
   useEffect(() => {
-    if (window.location.pathname === '/register' && currentUser) {
+    if (location.pathname === '/register' && currentUser) {
       localStorage.removeItem('user');
       localStorage.removeItem('league');
       setCurrentUser(null);
       setCurrentLeague(null);
       setIsCommissioner(false);
-      membershipCache.current = {}; // Clear cache
-      leagueCache.current = {}; // Clear cache
+      membershipCache.current = {};
+      leagueCache.current = {};
     }
-  }, [window.location.pathname, currentUser]);
+  }, [location.pathname, currentUser]);
 
   return (
     <div>

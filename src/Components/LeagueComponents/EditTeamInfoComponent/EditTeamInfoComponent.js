@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../../api'; // Use centralized axiosInstance
 import './EditTeamInfoComponent.css';
 
 const EditTeamInfoComponent = ({ currentUser, currentLeague }) => {
@@ -14,7 +14,9 @@ const EditTeamInfoComponent = ({ currentUser, currentLeague }) => {
       if (currentUser?.id && currentLeague?.league_id) {
         setIsLoading(true);
         try {
-          const response = await axios.get(`http://localhost:3000/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
+          console.log('Fetching team name for user:', currentUser.id, 'league:', currentLeague.league_id);
+          const response = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
+          console.log('League members response:', response.data);
           const member = response.data.find(m => m.user_id === currentUser.id);
           if (member) {
             setTeamName(member.team_name || '');
@@ -48,9 +50,11 @@ const EditTeamInfoComponent = ({ currentUser, currentLeague }) => {
 
     setIsLoading(true);
     try {
-      const response = await axios.put(`http://localhost:3000/league_members/updateTeamName/${currentLeague.league_id}/${currentUser.id}`, {
+      console.log('Updating team name to:', teamName);
+      const response = await axiosInstance.put(`/league_members/updateTeamName/${currentLeague.league_id}/${currentUser.id}`, {
         team_name: teamName
       });
+      console.log('Update team name response:', response.data);
       if (response.data.status === 'success') {
         setMessage('Team name updated successfully.');
         setMessageType('success');

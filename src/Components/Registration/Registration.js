@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../api'; // Use centralized axiosInstance
 import './Registration.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from 'axios';
-
-// Configure Axios instance to ensure correct backend port
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3000'
-});
 
 const Registration = () => {
   const [username, setUsername] = useState('');
@@ -75,22 +70,13 @@ const Registration = () => {
 
     try {
       const apiUrl = '/users/register';
-      console.log(`Registration: Preparing POST request to http://localhost:3000${apiUrl}`);
-      console.log('Registration: Request config:', {
-        method: 'POST',
-        url: apiUrl,
-        baseURL: 'http://localhost:3000',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        data: {
-          username: username.trim(),
-          email_address: email.trim(),
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
-          password: '******' // Masked for security
-        }
+      console.log(`Registration: Sending POST request to ${axiosInstance.defaults.baseURL}${apiUrl}`);
+      console.log('Registration: Request data:', {
+        username: username.trim(),
+        email_address: email.trim(),
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        password: '******' // Masked for security
       });
       const response = await axiosInstance.post(apiUrl, {
         username: username.trim(),
@@ -99,12 +85,7 @@ const Registration = () => {
         last_name: lastName.trim(),
         password
       });
-      console.log('Registration: Full response from register:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers,
-        data: response.data
-      });
+      console.log('Registration: Response:', response.data);
 
       if (response.data.status === 'success') {
         localStorage.setItem('user', JSON.stringify({
@@ -119,32 +100,11 @@ const Registration = () => {
           navigate('/');
         }, 2000);
       } else {
-        if (response.data.message === 'Username already exists') {
-          setMessage('Username already exists. Please use a different username.');
-        } else if (response.data.message === 'Email already exists') {
-          setMessage('Email already exists. Please use a different email.');
-        } else if (response.data.message === 'Invalid email format') {
-          setMessage('Invalid email format. Please enter a valid email.');
-        } else if (response.data.message === 'Username must be 3-50 characters') {
-          setMessage('Username must be 3-50 characters.');
-        } else if (response.data.message === 'Username must contain only letters, numbers, and underscores') {
-          setMessage('Username must contain only letters, numbers, and underscores.');
-        } else if (response.data.message === 'Password must be at least 8 characters') {
-          setMessage('Password must be at least 8 characters.');
-        } else {
-          setMessage('Error registering. Please try again.');
-        }
+        setMessage(response.data.message || 'Error registering. Please try again.');
       }
     } catch (error) {
-      console.error('Registration: Error registering:', error);
-      console.log('Registration: Detailed error info:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        headers: error.response?.headers,
-        message: error.message
-      });
-      setMessage('Error registering. Please check your connection and try again.');
+      console.error('Registration: Error registering:', error.response || error);
+      setMessage(error.response?.data?.message || `Error registering. Please verify the backend server is running at ${axiosInstance.defaults.baseURL}.`);
     } finally {
       setIsLoading(false);
     }

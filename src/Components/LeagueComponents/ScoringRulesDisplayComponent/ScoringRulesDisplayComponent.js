@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import axiosInstance from '../../../api'; // Use centralized axiosInstance
 import './ScoringRulesDisplayComponent.css';
 
 const ScoringRulesDisplayComponent = ({ currentUser, currentLeague }) => {
@@ -17,12 +17,15 @@ const ScoringRulesDisplayComponent = ({ currentUser, currentLeague }) => {
       }
 
       try {
-        const response = await axios.get(`/scoring_rules/getScoringRulesByLeagueId/${currentLeague.league_id}`);
+        console.log('Fetching scoring rules for league:', currentLeague.league_id);
+        const response = await axiosInstance.get(`/scoring_rules/getScoringRulesByLeagueId/${currentLeague.league_id}`);
+        console.log('Scoring rules response:', response.data);
         setScoringRules(response.data);
         setError(null);
       } catch (err) {
-        setError('Failed to fetch scoring rules.');
-        console.error('Error fetching scoring rules:', err);
+        console.error('Error fetching scoring rules:', err.response || err);
+        setError(`Failed to fetch scoring rules: ${err.response?.data?.message || err.message}`);
+        setLoading(false);
       } finally {
         setLoading(false);
       }

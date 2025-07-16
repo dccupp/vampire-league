@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../../api'; // Use centralized axiosInstance
 import PlayerCard from '../../PlayerCard/PlayerCard';
 import './AddPlayerToTeamComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -22,10 +22,12 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/players/getPlayers');
+        console.log('AddPlayerToTeam: Fetching all players');
+        const response = await axiosInstance.get('/players/getPlayers');
+        console.log('AddPlayerToTeam: Players response:', response.data);
         setPlayers(response.data);
       } catch (error) {
-        console.error('Error fetching players:', error);
+        console.error('AddPlayerToTeam: Error fetching players:', error.response || error);
         setMessage('Failed to load players.');
         setMessageType('error');
       }
@@ -38,10 +40,12 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     const fetchLeagueMembers = async () => {
       if (currentLeague?.league_id) {
         try {
-          const response = await axios.get(`http://localhost:3000/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
+          console.log('AddPlayerToTeam: Fetching league members for league:', currentLeague.league_id);
+          const response = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
+          console.log('AddPlayerToTeam: League members response:', response.data);
           setLeagueMembers(response.data);
         } catch (error) {
-          console.error('Error fetching league members:', error);
+          console.error('AddPlayerToTeam: Error fetching league members:', error.response || error);
           setMessage('Failed to load league members.');
           setMessageType('error');
         }
@@ -55,7 +59,9 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     const fetchRosterRules = async () => {
       if (currentLeague?.league_id) {
         try {
-          const response = await axios.get(`http://localhost:3000/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/1`);
+          console.log('AddPlayerToTeam: Fetching roster rules for league:', currentLeague.league_id);
+          const response = await axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/1`);
+          console.log('AddPlayerToTeam: Roster rules response:', response.data);
           setRosterRules(response.data);
           // Construct roster slots based on roster rules
           const slots = [];
@@ -75,7 +81,7 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
           });
           setRosterSlots(slots);
         } catch (error) {
-          console.error('Error fetching roster rules:', error);
+          console.error('AddPlayerToTeam: Error fetching roster rules:', error.response || error);
           setMessage('Failed to load roster rules.');
           setMessageType('error');
         }
@@ -89,13 +95,15 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     const fetchLeagueRosteredPlayers = async () => {
       if (currentLeague?.league_id) {
         try {
-          const response = await axios.get(`http://localhost:3000/rostered_players/getRosteredPlayersByLeagueId/${currentLeague.league_id}`);
+          console.log('AddPlayerToTeam: Fetching rostered players for league:', currentLeague.league_id);
+          const response = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueId/${currentLeague.league_id}`);
+          console.log('AddPlayerToTeam: League rostered players response:', response.data);
           const rosteredPlayerIds = response.data
             .filter(player => player.is_rostered === 1)
             .map(player => player.player_id);
           setLeagueRosteredPlayerIds(rosteredPlayerIds);
         } catch (error) {
-          console.error('Error fetching league rostered players:', error);
+          console.error('AddPlayerToTeam: Error fetching league rostered players:', error.response || error);
           setMessage('Failed to load league rostered players.');
           setMessageType('error');
         }
@@ -109,8 +117,9 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     const fetchRosteredPlayers = async () => {
       if (selectedMember) {
         try {
-          const response = await axios.get(`http://localhost:3000/rostered_players/getRosteredPlayersByLeagueMemberId/${selectedMember}`);
-          console.log('Retrieved rostered players for selected member:', response.data);
+          console.log('AddPlayerToTeam: Fetching rostered players for league member:', selectedMember);
+          const response = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${selectedMember}`);
+          console.log('AddPlayerToTeam: Rostered players response:', response.data);
           setRosteredPlayers(response.data);
           if (response.data.length === 0) {
             setMessage('No players rostered yet.');
@@ -119,7 +128,7 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
             setMessage('');
           }
         } catch (error) {
-          console.error('Error fetching rostered players:', error);
+          console.error('AddPlayerToTeam: Error fetching rostered players:', error.response || error);
           setMessage('Failed to load rostered players.');
           setMessageType('error');
         }
@@ -158,7 +167,7 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     const memberId = e.target.value;
     setSelectedMember(memberId);
     const selectedMemberRecord = leagueMembers.find(member => member.id === parseInt(memberId));
-    console.log('Selected league member record:', selectedMemberRecord);
+    console.log('AddPlayerToTeam: Selected league member record:', selectedMemberRecord);
   };
 
   // Find the first available slot for a player
@@ -166,7 +175,7 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     const assignedPositions = rosteredPlayers
       .filter(player => player.is_rostered === 1 && player.roster_position)
       .map(player => player.roster_position);
-    console.log('Assigned roster positions:', assignedPositions);
+    console.log('AddPlayerToTeam: Assigned roster positions:', assignedPositions);
     const allowedPositions = playerPosition === 'RB' || playerPosition === 'WR' || playerPosition === 'TE' ? [playerPosition, 'FLEX', 'BENCH'] :
                             playerPosition === 'QB' || playerPosition === 'DEF' || playerPosition === 'K' ? [playerPosition, 'BENCH'] :
                             [playerPosition];
@@ -174,11 +183,11 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     for (const slot of rosterSlots) {
       if (!assignedPositions.includes(slot.sPosition) && allowedPositions.includes(slot.position)) {
         const rosterPosition = slot.position === 'BENCH' ? 'BENCH' : slot.sPosition;
-        console.log(`Found available slot for ${playerPosition}: ${rosterPosition}`);
+        console.log(`AddPlayerToTeam: Found available slot for ${playerPosition}: ${rosterPosition}`);
         return rosterPosition;
       }
     }
-    console.log(`No available slot for ${playerPosition}`);
+    console.log(`AddPlayerToTeam: No available slot for ${playerPosition}`);
     return null;
   };
 
@@ -216,18 +225,25 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/rostered_players/create', {
+      console.log('AddPlayerToTeam: Sending POST to /rostered_players/create with data:', {
         league_member_id: selectedMember,
         player_id: selectedPlayer.player_id,
         roster_position: rosterPosition,
         is_rostered: 1
       });
+      const response = await axiosInstance.post('/rostered_players/create', {
+        league_member_id: selectedMember,
+        player_id: selectedPlayer.player_id,
+        roster_position: rosterPosition,
+        is_rostered: 1
+      });
+      console.log('AddPlayerToTeam: Response from create:', response.data);
       if (response.data.status === 'success') {
         setMessage('Player added successfully.');
         setMessageType('success');
         // Refetch rostered players
-        const rosterResponse = await axios.get(`http://localhost:3000/rostered_players/getRosteredPlayersByLeagueMemberId/${selectedMember}`);
-        console.log('Retrieved rostered players after adding:', rosterResponse.data);
+        const rosterResponse = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${selectedMember}`);
+        console.log('AddPlayerToTeam: Rostered players response after adding:', rosterResponse.data);
         setRosteredPlayers(rosterResponse.data);
         // Update league rostered player IDs
         setLeagueRosteredPlayerIds([...leagueRosteredPlayerIds, selectedPlayer.player_id]);
@@ -239,8 +255,8 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
         setMessageType('error');
       }
     } catch (error) {
-      console.error('Error adding player:', error);
-      setMessage('Error adding player: ' + (error.response?.data?.message || error.message));
+      console.error('AddPlayerToTeam: Error adding player:', error.response || error);
+      setMessage(`Error adding player: ${error.response?.data?.message || error.message}`);
       setMessageType('error');
     }
   };
@@ -250,8 +266,8 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     const assignedSlots = [...rosterSlots];
     const availablePlayers = [...rosteredPlayers.filter(player => player.is_rostered === 1)];
 
-    console.log('Assigning players to slots. Available players:', availablePlayers);
-    console.log('Available slots:', rosterSlots.map(slot => slot.sPosition));
+    console.log('AddPlayerToTeam: Assigning players to slots. Available players:', availablePlayers);
+    console.log('AddPlayerToTeam: Available slots:', rosterSlots.map(slot => slot.sPosition));
 
     assignedSlots.forEach(slot => {
       slot.player = null; // Initialize slot as empty
@@ -260,7 +276,7 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
         // Assign BENCH players to the first available BENCH slot
         player = availablePlayers.find(p => p.roster_position === 'BENCH');
         if (player) {
-          console.log(`Assigning player ${player.player_name} to BENCH slot ${slot.sPosition}`);
+          console.log(`AddPlayerToTeam: Assigning player ${player.player_name} to BENCH slot ${slot.sPosition}`);
           slot.player = {
             name: player.player_name,
             playingPosition: player.position,
@@ -276,7 +292,7 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
         // Match non-BENCH players by exact roster_position
         player = availablePlayers.find(p => p.roster_position === slot.sPosition);
         if (player) {
-          console.log(`Assigning player ${player.player_name} to slot ${slot.sPosition}`);
+          console.log(`AddPlayerToTeam: Assigning player ${player.player_name} to slot ${slot.sPosition}`);
           slot.player = {
             name: player.player_name,
             playingPosition: player.position,
@@ -291,7 +307,7 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
       }
     });
 
-    console.log('Assigned slots:', assignedSlots.map(slot => ({
+    console.log('AddPlayerToTeam: Assigned slots:', assignedSlots.map(slot => ({
       sPosition: slot.sPosition,
       player: slot.player ? slot.player.name : null
     })));
@@ -352,12 +368,12 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
             >
               Add Player
             </button>
+            {message && (
+              <div className={`message ${messageType}`}>
+                {message}
+              </div>
+            )}
           </form>
-          {message && (
-            <div className={`message ${messageType}`}>
-              {message}
-            </div>
-          )}
         </div>
         {rosterRules && (
           <div className="roster-table-container animate__animated animate__fadeIn">
