@@ -8,4 +8,4 @@ const axiosInstance = axios.create({
   baseURL: API_URL
 });
 
-export default axiosInstance;gt
+export default axiosInstance;
