@@ -18,12 +18,7 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }) => {
     const fetchLeagueMembersCount = async () => {
       if (currentLeague?.league_id) {
         try {
-          console.log('AddMemberToLeague: Fetching league members for league:', currentLeague.league_id);
           const response = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
-          console.log('AddMemberToLeague: Response from getLeagueMembersByLeagueId:', {
-            status: response.status,
-            data: response.data
-          });
           const memberCount = response.data.length;
           setRemainingSpots(10 - memberCount);
         } catch (error) {
@@ -63,12 +58,7 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }) => {
       // Step 1: Check username
       try {
         const apiUrl = `/users/getUserByUsername/${trimmedUsername}`;
-        console.log(`AddMemberToLeague: Sending GET request to ${axiosInstance.defaults.baseURL}${apiUrl}`);
         const response = await axiosInstance.get(apiUrl);
-        console.log('AddMemberToLeague: Response from getUserByUsername:', {
-          status: response.status,
-          data: response.data
-        });
 
         if (response.data && response.data.id) {
           setFoundUser(response.data);
@@ -88,14 +78,6 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }) => {
     } else {
       // Step 2: Add to league
       try {
-        console.log('AddMemberToLeague: Sending POST to /league_members/create with data:', {
-          league_id: currentLeague.league_id,
-          user_id: foundUser.id,
-          role: 'invited',
-          team_name: null,
-          remaining_faab_budget: null,
-          is_vamp: isVampire ? 1 : 0
-        });
         const response = await axiosInstance.post('/league_members/create', {
           league_id: currentLeague.league_id,
           user_id: foundUser.id,
@@ -104,8 +86,7 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }) => {
           remaining_faab_budget: null,
           is_vamp: isVampire ? 1 : 0
         });
-        console.log('AddMemberToLeague: Response from create:', response.data);
-
+        
         if (response.data.status === 'success') {
           setMessage(`User ${foundUser.first_name} ${foundUser.last_name} invited to league successfully!`);
           setFoundUser(null);

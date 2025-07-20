@@ -17,9 +17,7 @@ const ScoringRulesDisplayComponent = ({ currentUser, currentLeague }) => {
       }
 
       try {
-        console.log('Fetching scoring rules for league:', currentLeague.league_id);
         const response = await axiosInstance.get(`/scoring_rules/getScoringRulesByLeagueId/${currentLeague.league_id}`);
-        console.log('Scoring rules response:', response.data);
         setScoringRules(response.data);
         setError(null);
       } catch (err) {

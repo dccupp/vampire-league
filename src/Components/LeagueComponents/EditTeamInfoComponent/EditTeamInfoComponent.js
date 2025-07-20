@@ -14,9 +14,7 @@ const EditTeamInfoComponent = ({ currentUser, currentLeague }) => {
       if (currentUser?.id && currentLeague?.league_id) {
         setIsLoading(true);
         try {
-          console.log('Fetching team name for user:', currentUser.id, 'league:', currentLeague.league_id);
           const response = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
-          console.log('League members response:', response.data);
           const member = response.data.find(m => m.user_id === currentUser.id);
           if (member) {
             setTeamName(member.team_name || '');
@@ -50,21 +48,17 @@ const EditTeamInfoComponent = ({ currentUser, currentLeague }) => {
 
     setIsLoading(true);
     try {
-      console.log('Updating team name to:', teamName);
       const response = await axiosInstance.put(`/league_members/updateTeamName/${currentLeague.league_id}/${currentUser.id}`, {
         team_name: teamName
       });
-      console.log('Update team name response:', response.data);
       if (response.data.status === 'success') {
         setMessage('Team name updated successfully.');
         setMessageType('success');
       } else {
-        console.error('Update failed:', response.data);
         setMessage(response.data.message || 'Failed to update team name.');
         setMessageType('error');
       }
     } catch (error) {
-      console.error('Error updating team name:', error.response || error);
       setMessage(`Error updating team name: ${error.response?.data?.message || error.message}`);
       setMessageType('error');
     } finally {

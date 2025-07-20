@@ -70,14 +70,6 @@ const Registration = () => {
 
     try {
       const apiUrl = '/users/register';
-      console.log(`Registration: Sending POST request to ${axiosInstance.defaults.baseURL}${apiUrl}`);
-      console.log('Registration: Request data:', {
-        username: username.trim(),
-        email_address: email.trim(),
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        password: '******' // Masked for security
-      });
       const response = await axiosInstance.post(apiUrl, {
         username: username.trim(),
         email_address: email.trim(),
@@ -85,7 +77,6 @@ const Registration = () => {
         last_name: lastName.trim(),
         password
       });
-      console.log('Registration: Response:', response.data);
 
       if (response.data.status === 'success') {
         localStorage.setItem('user', JSON.stringify({

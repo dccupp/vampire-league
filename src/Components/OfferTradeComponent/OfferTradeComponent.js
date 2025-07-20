@@ -30,8 +30,6 @@ const OfferTradeComponent = () => {
       } else {
         newState = prev; // Ignore if at limit
       }
-      console.log('selectedUser1Players:', newState);
-      console.log('selectedUser2Players:', selectedUser2Players);
       return newState;
     });
   };
@@ -49,8 +47,6 @@ const OfferTradeComponent = () => {
       } else {
         newState = prev; // Ignore if at limit
       }
-      console.log('selectedUser1Players:', selectedUser1Players);
-      console.log('selectedUser2Players:', newState);
       return newState;
     });
   };
@@ -59,8 +55,6 @@ const OfferTradeComponent = () => {
   const handleRemoveUser1Player = (playerName) => {
     setSelectedUser1Players((prev) => {
       const newState = prev.filter((p) => p.name !== playerName);
-      console.log('selectedUser1Players:', newState);
-      console.log('selectedUser2Players:', selectedUser2Players);
       return newState;
     });
   };
@@ -69,8 +63,6 @@ const OfferTradeComponent = () => {
   const handleRemoveUser2Player = (playerName) => {
     setSelectedUser2Players((prev) => {
       const newState = prev.filter((p) => p.name !== playerName);
-      console.log('selectedUser1Players:', selectedUser1Players);
-      console.log('selectedUser2Players:', newState);
       return newState;
     });
   };
@@ -103,8 +95,6 @@ const OfferTradeComponent = () => {
         teamId: user2TeamInfo.team_id,
       })),
     };
-
-    console.log('Trade Data Package:', tradeDataPackage);
 
     // Reset selections and close modal
     setSelectedUser1Players([]);

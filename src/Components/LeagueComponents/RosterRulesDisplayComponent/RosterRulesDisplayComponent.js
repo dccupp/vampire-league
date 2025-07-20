@@ -17,12 +17,8 @@ const RosterRulesDisplayComponent = ({ currentUser, currentLeague }) => {
       }
 
       try {
-        console.log('Fetching roster rules for league:', currentLeague.league_id);
         const regularResponse = await axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/1`);
         const vampireResponse = await axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/2`);
-        
-        console.log('Regular Roster Rules Response:', regularResponse.data);
-        console.log('Vampire Roster Rules Response:', vampireResponse.data);
 
         const rules = [];
         if (regularResponse.data && Object.keys(regularResponse.data).length > 0) {

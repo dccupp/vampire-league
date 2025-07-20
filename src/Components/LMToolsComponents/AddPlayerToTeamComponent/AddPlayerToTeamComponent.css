@@ -118,8 +118,20 @@
   max-height: 150px;
   overflow-y: auto;
   position: absolute;
-  width: calc(100% - 22px);
+  width: 100%; /* Match the width of the parent input */
   z-index: 1000;
+  left: 0; /* Align with the left edge of the parent */
+}
+
+/* Ensure the form-group is positioned to contain the absolute dropdown */
+.form-group {
+  position: relative; /* Make form-group the positioning context for the dropdown */
+}
+
+/* Ensure the input field takes full width of its container */
+.form-control {
+  width: 100%;
+  box-sizing: border-box; /* Ensure padding/border are included in width */
 }
 
 .autocomplete-list li {

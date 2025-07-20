@@ -21,10 +21,7 @@ const Dashboard = ({ currentUser, currentLeague }) => {
         setError('Missing user or league information.');
         return;
       }
-      try {
-        console.log('Fetching league members for league:', currentLeague.league_id);
-        const memberResponse = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
-        console.log('League members response:', memberResponse.data);
+      try {        const memberResponse = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
         const member = memberResponse.data.find(m => m.user_id === currentUser.id);
         if (member) {
           setTeamData({
@@ -32,9 +29,7 @@ const Dashboard = ({ currentUser, currentLeague }) => {
             remaining_faab_budget: member.remaining_faab_budget !== null ? member.remaining_faab_budget : '0'
           });
 
-          console.log('Fetching rostered players for league member:', member.id);
           const rosterResponse = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${member.id}`);
-          console.log('Rostered players response:', rosterResponse.data);
           setRosteredPlayers(rosterResponse.data);
         } else {
           setError('You are not a member of this league.');

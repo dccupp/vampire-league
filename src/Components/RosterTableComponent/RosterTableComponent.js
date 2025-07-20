@@ -24,9 +24,7 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
         return;
       }
       try {
-        console.log('Fetching league member ID for user:', currentUser.id);
         const response = await axiosInstance.get(`/league_members/getLeagueMembersByUserId/${currentUser.id}`);
-        console.log('League members response:', response.data);
         const member = response.data.find(m => m.league_id === currentLeague.league_id);
         if (member) {
           setLeagueMemberId(member.id);
@@ -49,9 +47,7 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
     const fetchRosterRules = async () => {
       if (currentLeague?.league_id) {
         try {
-          console.log('Fetching roster rules for league:', currentLeague.league_id);
           const response = await axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/1`);
-          console.log('Roster rules response:', response.data);
           setRosterRules(response.data);
         } catch (error) {
           console.error('Error fetching roster rules:', error.response || error);
@@ -68,9 +64,7 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
     const fetchRosteredPlayers = async () => {
       if (leagueMemberId && rosterRules) {
         try {
-          console.log('Fetching rostered players for league member:', leagueMemberId);
           const response = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${leagueMemberId}`);
-          console.log('Rostered players response:', response.data);
           setRosteredPlayers(response.data);
           if (response.data.length === 0) {
             setMessage('No players rostered yet.');
@@ -227,7 +221,6 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
 
       // Sync with backend
       const response = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${leagueMemberId}`);
-      console.log('Sync rostered players response:', response.data);
       setRosteredPlayers(response.data);
       const updatedSlots = constructRosterSlots(rosterRules, response.data);
       setRosterSlots(updatedSlots);

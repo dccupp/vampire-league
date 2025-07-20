@@ -18,9 +18,7 @@ const LandingComponent = ({ currentUser, setCurrentLeague, setIsCommissioner, ge
       const fetchLeagues = async () => {
         setIsDataLoading(true);
         try {
-          console.log('LandingComponent: Fetching league memberships for user:', currentUser.id);
           const response = await getCachedMembership(currentUser.id);
-          console.log('LandingComponent: League memberships response:', response);
           const memberships = Array.isArray(response) ? response : [];
           setLeagues(memberships.filter(m => m.role === 'player' || m.role === 'commish'));
           setInvitations(memberships.filter(m => m.role === 'invited'));
@@ -51,13 +49,10 @@ const LandingComponent = ({ currentUser, setCurrentLeague, setIsCommissioner, ge
     setIsLoading(true);
     setError('');
     try {
-      console.log('LandingComponent: Selecting league:', league.league_id);
       const [leagueResponse, membershipResponse] = await Promise.all([
         getCachedLeague(league.league_id),
         getCachedMembership(currentUser.id)
       ]);
-      console.log('LandingComponent: League response:', leagueResponse);
-      console.log('LandingComponent: Membership response:', membershipResponse);
       const membership = membershipResponse.find(m => m.league_id === league.league_id);
       const selectedLeague = {
         league_id: leagueResponse.league_id,
@@ -70,7 +65,6 @@ const LandingComponent = ({ currentUser, setCurrentLeague, setIsCommissioner, ge
       setIsCommissioner(membership && membership.role === 'commish');
       navigate('/dashboard');
     } catch (err) {
-      console.error('LandingComponent: Error selecting league:', err.response || err);
       setError('Failed to select league. Please try again.');
     } finally {
       setIsLoading(false);
@@ -82,25 +76,13 @@ const LandingComponent = ({ currentUser, setCurrentLeague, setIsCommissioner, ge
     setIsLoading(true);
     setError('');
     try {
-      console.log('LandingComponent: Sending PUT to /league_members/updateRole:', {
-        league_id: league.league_id,
-        user_id: currentUser.id,
-        role: 'player'
-      });
       const roleResponse = await axiosInstance.put(`/league_members/updateRole/${league.league_id}/${currentUser.id}`, { role: 'player' });
-      console.log('LandingComponent: Update role response:', roleResponse.data);
       if (roleResponse.data.status !== 'success') {
         throw new Error(roleResponse.data.message || 'Failed to accept invitation');
       }
 
       const teamName = currentUser.first_name ? `${currentUser.first_name}'s Team` : 'Default Team';
-      console.log('LandingComponent: Sending PUT to /league_members/updateTeamName:', {
-        league_id: league.league_id,
-        user_id: currentUser.id,
-        team_name: teamName
-      });
       const teamNameResponse = await axiosInstance.put(`/league_members/updateTeamName/${league.league_id}/${currentUser.id}`, { team_name: teamName });
-      console.log('LandingComponent: Update team name response:', teamNameResponse.data);
       if (teamNameResponse.data.status !== 'success') {
         throw new Error(teamNameResponse.data.message || 'Failed to set team name');
       }
@@ -109,7 +91,6 @@ const LandingComponent = ({ currentUser, setCurrentLeague, setIsCommissioner, ge
       setInvitations(invitations.filter(i => i.league_id !== league.league_id));
       setError('');
     } catch (err) {
-      console.error('LandingComponent: Error accepting invitation:', err.response || err);
       setError(err.response?.data?.message || `Failed to accept invitation. Please verify the backend server is running at ${axiosInstance.defaults.baseURL}.`);
     } finally {
       setIsLoading(false);
