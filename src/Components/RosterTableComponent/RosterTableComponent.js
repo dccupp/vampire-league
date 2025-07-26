@@ -10,9 +10,29 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
   const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(null);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
+  const [isMessageFading, setIsMessageFading] = useState(false);
   const [leagueMemberId, setLeagueMemberId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [rosterRules, setRosterRules] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalPlayer, setModalPlayer] = useState(null);
+  const [modalMode, setModalMode] = useState('playerInfo'); // playerInfo, confirmDrop, confirmBench
+
+  // Clear message after 3 seconds with fade-out
+  useEffect(() => {
+    if (message) {
+      setIsMessageFading(false);
+      const timer = setTimeout(() => {
+        setIsMessageFading(true);
+        setTimeout(() => {
+          setMessage('');
+          setMessageType('');
+          setIsMessageFading(false);
+        }, 500); // Match animate__fadeOut duration
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   // Fetch league member ID
   useEffect(() => {
@@ -160,6 +180,14 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
       return;
     }
 
+    if (selectedPlayerIndex === index) {
+      setModalPlayer(rosterSlots[index].player);
+      setModalMode('playerInfo');
+      setShowModal(true);
+      setSelectedPlayerIndex(null);
+      return;
+    }
+
     const sourcePlayer = rosterSlots[selectedPlayerIndex].player;
     const targetPlayer = rosterSlots[index]?.player;
     const eligibleSlots = getEligibleSlots(selectedPlayerIndex);
@@ -232,6 +260,105 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
     }
   };
 
+  // Initiate drop player action
+  const initiateDropPlayer = () => {
+    setModalMode('confirmDrop');
+  };
+
+  // Handle dropping a player
+  const handleDropPlayer = async () => {
+    if (!modalPlayer) return;
+
+    try {
+      const playerToDrop = rosteredPlayers.find(
+        p => p.player_name === modalPlayer.name && p.position === modalPlayer.playingPosition
+      );
+      if (!playerToDrop) {
+        setMessage('Player not found.');
+        setMessageType('error');
+        setShowModal(false);
+        return;
+      }
+
+      await axiosInstance.put(`/rostered_players/update/${playerToDrop.id}`, {
+        league_member_id: null,
+        player_id: playerToDrop.player_id,
+        roster_position: null,
+        is_rostered: 0
+      });
+
+      // Sync with backend
+      const response = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${leagueMemberId}`);
+      setRosteredPlayers(response.data);
+      const updatedSlots = constructRosterSlots(rosterRules, response.data);
+      setRosterSlots(updatedSlots);
+      setMessage(`${modalPlayer.name} has been dropped successfully.`);
+      setMessageType('success');
+      setShowModal(false);
+      setModalPlayer(null);
+      setModalMode('playerInfo');
+    } catch (error) {
+      console.error('Error dropping player:', error.response || error);
+      const errorMessage = error.response?.data?.message || 'Failed to drop player.';
+      setMessage(errorMessage);
+      setMessageType('error');
+      setShowModal(false);
+      setModalMode('playerInfo');
+    }
+  };
+
+  // Initiate move to bench action
+  const initiateMoveToBench = () => {
+    setModalMode('confirmBench');
+  };
+
+  // Handle moving a player to bench
+  const handleMoveToBench = async () => {
+    if (!modalPlayer) return;
+
+    try {
+      const playerToBench = rosteredPlayers.find(
+        p => p.player_name === modalPlayer.name && p.position === modalPlayer.playingPosition
+      );
+      if (!playerToBench) {
+        setMessage('Player not found.');
+        setMessageType('error');
+        setShowModal(false);
+        return;
+      }
+
+      await axiosInstance.put(`/rostered_players/update/${playerToBench.id}`, {
+        league_member_id: leagueMemberId,
+        player_id: playerToBench.player_id,
+        roster_position: 'BENCH',
+        is_rostered: 1
+      });
+
+      // Sync with backend
+      const response = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${leagueMemberId}`);
+      setRosteredPlayers(response.data);
+      const updatedSlots = constructRosterSlots(rosterRules, response.data);
+      setRosterSlots(updatedSlots);
+      setMessage(`${modalPlayer.name} has been moved to bench successfully.`);
+      setMessageType('success');
+      setShowModal(false);
+      setModalPlayer(null);
+      setModalMode('playerInfo');
+    } catch (error) {
+      console.error('Error moving player to bench:', error.response || error);
+      const errorMessage = error.response?.data?.message || 'Failed to move player to bench.';
+      setMessage(errorMessage);
+      setMessageType('error');
+      setShowModal(false);
+      setModalMode('playerInfo');
+    }
+  };
+
+  // Cancel confirmation
+  const handleCancel = () => {
+    setModalMode('playerInfo');
+  };
+
   if (isLoading) {
     return <div className="fantasy-roster-container">Loading roster data...</div>;
   }
@@ -245,7 +372,11 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
   return (
     <div className="fantasy-roster-container animate__animated animate__fadeIn">
       <h2 className="roster-title">{currentLeague?.name ? `${currentLeague.name} Roster` : 'Team Roster'}</h2>
-      {message && <div className={`message ${messageType}`}>{message}</div>}
+      {message && (
+        <div className={`message ${messageType} animate__animated ${isMessageFading ? 'animate__fadeOut' : 'animate__fadeIn'}`}>
+          {message}
+        </div>
+      )}
       <div className="table-responsive">
         <table className="roster-table">
           <thead>
@@ -268,6 +399,7 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
                       player={rosterEntry.player}
                       index={index}
                       onClick={handlePlayerClick}
+                      isSelected={selectedPlayerIndex === index}
                     />
                   ) : (
                     <div
@@ -283,6 +415,45 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
           </tbody>
         </table>
       </div>
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            {modalMode === 'playerInfo' && (
+              <>
+                <h3 className="modal-title">Player Information</h3>
+                <p><strong>Name:</strong> {modalPlayer.name}</p>
+                <p><strong>Position:</strong> {modalPlayer.playingPosition}</p>
+                <p><strong>Team:</strong> {modalPlayer.team}</p>
+                <div className="modal-buttons">
+                  <button className="close-modal-btn" onClick={() => setShowModal(false)}>Close</button>
+                  <button className="move-bench-btn" onClick={initiateMoveToBench}>Move to Bench</button>
+                  <button className="drop-player-btn" onClick={initiateDropPlayer}>Drop Player</button>
+                </div>
+              </>
+            )}
+            {modalMode === 'confirmDrop' && (
+              <>
+                <h3 className="modal-title">Confirm Drop Player</h3>
+                <p>Are you sure you want to drop {modalPlayer.name}?</p>
+                <div className="modal-buttons">
+                  <button className="confirm-btn" onClick={handleDropPlayer}>Confirm</button>
+                  <button className="cancel-btn" onClick={handleCancel}>Cancel</button>
+                </div>
+              </>
+            )}
+            {modalMode === 'confirmBench' && (
+              <>
+                <h3 className="modal-title">Confirm Move to Bench</h3>
+                <p>Are you sure you want to move {modalPlayer.name} to the bench?</p>
+                <div className="modal-buttons">
+                  <button className="confirm-btn" onClick={handleMoveToBench}>Confirm</button>
+                  <button className="cancel-btn" onClick={handleCancel}>Cancel</button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
