@@ -21,7 +21,9 @@ const Dashboard = ({ currentUser, currentLeague }) => {
         setError('Missing user or league information.');
         return;
       }
-      try {        const memberResponse = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
+      
+      try {
+        const memberResponse = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
         const member = memberResponse.data.find(m => m.user_id === currentUser.id);
         if (member) {
           setTeamData({

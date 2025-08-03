@@ -23,21 +23,13 @@
 
 .waivers-tables-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: center; /* Center the single table */
   gap: 20px;
 }
 
-.table-wrapper {
-  max-width: 900px; /* Free Agents expands */
-}
-
-.roster-table-wrapper {
-  flex: 0.33; /* 1/3 the size of Free Agents */
-  max-width: 240px; /* Tighter for PlayerCard */
-}
-
-.free-agents-table-wrapper {
-  flex: 1; /* Fills remaining space */
+.table-wrapper.free-agents-table-wrapper {
+  flex: 1; /* Fills available space */
+  max-width: 100%; /* Expand to full width */
 }
 
 .table-title {
@@ -46,6 +38,47 @@
   color: #2ecc71;
   text-align: center;
   margin-bottom: 1rem;
+}
+
+.filters-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.filter-label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  color: #e0e0e0;
+  flex: 1;
+}
+
+.filter-input,
+.filter-select {
+  background-color: #2e2e2e;
+  border: 1px solid #27ae60;
+  color: #e0e0e0;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  width: 100%;
+}
+
+.filter-select {
+  appearance: none; /* Remove default dropdown styling */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%2327ae60" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #2ecc71;
 }
 
 .waivers-table {
@@ -72,7 +105,7 @@
 }
 
 .waivers-row {
-  height: 42px; /* PlayerCard (40px) + 2px padding (1px top/bottom) */
+  height: 42px; /* PlayerCard (40px) + 2px padding */
 }
 
 .waivers-row:hover {
@@ -145,15 +178,14 @@
     gap: 10px;
   }
 
-  .table-wrapper,
-  .roster-table-wrapper,
-  .free-agents-table-wrapper {
+  .table-wrapper.free-agents-table-wrapper {
     max-width: 100%;
-    flex: none; /* Stack vertically */
+    flex: none;
   }
 
-  .roster-table-wrapper {
-    max-width: 100%;
+  .filters-container {
+    flex-direction: column;
+    gap: 8px;
   }
 
   .table-title {

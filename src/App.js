@@ -5,7 +5,8 @@ import Login from './Components/Login/Login';
 import Registration from './Components/Registration/Registration';
 import Dashboard from './Components/Dashboard/Dashboard';
 import RosterTableComponent from './Components/RosterTableComponent/RosterTableComponent';
-import AddPlayerFromWaiversComponent from './Components/AddPlayerFromWaiversComponent/AddPlayerFromWaiversComponent';
+import WaiversComponent from './Components/WaiversComponent/WaiversComponent';
+import ActiveWaiverClaimsComponent from './Components/ActiveWaiverClaimsComponent/ActiveWaiverClaimsComponent';
 import CreateLeagueForm from './Components/CreateLeague/CreateLeagueForm';
 import PrivateRoute from './Components/PrivateRoute/PrivateRoute';
 import LandingComponent from './Components/LandingComponent/LandingComponent';
@@ -17,6 +18,28 @@ import AddPlayerToTeamComponent from './Components/LMToolsComponents/AddPlayerTo
 import EditTeamInfoComponent from './Components/LeagueComponents/EditTeamInfoComponent/EditTeamInfoComponent';
 import axiosInstance from './api';
 
+const ErrorBoundary = ({ children }) => {
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    const errorHandler = (error) => {
+      console.error('Error in App:', error);
+      setHasError(true);
+    };
+    window.addEventListener('error', errorHandler);
+    return () => window.removeEventListener('error', errorHandler);
+  }, []);
+
+  if (hasError) {
+    return (
+      <div className="error-message">
+        Something went wrong. Please refresh the page or contact support.
+      </div>
+    );
+  }
+  return children;
+};
+
 function AppContent() {
   const [currentUser, setCurrentUser] = useState(null);
   const [currentLeague, setCurrentLeague] = useState(null);
@@ -24,6 +47,10 @@ function AppContent() {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    console.log('AppContent initialized with:', { currentUser, currentLeague });
+  }, [currentUser, currentLeague]);
 
   const getCachedMembership = async (userId) => {
     const cached = membershipCache.current[userId];
@@ -142,8 +169,8 @@ function AppContent() {
   }, [currentLeague?.league_id, currentUser?.id, navigate]);
 
   useEffect(() => {
-    const checkCommissionerStatus = async () => {
-      if (currentUser?.id && currentLeague?.league_id) {
+    if (currentUser?.id && currentLeague?.league_id) {
+      const checkCommissionerStatus = async () => {
         try {
           const membership = await getCachedMembership(currentUser.id);
           const membershipRecord = Array.isArray(membership) ? 
@@ -155,13 +182,13 @@ function AppContent() {
           console.error('Error checking commissioner status:', error);
           setIsCommissioner(false);
         }
-      } else {
-        setIsCommissioner(false);
-      }
-    };
-    checkCommissionerStatus();
-    const interval = setInterval(checkCommissionerStatus, 60000);
-    return () => clearInterval(interval);
+      };
+      checkCommissionerStatus();
+      const interval = setInterval(checkCommissionerStatus, 60000);
+      return () => clearInterval(interval);
+    } else {
+      setIsCommissioner(false);
+    }
   }, [currentUser?.id, currentLeague?.league_id]);
 
   useEffect(() => {
@@ -177,179 +204,197 @@ function AppContent() {
   }, [location.pathname, currentUser]);
 
   return (
-    <div>
-      {errorMessage && (
-        <div className="alert alert-danger" role="alert">
-          {errorMessage}
-        </div>
-      )}
-      <Navbar
-        currentUser={currentUser}
-        setCurrentUser={setCurrentUser}
-        currentLeague={currentLeague}
-        setCurrentLeague={setCurrentLeague}
-        isCommissioner={isCommissioner}
-      />
-      <Routes>
-        <Route path="/login" element={<Login currentUser={currentUser} setCurrentUser={setCurrentUser} />} />
-        <Route
-          path="/register"
-          element={currentUser ? <Navigate to="/dashboard" /> : <Registration />}
+    <ErrorBoundary>
+      <div>
+        {errorMessage && (
+          <div className="alert alert-danger" role="alert">
+            {errorMessage}
+          </div>
+        )}
+        <Navbar
+          currentUser={currentUser}
+          setCurrentUser={setCurrentUser}
+          currentLeague={currentLeague}
+          setCurrentLeague={setCurrentLeague}
+          isCommissioner={isCommissioner}
         />
-        <Route
-          path="/landing"
-          element={
-            <PrivateRoute>
-              {currentUser ? (
-                <LandingComponent
-                  currentUser={currentUser}
-                  setCurrentLeague={setCurrentLeague}
-                  setIsCommissioner={setIsCommissioner}
-                  getCachedMembership={getCachedMembership}
-                  getCachedLeague={getCachedLeague}
-                />
-              ) : (
-                <Navigate to="/login" />
-              )}
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              {currentUser ? (
-                <Dashboard
-                  currentUser={currentUser}
-                  currentLeague={currentLeague}
-                />
-              ) : (
-                <Navigate to="/login" />
-              )}
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/roster"
-          element={
-            <PrivateRoute>
-              {currentUser && currentLeague && currentLeague.is_active ? (
-                <RosterTableComponent
-                  currentUser={currentUser}
-                  currentLeague={currentLeague}
-                />
-              ) : (
-                <Navigate to="/dashboard" />
-              )}
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/waivers"
-          element={
-            <PrivateRoute>
-              {currentUser && currentLeague && currentLeague.is_active ? (
-                <AddPlayerFromWaiversComponent
-                  currentUser={currentUser}
-                />
-              ) : (
-                <Navigate to="/dashboard" />
-              )}
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/scoring-rules"
-          element={
-            <PrivateRoute>
-              {currentUser && currentLeague ? (
-                <ScoringRulesDisplayComponent
-                  currentUser={currentUser}
-                  currentLeague={currentLeague}
-                />
-              ) : (
-                <Navigate to="/dashboard" />
-              )}
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/roster-rules"
-          element={
-            <PrivateRoute>
-              {currentUser && currentLeague ? (
-                <RosterRulesDisplayComponent
-                  currentUser={currentUser}
-                  currentLeague={currentLeague}
-                />
-              ) : (
-                <Navigate to="/dashboard" />
-              )}
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/create-league"
-          element={
-            <PrivateRoute>
-              {currentUser ? (
-                <CreateLeagueForm 
-                  currentUser={currentUser}
-                />
-              ) : (
-                <Navigate to="/login" />
-              )}
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/add-member-to-league"
-          element={
-            <PrivateRoute>
-              {currentUser && currentLeague && isCommissioner ? (
-                <AddMemberToLeagueComponent
-                  currentUser={currentUser}
-                  currentLeague={currentLeague}
-                />
-              ) : (
-                <Navigate to="/dashboard" />
-              )}
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/add-player-to-team"
-          element={
-            <PrivateRoute>
-              {currentUser && currentLeague && isCommissioner ? (
-                <AddPlayerToTeamComponent
-                  currentUser={currentUser}
-                  currentLeague={currentLeague}
-                />
-              ) : (
-                <Navigate to="/dashboard" />
-              )}
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/edit-team-info"
-          element={
-            <PrivateRoute>
-              {currentUser && currentLeague ? (
-                <EditTeamInfoComponent
-                  currentUser={currentUser}
-                  currentLeague={currentLeague}
-                />
-              ) : (
-                <Navigate to="/dashboard" />
-              )}
-            </PrivateRoute>
-          }
-        />
-        <Route path="/" element={<Navigate to="/login" />} />
-      </Routes>
-    </div>
+        <Routes>
+          <Route path="/login" element={<Login currentUser={currentUser} setCurrentUser={setCurrentUser} />} />
+          <Route
+            path="/register"
+            element={currentUser ? <Navigate to="/dashboard" /> : <Registration />}
+          />
+          <Route
+            path="/landing"
+            element={
+              <PrivateRoute>
+                {currentUser ? (
+                  <LandingComponent
+                    currentUser={currentUser}
+                    setCurrentLeague={setCurrentLeague}
+                    setIsCommissioner={setIsCommissioner}
+                    getCachedMembership={getCachedMembership}
+                    getCachedLeague={getCachedLeague}
+                  />
+                ) : (
+                  <Navigate to="/login" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                {currentUser ? (
+                  <Dashboard
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/login" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/roster"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague && currentLeague.is_active ? (
+                  <RosterTableComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/waivers"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague && currentLeague.is_active ? (
+                  <WaiversComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/view-waivers"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague && currentLeague.is_active ? (
+                  <ActiveWaiverClaimsComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/scoring-rules"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague ? (
+                  <ScoringRulesDisplayComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/roster-rules"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague ? (
+                  <RosterRulesDisplayComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/create-league"
+            element={
+              <PrivateRoute>
+                {currentUser ? (
+                  <CreateLeagueForm 
+                    currentUser={currentUser}
+                  />
+                ) : (
+                  <Navigate to="/login" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/add-member-to-league"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague && isCommissioner ? (
+                  <AddMemberToLeagueComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/add-player-to-team"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague && isCommissioner ? (
+                  <AddPlayerToTeamComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/edit-team-info"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague ? (
+                  <EditTeamInfoComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route path="/" element={<Navigate to="/login" />} />
+        </Routes>
+      </div>
+    </ErrorBoundary>
   );
 }
 
