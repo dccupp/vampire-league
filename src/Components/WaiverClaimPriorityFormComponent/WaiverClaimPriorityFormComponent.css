@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
-.active-waiver-claims-container {
+.waiver-priority-container {
   background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
   border-radius: 8px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
@@ -12,34 +12,12 @@
   --animate-duration: 0.3s;
 }
 
-.header-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.active-waiver-claims-title {
+.waiver-priority-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #2ecc71;
-  margin: 0;
-}
-
-.manage-priorities-btn {
-  background: #27ae60;
-  color: #1c1c1c;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background 0.2s;
-}
-
-.manage-priorities-btn:hover {
-  background: #2ecc71;
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
 .error-message {
@@ -52,11 +30,21 @@
   border-radius: 4px;
 }
 
+.success-message {
+  color: #2ecc71;
+  text-align: center;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  background: #2e2e2e;
+  padding: 8px;
+  border-radius: 4px;
+}
+
 .table-wrapper {
   overflow-x: auto;
 }
 
-.waiver-claims-table {
+.waiver-priority-table {
   width: 100%;
   border-collapse: collapse;
   background: #2e2e2e;
@@ -64,42 +52,57 @@
   border-radius: 6px;
 }
 
-.waiver-claims-table th,
-.waiver-claims-table td {
+.waiver-priority-table th,
+.waiver-priority-table td {
   padding: 10px;
   text-align: left;
   font-size: 0.9rem;
 }
 
-.waiver-claims-table th {
+.waiver-priority-table th {
   background: #27ae60;
   color: #1c1c1c;
   font-weight: 700;
 }
 
-.waiver-claims-table td {
+.waiver-priority-table td {
   color: #e0e0e0;
   border-bottom: 1px solid #27ae60;
 }
 
-.waiver-claim-row:hover {
+.waiver-priority-row:hover {
   background: #333333;
 }
 
-.delete-btn {
-  background: #ff4d4d;
-  color: #fff;
+.priority-select {
+  background: #2e2e2e;
+  color: #e0e0e0;
+  border: 1px solid #27ae60;
+  border-radius: 4px;
+  padding: 5px;
+  font-size: 0.85rem;
+  width: 100px;
+}
+
+.submit-button-container {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.submit-btn {
+  background: #27ae60;
+  color: #1c1c1c;
   border: none;
   border-radius: 4px;
-  padding: 6px 12px;
+  padding: 10px 20px;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 700;
   transition: background 0.2s;
 }
 
-.delete-btn:hover {
-  background: #e63939;
+.submit-btn:hover {
+  background: #2ecc71;
 }
 
 .empty-message {
@@ -109,39 +112,34 @@
 }
 
 @media (max-width: 768px) {
-  .active-waiver-claims-container {
+  .waiver-priority-container {
     margin: 10px;
     padding: 15px;
   }
 
-  .header-container {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .active-waiver-claims-title {
+  .waiver-priority-title {
     font-size: 1.2rem;
   }
 
-  .manage-priorities-btn {
-    padding: 6px 12px;
-    font-size: 0.8rem;
-  }
-
-  .error-message {
+  .error-message,
+  .success-message {
     font-size: 0.8rem;
     padding: 6px;
   }
 
-  .waiver-claims-table th,
-  .waiver-claims-table td {
+  .waiver-priority-table th,
+  .waiver-priority-table td {
     padding: 8px;
     font-size: 0.85rem;
   }
 
-  .delete-btn {
-    padding: 5px 10px;
+  .priority-select {
+    width: 80px;
+    font-size: 0.8rem;
+  }
+
+  .submit-btn {
+    padding: 8px 16px;
     font-size: 0.8rem;
   }
 }

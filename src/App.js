@@ -7,6 +7,7 @@ import Dashboard from './Components/Dashboard/Dashboard';
 import RosterTableComponent from './Components/RosterTableComponent/RosterTableComponent';
 import WaiversComponent from './Components/WaiversComponent/WaiversComponent';
 import ActiveWaiverClaimsComponent from './Components/ActiveWaiverClaimsComponent/ActiveWaiverClaimsComponent';
+import WaiverClaimPriorityFormComponent from './Components/WaiverClaimPriorityFormComponent/WaiverClaimPriorityFormComponent';
 import CreateLeagueForm from './Components/CreateLeague/CreateLeagueForm';
 import PrivateRoute from './Components/PrivateRoute/PrivateRoute';
 import LandingComponent from './Components/LandingComponent/LandingComponent';
@@ -293,6 +294,21 @@ function AppContent() {
               <PrivateRoute>
                 {currentUser && currentLeague && currentLeague.is_active ? (
                   <ActiveWaiverClaimsComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/manage-waiver-priority"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague && currentLeague.is_active ? (
+                  <WaiverClaimPriorityFormComponent
                     currentUser={currentUser}
                     currentLeague={currentLeague}
                   />

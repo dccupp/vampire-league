@@ -54,7 +54,8 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
 
       const rosterRes = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${userMember.id}`);
       const rosteredPlayers = Array.isArray(rosterRes.data)
-        ? rosteredPlayers.filter(r => r.is_rostered === 1)
+        ? rosterRes.data
+            .filter(r => r.is_rostered === 1)
             .map(p => ({
               ...p,
               name: p.player_name,
@@ -62,7 +63,6 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
               league_member: userMember
             }))
         : [];
-
       setUserRoster(rosteredPlayers);
 
       const rosteredIds = new Set(
