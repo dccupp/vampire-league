@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api';
 import './WaiverClaimPriorityFormComponent.css';
 
@@ -10,6 +11,7 @@ const WaiverClaimPriorityFormComponent = ({ currentUser, currentLeague }) => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchLeagueMember = async () => {
@@ -167,7 +169,12 @@ const WaiverClaimPriorityFormComponent = ({ currentUser, currentLeague }) => {
 
   return (
     <div className="waiver-priority-container animate__animated animate__fadeIn">
-      <h2 className="waiver-priority-title">{currentLeague?.name ? `${currentLeague.name} Waiver Claim Priorities` : 'Waiver Claim Priorities'}</h2>
+      <div className="header-container">
+        <h2 className="waiver-priority-title">{currentLeague?.name ? `${currentLeague.name} Waiver Claim Priorities` : 'Waiver Claim Priorities'}</h2>
+        <button className="view-claims-btn" onClick={() => navigate('/view-waivers')}>
+          View Claims
+        </button>
+      </div>
       {error && <div className="error-message">{error}</div>}
       {successMessage && <div className="success-message">{successMessage}</div>}
       <div className="table-wrapper">
