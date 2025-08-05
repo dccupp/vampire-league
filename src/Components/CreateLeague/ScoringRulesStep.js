@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ScoringRulesStep = ({ formData, handleInputChange, setError, onSubmit, onBack, isLoading }) => {
+const ScoringRulesStep = ({ formData, handleInputChange, setError, onNext, onBack, isLoading }) => {
   const validateStep = () => {
     const scoringFields = [
       'passing_yards', 'passing_touchdowns', 'interceptions_thrown', 'two_point_pass',
@@ -21,10 +21,10 @@ const ScoringRulesStep = ({ formData, handleInputChange, setError, onSubmit, onB
     return true;
   };
 
-  const handleSubmitClick = () => {
+  const handleNextClick = () => {
     if (validateStep()) {
       setError('');
-      onSubmit();
+      onNext();
     }
   };
 
@@ -90,11 +90,11 @@ const ScoringRulesStep = ({ formData, handleInputChange, setError, onSubmit, onB
         </button>
         <button
           type="button"
-          onClick={handleSubmitClick}
+          onClick={handleNextClick}
           disabled={isLoading}
           className="btn btn-success w-45"
         >
-          {isLoading ? 'Creating...' : 'Create League'}
+          Next
         </button>
       </div>
     </div>

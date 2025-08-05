@@ -46,28 +46,28 @@ const NavBar = ({ currentUser, setCurrentUser, currentLeague, setCurrentLeague, 
                     >
                       Roster
                     </Nav.Link>
+                    <NavDropdown
+                      title="Waivers"
+                      id="waivers-dropdown"
+                      className="nav-link-custom"
+                    >
+                      <NavDropdown.Item
+                        as={NavLink}
+                        to="/waivers"
+                        className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
+                      >
+                        Add Player
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        as={NavLink}
+                        to="/view-waivers"
+                        className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
+                      >
+                        Manage Waiver Claims
+                      </NavDropdown.Item>
+                    </NavDropdown>
                   </>
                 )}
-                <NavDropdown
-                  title="Waivers"
-                  id="waivers-dropdown"
-                  className="nav-link-custom"
-                >
-                  <NavDropdown.Item
-                      as={NavLink}
-                      to="/waivers"
-                      className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
-                    >
-                      Add Player
-                  </NavDropdown.Item>
-                  <NavDropdown.Item
-                      as={NavLink}
-                      to="/view-waivers"
-                      className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
-                    >
-                      Manage Waiver Claims
-                  </NavDropdown.Item>
-                </NavDropdown>
                 <NavDropdown
                   title="League"
                   id="league-dropdown"
@@ -86,6 +86,13 @@ const NavBar = ({ currentUser, setCurrentUser, currentLeague, setCurrentLeague, 
                     className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
                   >
                     Roster Rules
+                  </NavDropdown.Item>
+                  <NavDropdown.Item
+                    as={NavLink}
+                    to="/waiver-rules"
+                    className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
+                  >
+                    Waiver Rules
                   </NavDropdown.Item>
                 </NavDropdown>
               </>

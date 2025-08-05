@@ -281,7 +281,7 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
       }
 
       await axiosInstance.put(`/rostered_players/update/${playerToDrop.id}`, {
-        league_member_id: null,
+        league_member_id: 0,
         player_id: playerToDrop.player_id,
         roster_position: null,
         is_rostered: 0

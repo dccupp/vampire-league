@@ -1,10 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createLeague } from '../../api/leagueService';
 import ProgressBar from './ProgressBar';
 import LeagueInfoStep from './LeagueInfoStep';
 import RosterRulesStep from './RosterRulesStep';
 import ScoringRulesStep from './ScoringRulesStep';
+import WaiverRulesStep from './WaiverRulesStep';
 import './CreateLeagueFormComponent.css';
 
 const defaultFormValues = {
@@ -65,6 +66,8 @@ const defaultFormValues = {
   blocked_return_touchdown: '6',
   two_point_return: '2',
   one_point_safety: '2',
+  waivers_length: '2',
+  waiver_day: 'Wednesday',
 };
 
 const CreateLeagueForm = ({ currentUser }) => {
@@ -73,6 +76,16 @@ const CreateLeagueForm = ({ currentUser }) => {
   const [formData, setFormData] = useState(defaultFormValues);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const formRef = useRef(null);
+
+  useEffect(() => {
+    if (formRef.current) {
+      window.scrollTo({
+        top: formRef.current.offsetTop,
+        behavior: 'smooth',
+      });
+    }
+  }, [step]);
 
   const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -151,6 +164,17 @@ const CreateLeagueForm = ({ currentUser }) => {
             formData={formData}
             handleInputChange={handleInputChange}
             setError={setError}
+            onNext={handleNext}
+            onBack={handleBack}
+            isLoading={isLoading}
+          />
+        );
+      case 5:
+        return (
+          <WaiverRulesStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+            setError={setError}
             onSubmit={handleSubmit}
             onBack={handleBack}
             isLoading={isLoading}
@@ -163,8 +187,8 @@ const CreateLeagueForm = ({ currentUser }) => {
 
   return (
     <div className="create-league-container">
-      <div className="create-league-form">
-        <ProgressBar step={step} totalSteps={4} />
+      <div className="create-league-form" ref={formRef}>
+        <ProgressBar step={step} totalSteps={5} />
         {error && (
           <div className="error-message" role="alert">
             {error}

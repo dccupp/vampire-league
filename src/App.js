@@ -14,6 +14,7 @@ import LandingComponent from './Components/LandingComponent/LandingComponent';
 import Navbar from './Components/Navbar/Navbar';
 import ScoringRulesDisplayComponent from './Components/LeagueComponents/ScoringRulesDisplayComponent/ScoringRulesDisplayComponent';
 import RosterRulesDisplayComponent from './Components/LeagueComponents/RosterRulesDisplayComponent/RosterRulesDisplayComponent';
+import WaiverRulesDisplayComponent from './Components/LeagueComponents/WaiverRulesDisplayComponent/WaiverRulesDisplayComponent';
 import AddMemberToLeagueComponent from './Components/LMToolsComponents/AddMemberToLeagueComponent/AddMemberToLeagueComponent';
 import AddPlayerToTeamComponent from './Components/LMToolsComponents/AddPlayerToTeamComponent/AddPlayerToTeamComponent';
 import EditTeamInfoComponent from './Components/LeagueComponents/EditTeamInfoComponent/EditTeamInfoComponent';
@@ -339,6 +340,21 @@ function AppContent() {
               <PrivateRoute>
                 {currentUser && currentLeague ? (
                   <RosterRulesDisplayComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/waiver-rules"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague ? (
+                  <WaiverRulesDisplayComponent
                     currentUser={currentUser}
                     currentLeague={currentLeague}
                   />

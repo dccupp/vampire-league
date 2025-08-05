@@ -108,8 +108,8 @@ const RosterRulesDisplayComponent = ({ currentUser, currentLeague }) => {
     <div className="roster-rules-container animate__animated animate__fadeIn">
       <h2 className="roster-rules-title">Roster Rules</h2>
       <div className="roster-rules-categories">
-        {renderRosterSection(regularRules, 'Regular Player Rules')}
-        {renderRosterSection(vampireRules, 'Vampire Player Rules')}
+        {renderRosterSection(regularRules, 'Regular Player Roster Rules')}
+        {renderRosterSection(vampireRules, 'Vampire Player Roster Rules')}
       </div>
     </div>
   );

@@ -19,24 +19,6 @@ export const createLeague = async (formData, userId) => {
     }
     const leagueId = leagueResponse.data.league_id;
 
-    // Create division 1
-    const division1Response = await axiosInstance.post('/league_divisions/create', {
-      league_id: leagueId,
-      name: formData.division1Name,
-    });
-    if (division1Response.data.status !== 'success') {
-      throw new Error('Failed to create division 1');
-    }
-
-    // Create division 2
-    const division2Response = await axiosInstance.post('/league_divisions/create', {
-      league_id: leagueId,
-      name: formData.division2Name,
-    });
-    if (division2Response.data.status !== 'success') {
-      throw new Error('Failed to create division 2');
-    }
-
     // Create regular roster rules
     const regularRosterResponse = await axiosInstance.post('/roster_rules/create', {
       league_id: leagueId,
@@ -115,6 +97,16 @@ export const createLeague = async (formData, userId) => {
     });
     if (scoringResponse.data.status !== 'success') {
       throw new Error(scoringResponse.data.message || 'Failed to create scoring rules');
+    }
+
+    // Create waiver rules
+    const waiverRulesResponse = await axiosInstance.post('/waiver_rules/create', {
+      league_id: leagueId,
+      waivers_length: parseInt(formData.waivers_length),
+      waiver_day: formData.waiver_day,
+    });
+    if (waiverRulesResponse.data.status !== 'success') {
+      throw new Error(waiverRulesResponse.data.message || 'Failed to create waiver rules');
     }
 
     // Create league member (commissioner)
