@@ -1,11 +1,4 @@
-import axios from 'axios';
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost/vampire_project/vamp_api';
-
-const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-});
+import axiosInstance from '../api';
 
 export const createLeague = async (formData, userId) => {
   try {

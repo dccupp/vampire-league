@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import axiosInstance from '../../../api'; // Use centralized axiosInstance
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import axiosInstance from '../../../api';
 import PlayerCard from '../../PlayerCard/PlayerCard';
 import './AddPlayerToTeamComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
-  const [playerName, setPlayerName] = useState('');
+  const [nameFilter, setNameFilter] = useState('');
+  const [teamFilter, setTeamFilter] = useState('All');
+  const [positionFilter, setPositionFilter] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [players, setPlayers] = useState([]);
-  const [filteredPlayers, setFilteredPlayers] = useState([]);
   const [leagueMembers, setLeagueMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState('');
   const [rosterRules, setRosterRules] = useState(null);
@@ -17,92 +19,79 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
   const [leagueRosteredPlayerIds, setLeagueRosteredPlayerIds] = useState([]);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
+  const [isMessageExiting, setIsMessageExiting] = useState(false);
+  const itemsPerPage = 20;
 
-  // Fetch all players for autocomplete
-  useEffect(() => {
-    const fetchPlayers = async () => {
-      try {
-        const response = await axiosInstance.get('/players/getPlayers');
-        setPlayers(response.data);
-      } catch (error) {
-        console.error('AddPlayerToTeam: Error fetching players:', error.response || error);
-        setMessage('Failed to load players.');
-        setMessageType('error');
-      }
-    };
-    fetchPlayers();
-  }, []);
+  const nflTeams = useMemo(() => [
+    'All', 'ARI', 'ATL', 'BAL', 'BUF', 'CAR', 'CHI', 'CIN', 'CLE',
+    'DAL', 'DEN', 'DET', 'GB', 'HOU', 'IND', 'JAX', 'KC', 'LAC',
+    'LAR', 'LV', 'MIA', 'MIN', 'NE', 'NO', 'NYG', 'NYJ', 'PHI',
+    'PIT', 'SEA', 'SF', 'TB', 'TEN', 'WAS'
+  ], []);
 
-  // Fetch league members for dropdown
-  useEffect(() => {
-    const fetchLeagueMembers = async () => {
-      if (currentLeague?.league_id) {
-        try {
-          const response = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
-          setLeagueMembers(response.data);
-        } catch (error) {
-          console.error('AddPlayerToTeam: Error fetching league members:', error.response || error);
-          setMessage('Failed to load league members.');
-          setMessageType('error');
+  // Fetch all players and league data
+  const fetchData = useCallback(async () => {
+    if (!currentLeague?.league_id) {
+      setMessage('Missing league information');
+      setMessageType('error');
+      setIsMessageExiting(false);
+      setTimeout(() => {
+        setIsMessageExiting(true);
+        setTimeout(() => setMessage(''), 500); // Match animation duration
+      }, 5000);
+      return;
+    }
+
+    try {
+      const [playersRes, membersRes, leagueRosteredRes, rosterRulesRes] = await Promise.all([
+        axiosInstance.get('/players/getPlayers'),
+        axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`),
+        axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueId/${currentLeague.league_id}`),
+        axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/1`)
+      ]);
+
+      setPlayers(Array.isArray(playersRes.data) ? playersRes.data : []);
+      setLeagueMembers(Array.isArray(membersRes.data) ? membersRes.data : []);
+      setLeagueRosteredPlayerIds(
+        Array.isArray(leagueRosteredRes.data)
+          ? leagueRosteredRes.data
+              .filter(player => player.is_rostered === 1)
+              .map(player => player.player_id)
+          : []
+      );
+
+      setRosterRules(rosterRulesRes.data);
+      const slots = [];
+      const positions = [
+        { key: 'quarterback_count', position: 'QB' },
+        { key: 'running_back_count', position: 'RB' },
+        { key: 'wide_receiver_count', position: 'WR' },
+        { key: 'tight_end_count', position: 'TE' },
+        { key: 'flex_count', position: 'FLEX' },
+        { key: 'bench_count', position: 'BENCH' },
+      ];
+      positions.forEach(({ key, position }) => {
+        const count = rosterRulesRes.data[key] || 0;
+        for (let i = 1; i <= count; i++) {
+          slots.push({ sPosition: `${position}${i}`, position });
         }
-      }
-    };
-    fetchLeagueMembers();
+      });
+      setRosterSlots(slots);
+    } catch (error) {
+      console.error('AddPlayerToTeam: Error fetching data:', error.response || error);
+      setMessage('Failed to load data.');
+      setMessageType('error');
+      setIsMessageExiting(false);
+      setTimeout(() => {
+        setIsMessageExiting(true);
+        setTimeout(() => setMessage(''), 500);
+      }, 5000);
+    }
   }, [currentLeague]);
 
-  // Fetch roster rules and construct roster slots
   useEffect(() => {
-    const fetchRosterRules = async () => {
-      if (currentLeague?.league_id) {
-        try {
-          const response = await axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/1`);
-          setRosterRules(response.data);
-          // Construct roster slots based on roster rules
-          const slots = [];
-          const positions = [
-            { key: 'quarterback_count', position: 'QB' },
-            { key: 'running_back_count', position: 'RB' },
-            { key: 'wide_receiver_count', position: 'WR' },
-            { key: 'tight_end_count', position: 'TE' },
-            { key: 'flex_count', position: 'FLEX' },
-            { key: 'bench_count', position: 'BENCH' },
-          ];
-          positions.forEach(({ key, position }) => {
-            const count = response.data[key] || 0;
-            for (let i = 1; i <= count; i++) {
-              slots.push({ sPosition: `${position}${i}`, position });
-            }
-          });
-          setRosterSlots(slots);
-        } catch (error) {
-          console.error('AddPlayerToTeam: Error fetching roster rules:', error.response || error);
-          setMessage('Failed to load roster rules.');
-          setMessageType('error');
-        }
-      }
-    };
-    fetchRosterRules();
-  }, [currentLeague]);
-
-  // Fetch rostered player IDs for the entire league
-  useEffect(() => {
-    const fetchLeagueRosteredPlayers = async () => {
-      if (currentLeague?.league_id) {
-        try {
-          const response = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueId/${currentLeague.league_id}`);
-          const rosteredPlayerIds = response.data
-            .filter(player => player.is_rostered === 1)
-            .map(player => player.player_id);
-          setLeagueRosteredPlayerIds(rosteredPlayerIds);
-        } catch (error) {
-          console.error('AddPlayerToTeam: Error fetching league rostered players:', error.response || error);
-          setMessage('Failed to load league rostered players.');
-          setMessageType('error');
-        }
-      }
-    };
-    fetchLeagueRosteredPlayers();
-  }, [currentLeague]);
+    fetchData();
+  }, [fetchData]);
 
   // Fetch rostered players for selected member
   useEffect(() => {
@@ -110,10 +99,15 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
       if (selectedMember) {
         try {
           const response = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${selectedMember}`);
-          setRosteredPlayers(response.data);
+          setRosteredPlayers(Array.isArray(response.data) ? response.data : []);
           if (response.data.length === 0) {
             setMessage('No players rostered yet.');
             setMessageType('info');
+            setIsMessageExiting(false);
+            setTimeout(() => {
+              setIsMessageExiting(true);
+              setTimeout(() => setMessage(''), 500);
+            }, 5000);
           } else {
             setMessage('');
           }
@@ -121,6 +115,11 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
           console.error('AddPlayerToTeam: Error fetching rostered players:', error.response || error);
           setMessage('Failed to load rostered players.');
           setMessageType('error');
+          setIsMessageExiting(false);
+          setTimeout(() => {
+            setIsMessageExiting(true);
+            setTimeout(() => setMessage(''), 500);
+          }, 5000);
         }
       } else {
         setRosteredPlayers([]);
@@ -129,36 +128,34 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     fetchRosteredPlayers();
   }, [selectedMember]);
 
-  // Handle autocomplete filtering
-  const handlePlayerNameChange = (e) => {
-    const value = e.target.value;
-    setPlayerName(value);
-    if (value.length > 0) {
-      const filtered = players.filter(
-        player =>
-          player.player_name.toLowerCase().includes(value.toLowerCase()) &&
-          !leagueRosteredPlayerIds.includes(player.player_id)
-      );
-      setFilteredPlayers(filtered);
-    } else {
-      setFilteredPlayers([]);
-    }
-  };
+  // Filter players
+  const filteredPlayers = useMemo(() => {
+    return players.filter(player => {
+      const matchesName = player.player_name.toLowerCase().includes(nameFilter.toLowerCase());
+      const matchesTeam = teamFilter !== 'All' ? player.team.toUpperCase() === teamFilter.toUpperCase() : true;
+      const matchesPosition = positionFilter !== 'All' ? player.position === positionFilter : true;
+      return matchesName && matchesTeam && matchesPosition && !leagueRosteredPlayerIds.includes(player.player_id);
+    }).map(player => ({
+      ...player,
+      name: player.player_name,
+      playingPosition: player.position
+    }));
+  }, [players, nameFilter, teamFilter, positionFilter, leagueRosteredPlayerIds]);
+
+  const totalPages = Math.ceil(filteredPlayers.length / itemsPerPage);
+  const currentPlayers = filteredPlayers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   // Handle player selection
   const handlePlayerSelect = (player) => {
     setSelectedPlayer(player);
-    setPlayerName(player.player_name);
-    setFilteredPlayers([]);
   };
 
   // Handle league member selection
   const handleMemberSelect = (e) => {
-    const memberId = e.target.value;
-    setSelectedMember(memberId);
-    const selectedMemberRecord = leagueMembers.find(member => member.id === parseInt(memberId));  };
+    setSelectedMember(e.target.value);
+  };
 
-  // Find the first available slot for a player
+  // Find available slot
   const findAvailableSlot = (playerPosition) => {
     const assignedPositions = rosteredPlayers
       .filter(player => player.is_rostered === 1 && player.roster_position)
@@ -182,30 +179,47 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     if (!selectedPlayer || !selectedMember) {
       setMessage('Please select a player and a league member.');
       setMessageType('error');
+      setIsMessageExiting(false);
+      setTimeout(() => {
+        setIsMessageExiting(true);
+        setTimeout(() => setMessage(''), 500);
+      }, 5000);
       return;
     }
 
-    // Check if player is already rostered in the league
     if (leagueRosteredPlayerIds.includes(selectedPlayer.player_id)) {
       setMessage('This player is already rostered by another league member.');
       setMessageType('error');
+      setIsMessageExiting(false);
+      setTimeout(() => {
+        setIsMessageExiting(true);
+        setTimeout(() => setMessage(''), 500);
+      }, 5000);
       return;
     }
 
-    // Check if max roster size is reached
     const currentRosterCount = rosteredPlayers.filter(player => player.is_rostered === 1).length;
     const maxRosterSize = rosterRules?.max_roster_size || 13;
     if (currentRosterCount >= maxRosterSize) {
       setMessage('Roster is full. Maximum roster size reached.');
       setMessageType('error');
+      setIsMessageExiting(false);
+      setTimeout(() => {
+        setIsMessageExiting(true);
+        setTimeout(() => setMessage(''), 500);
+      }, 5000);
       return;
     }
 
-    // Find available slot for the player
     const rosterPosition = findAvailableSlot(selectedPlayer.position);
     if (!rosterPosition) {
       setMessage('No available roster slot for this player\'s position.');
       setMessageType('error');
+      setIsMessageExiting(false);
+      setTimeout(() => {
+        setIsMessageExiting(true);
+        setTimeout(() => setMessage(''), 500);
+      }, 5000);
       return;
     }
 
@@ -219,22 +233,34 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
       if (response.data.status === 'success') {
         setMessage('Player added successfully.');
         setMessageType('success');
-        // Refetch rostered players
+        setIsMessageExiting(false);
+        setTimeout(() => {
+          setIsMessageExiting(true);
+          setTimeout(() => setMessage(''), 500);
+        }, 5000);
         const rosterResponse = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${selectedMember}`);
         setRosteredPlayers(rosterResponse.data);
-        // Update league rostered player IDs
         setLeagueRosteredPlayerIds([...leagueRosteredPlayerIds, selectedPlayer.player_id]);
-        // Clear selection
         setSelectedPlayer(null);
-        setPlayerName('');
+        setCurrentPage(1);
       } else {
         setMessage(response.data.message || 'Failed to add player.');
         setMessageType('error');
+        setIsMessageExiting(false);
+        setTimeout(() => {
+          setIsMessageExiting(true);
+          setTimeout(() => setMessage(''), 500);
+        }, 5000);
       }
     } catch (error) {
       console.error('AddPlayerToTeam: Error adding player:', error.response || error);
       setMessage(`Error adding player: ${error.response?.data?.message || error.message}`);
       setMessageType('error');
+      setIsMessageExiting(false);
+      setTimeout(() => {
+        setIsMessageExiting(true);
+        setTimeout(() => setMessage(''), 500);
+      }, 5000);
     }
   };
 
@@ -244,10 +270,9 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     const availablePlayers = [...rosteredPlayers.filter(player => player.is_rostered === 1)];
 
     assignedSlots.forEach(slot => {
-      slot.player = null; // Initialize slot as empty
+      slot.player = null;
       let player = null;
       if (slot.position === 'BENCH') {
-        // Assign BENCH players to the first available BENCH slot
         player = availablePlayers.find(p => p.roster_position === 'BENCH');
         if (player) {
           slot.player = {
@@ -255,14 +280,12 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
             playingPosition: player.position,
             team: player.team
           };
-          // Remove assigned player
           const playerIndex = availablePlayers.findIndex(p => p.roster_position === 'BENCH');
           if (playerIndex !== -1) {
             availablePlayers.splice(playerIndex, 1);
           }
         }
       } else {
-        // Match non-BENCH players by exact roster_position
         player = availablePlayers.find(p => p.roster_position === slot.sPosition);
         if (player) {
           slot.player = {
@@ -270,7 +293,6 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
             playingPosition: player.position,
             team: player.team
           };
-          // Remove assigned player
           const playerIndex = availablePlayers.findIndex(p => p.roster_position === slot.sPosition);
           if (playerIndex !== -1) {
             availablePlayers.splice(playerIndex, 1);
@@ -286,65 +308,134 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
 
   return (
     <div className="add-player-container">
-      <div className="content-wrapper">
-        <div className="add-player-form animate__animated animate__fadeIn">
-          <h3>Add Player to Team</h3>
+      <h2 className="add-player-title">Add Player to Team</h2>
+      {message && (
+        <div className={`message ${messageType} ${isMessageExiting ? 'message-exit' : ''}`}>
+          {message}
+        </div>
+      )}
+      <div className="add-player-sections">
+        <div className="search-section">
+          <h3 className="section-title">Search Players</h3>
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="vampire-label">Player Name</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Enter player name"
-                value={playerName}
-                onChange={handlePlayerNameChange}
-                autoComplete="off"
-              />
-              {filteredPlayers.length > 0 && (
-                <ul className="autocomplete-list">
-                  {filteredPlayers.map(player => (
-                    <li
-                      key={player.player_id}
-                      onClick={() => handlePlayerSelect(player)}
-                    >
-                      {player.player_name} ({player.position}, {player.team})
-                    </li>
+            <div className="filters-container">
+              <label className="filter-label">
+                Name
+                <input
+                  type="text"
+                  className="filter-input"
+                  value={nameFilter}
+                  onChange={(e) => setNameFilter(e.target.value)}
+                  placeholder="Enter player name"
+                />
+              </label>
+              <label className="filter-label">
+                Team
+                <select
+                  className="filter-select"
+                  value={teamFilter}
+                  onChange={(e) => setTeamFilter(e.target.value)}
+                >
+                  {nflTeams.map(team => (
+                    <option key={team} value={team}>{team}</option>
                   ))}
-                </ul>
-              )}
-            </div>
-            <div className="form-group">
-              <label className="vampire-label">League Member</label>
-              <select
-                className="form-control"
-                value={selectedMember}
-                onChange={handleMemberSelect}
-              >
-                <option value="">Select a league member</option>
-                {leagueMembers.map(member => (
-                  <option key={member.id} value={member.id}>
-                    {member.username} - {member.team_name || 'No Team Name'}
-                  </option>
-                ))}
-              </select>
+                </select>
+              </label>
+              <label className="filter-label">
+                Position
+                <select
+                  className="filter-select"
+                  value={positionFilter}
+                  onChange={(e) => setPositionFilter(e.target.value)}
+                >
+                  <option value="All">All</option>
+                  <option value="QB">QB</option>
+                  <option value="RB">RB</option>
+                  <option value="WR">WR</option>
+                  <option value="TE">TE</option>
+                  <option value="DEF">DEF</option>
+                  <option value="K">K</option>
+                </select>
+              </label>
+              <label className="filter-label">
+                League Member
+                <select
+                  className="filter-select"
+                  value={selectedMember}
+                  onChange={handleMemberSelect}
+                >
+                  <option value="">Select a league member</option>
+                  {leagueMembers.map(member => (
+                    <option key={member.id} value={member.id}>
+                      {member.username} - {member.team_name || 'No Team Name'}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
             <button
               type="submit"
-              className="btn-success"
-              disabled={!playerName || !selectedMember}
+              className="btn-add"
+              disabled={!selectedPlayer || !selectedMember}
             >
               Add Player
             </button>
-            {message && (
-              <div className={`message ${messageType}`}>
-                {message}
-              </div>
-            )}
           </form>
+          <table className="player-table">
+            <thead>
+              <tr>
+                <th>Player</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentPlayers.length > 0 ? (
+                currentPlayers.map((player, index) => (
+                  <tr key={player.player_id} className="player-row">
+                    <td className="player-cell">
+                      <PlayerCard
+                        player={player}
+                        index={index}
+                        onClick={() => handlePlayerSelect(player)}
+                      />
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="empty-message">No players available</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button
+                className="pagination-btn"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                aria-label="Previous page"
+              >
+                <svg className="pagination-icon" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                </svg>
+              </button>
+              <span className="pagination-current">{currentPage} / {totalPages}</span>
+              <button
+                className="pagination-btn"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                aria-label="Next page"
+              >
+                <svg className="pagination-icon" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
         {rosterRules && (
-          <div className="roster-table-container animate__animated animate__fadeIn">
-            <h3>Roster Preview</h3>
+          <div className="roster-section">
+            <h3 className="section-title">Roster Preview</h3>
             <div className="table-responsive">
               <table className="roster-table">
                 <thead>
