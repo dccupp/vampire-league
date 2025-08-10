@@ -1,0 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+.schedule-container {
+  padding: 16px;
+  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
+  border-radius: 6px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  max-width: 800px;
+  width: 100%;
+  margin: 2rem auto 0 auto;
+  font-family: 'Poppins', sans-serif;
+}
+
+.schedule-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #2ecc71;
+  letter-spacing: 0.5px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.schedule-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.arrow-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.arrow-button:hover {
+  transform: scale(1.2);
+}
+
+.arrow-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.member-select {
+  background: #333333;
+  color: #e0e0e0;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid #27ae60;
+  border-radius: 4px;
+  cursor: pointer;
+  max-width: 300px;
+  width: 100%;
+  transition: background 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.member-select:hover {
+  background: #3a3a3a;
+  border-color: #2ecc71;
+}
+
+.member-select option {
+  background: #333333;
+  color: #e0e0e0;
+}
+
+.member-select option:checked {
+  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+  color: #1c1c1c;
+  font-weight: 600;
+}
+
+.schedule-table-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.schedule-table {
+  width: 100%;
+  background-color: #333333;
+  color: #e0e0e0;
+  font-size: 14px;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.schedule-table th,
+.schedule-table td {
+  border: 0.5px solid #27ae60;
+  padding: 8px;
+  vertical-align: middle;
+  text-align: center;
+  word-wrap: break-word;
+}
+
+.schedule-table th {
+  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+  color: #1c1c1c;
+  font-weight: 700;
+}
+
+.week-column {
+  width: 20%;
+}
+
+.matchup-column {
+  width: 80%;
+}
+
+.schedule-row:hover {
+  background-color: #3a3a3a;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.schedule-row:hover .matchup-details {
+  background-color: rgba(46, 204, 113, 0.1);
+  transition: background-color 0.2s ease-in-out;
+}
+
+.schedule-info {
+  font-size: 14px;
+  font-weight: 400;
+  color: #b0b0b0;
+}
+
+.week-info {
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.matchup-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.team-name {
+  font-weight: 700;
+  color: #27ae60;
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: color 0.2s ease-in-out;
+}
+
+.schedule-row:hover .team-name {
+  color: #2ecc71;
+}
+
+.score {
+  display: inline-block;
+  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+  color: #1c1c1c;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  min-width: 50px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.at-symbol {
+  color: #b0b0b0;
+  font-weight: 500;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+@media (max-width: 768px) {
+  .schedule-container {
+    padding: 12px;
+    max-width: 100%;
+    margin: 1.5rem auto 0 auto;
+  }
+
+  .schedule-title {
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .schedule-controls {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .member-select {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .arrow-button {
+    padding: 6px;
+  }
+
+  .arrow-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .schedule-table {
+    font-size: 13px;
+  }
+
+  .schedule-table th,
+  .schedule-table td {
+    padding: 6px;
+  }
+
+  .week-column {
+    width: 30%;
+  }
+
+  .matchup-column {
+    width: 70%;
+  }
+
+  .schedule-info {
+    font-size: 13px;
+  }
+
+  .team-name {
+    font-size: 12px;
+    padding: 1px 3px;
+  }
+
+  .score {
+    font-size: 12px;
+    padding: 2px 8px;
+    min-width: 40px;
+  }
+
+  .at-symbol {
+    font-size: 12px;
+    padding: 1px 4px;
+  }
+
+  .matchup-info {
+    gap: 6px;
+    padding: 4px 0;
+  }
+}

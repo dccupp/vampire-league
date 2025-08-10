@@ -46,6 +46,20 @@ const NavBar = ({ currentUser, setCurrentUser, currentLeague, setCurrentLeague, 
                     >
                       Roster
                     </Nav.Link>
+                    <Nav.Link
+                      as={NavLink}
+                      to="/matchups"
+                      className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
+                    >
+                      Matchups
+                    </Nav.Link>
+                                        <Nav.Link
+                      as={NavLink}
+                      to="/league-member-schedule"
+                      className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
+                    >
+                      Schedule
+                    </Nav.Link>
                     <NavDropdown
                       title="Waivers"
                       id="waivers-dropdown"
@@ -73,6 +87,13 @@ const NavBar = ({ currentUser, setCurrentUser, currentLeague, setCurrentLeague, 
                   id="league-dropdown"
                   className="nav-link-custom"
                 >
+                  <NavDropdown.Item
+                    as={NavLink}
+                    to="/view-league-member-roster"
+                    className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
+                  >
+                    View League Rosters
+                  </NavDropdown.Item>
                   <NavDropdown.Item
                     as={NavLink}
                     to="/scoring-rules"
@@ -116,6 +137,13 @@ const NavBar = ({ currentUser, setCurrentUser, currentLeague, setCurrentLeague, 
                   className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
                 >
                   Add Player to Team
+                </NavDropdown.Item>
+                <NavDropdown.Item
+                  as={NavLink}
+                  to="/activate-league"
+                  className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
+                >
+                  Activate League
                 </NavDropdown.Item>
               </NavDropdown>
             )}

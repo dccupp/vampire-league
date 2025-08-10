@@ -5,6 +5,7 @@ import Login from './Components/Login/Login';
 import Registration from './Components/Registration/Registration';
 import Dashboard from './Components/Dashboard/Dashboard';
 import RosterTableComponent from './Components/RosterTableComponent/RosterTableComponent';
+import MatchupComponent from './Components/MatchupComponent/MatchupComponent';
 import WaiversComponent from './Components/WaiversComponent/WaiversComponent';
 import ActiveWaiverClaimsComponent from './Components/ActiveWaiverClaimsComponent/ActiveWaiverClaimsComponent';
 import WaiverClaimPriorityFormComponent from './Components/WaiverClaimPriorityFormComponent/WaiverClaimPriorityFormComponent';
@@ -14,10 +15,13 @@ import LandingComponent from './Components/LandingComponent/LandingComponent';
 import Navbar from './Components/Navbar/Navbar';
 import ScoringRulesDisplayComponent from './Components/LeagueComponents/ScoringRulesDisplayComponent/ScoringRulesDisplayComponent';
 import RosterRulesDisplayComponent from './Components/LeagueComponents/RosterRulesDisplayComponent/RosterRulesDisplayComponent';
-import WaiverRulesDisplayComponent from './Components/LeagueComponents/WaiverRulesDisplayComponent/WaiverRulesDisplayComponent';
+import WaiverRulesDisplayComponent from './Components/LeagueComponents/WaiverRulesDisplayComponent/WaiverRulesDisplayComponent'; 
+import EditTeamInfoComponent from './Components/LeagueComponents/EditTeamInfoComponent/EditTeamInfoComponent';
+import LeagueMemberScheduleComponent from './Components/LeagueComponents/LeagueMemberScheduleComponent/LeagueMemberScheduleComponent';
 import AddMemberToLeagueComponent from './Components/LMToolsComponents/AddMemberToLeagueComponent/AddMemberToLeagueComponent';
 import AddPlayerToTeamComponent from './Components/LMToolsComponents/AddPlayerToTeamComponent/AddPlayerToTeamComponent';
-import EditTeamInfoComponent from './Components/LeagueComponents/EditTeamInfoComponent/EditTeamInfoComponent';
+import ViewLeagueMemberRosterComponent from './Components/LeagueComponents/ViewLeagueMemberRosterComponent/ViewLeagueMemberRosterComponent';
+import ActivateLeagueComponent from './Components/LMToolsComponents/ActivateLeagueComponent/ActivateLeagueComponent';
 import axiosInstance from './api';
 
 const ErrorBoundary = ({ children }) => {
@@ -275,6 +279,21 @@ function AppContent() {
             }
           />
           <Route
+            path="/matchups"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague && currentLeague.is_active ? (
+                  <MatchupComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/waivers"
             element={
               <PrivateRoute>
@@ -310,6 +329,21 @@ function AppContent() {
               <PrivateRoute>
                 {currentUser && currentLeague && currentLeague.is_active ? (
                   <WaiverClaimPriorityFormComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/edit-team-info"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague ? (
+                  <EditTeamInfoComponent
                     currentUser={currentUser}
                     currentLeague={currentLeague}
                   />
@@ -365,6 +399,36 @@ function AppContent() {
             }
           />
           <Route
+            path="/league-member-schedule"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague ? (
+                  <LeagueMemberScheduleComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/view-league-member-roster"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague ? (
+                  <ViewLeagueMemberRosterComponent
+                    currentUser={currentUser}
+                    currentLeague={currentLeague}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/create-league"
             element={
               <PrivateRoute>
@@ -409,11 +473,11 @@ function AppContent() {
             }
           />
           <Route
-            path="/edit-team-info"
+            path="/activate-league"
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
-                  <EditTeamInfoComponent
+                  <ActivateLeagueComponent
                     currentUser={currentUser}
                     currentLeague={currentLeague}
                   />

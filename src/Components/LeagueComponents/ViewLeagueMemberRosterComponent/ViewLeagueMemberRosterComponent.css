@@ -1,0 +1,228 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+.roster-view-container {
+  padding: 12px;
+  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
+  border-radius: 6px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto;
+  font-family: 'Poppins', sans-serif;
+}
+
+.roster-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2ecc71;
+  letter-spacing: 0.5px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.roster-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.arrow-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.arrow-button:hover {
+  transform: scale(1.2);
+}
+
+.arrow-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.member-select {
+  background: #333333;
+  color: #e0e0e0;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid #27ae60;
+  border-radius: 4px;
+  cursor: pointer;
+  max-width: 300px;
+  width: 100%;
+  transition: background 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.member-select:hover {
+  background: #3a3a3a;
+  border-color: #2ecc71;
+}
+
+.member-select option {
+  background: #333333;
+  color: #e0e0e0;
+}
+
+.member-select option:checked {
+  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+  color: #1c1c1c;
+  font-weight: 600;
+}
+
+.roster-table {
+  background-color: #333333;
+  color: #e0e0e0;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.roster-table th,
+.roster-table td {
+  border: 0.5px solid #27ae60;
+  padding: 8px;
+  vertical-align: middle;
+}
+
+.roster-table th {
+  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+  color: #1c1c1c;
+  font-weight: 700;
+  text-align: left;
+}
+
+.roster-table th:first-child {
+  width: 80px;
+}
+
+.roster-row {
+  height: 80px;
+}
+
+.roster-row:hover {
+  background-color: #3a3a3a;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.slot-cell {
+  width: 80px;
+  height: 80px;
+  background: #1c1c1c;
+  border: 0.5px solid #27ae60;
+  color: #2ecc71;
+  font-weight: 700;
+  font-size: 12px;
+  text-align: center;
+  vertical-align: middle;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.player-cell {
+  text-align: left;
+}
+
+.empty-slot {
+  font-size: 13px;
+  color: #b0b0b0;
+  text-align: center;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.message {
+  text-align: center;
+  padding: 20px;
+  font-size: 1.2rem;
+}
+
+.message.error {
+  color: #ff4444;
+}
+
+.message.info {
+  color: #b0b0b0;
+}
+
+.table-responsive {
+  max-width: 700px;
+  margin: 0 auto;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .roster-view-container {
+    padding: 10px;
+    max-width: 100%;
+  }
+
+  .roster-title {
+    font-size: 1.2rem;
+  }
+
+  .roster-controls {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .member-select {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .arrow-button {
+    padding: 6px;
+  }
+
+  .arrow-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .roster-table {
+    font-size: 12px;
+  }
+
+  .roster-table th,
+  .roster-table td {
+    padding: 6px;
+  }
+
+  .slot-cell {
+    width: 70px;
+    height: 70px;
+    font-size: 11px;
+  }
+
+  .roster-table th:first-child {
+    width: 70px;
+  }
+
+  .roster-row {
+    height: 70px;
+  }
+
+  .empty-slot {
+    font-size: 11px;
+    min-height: 70px;
+  }
+
+  .table-responsive {
+    max-width: 100%;
+  }
+
+  .message {
+    font-size: 1rem;
+    padding: 15px;
+  }
+}

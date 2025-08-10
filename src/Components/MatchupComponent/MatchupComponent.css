@@ -1,0 +1,307 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+/* Container for the entire matchup component */
+.matchup-container {
+  padding: 16px;
+  background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+  font-family: 'Poppins', sans-serif;
+  color: #e0e0e0;
+}
+
+/* Title for the matchup component */
+.matchup-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2ecc71;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.5px;
+}
+
+/* Controls for week and matchup selection */
+.matchup-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Styles for select dropdowns */
+.week-select,
+.matchup-select {
+  background: #2a2a2a;
+  color: #e0e0e0;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid #27ae60;
+  border-radius: 4px;
+  cursor: pointer;
+  max-width: 250px;
+  width: 100%;
+  transition: background 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.week-select:hover,
+.matchup-select:hover {
+  background: #333333;
+  border-color: #2ecc71;
+}
+
+.week-select option,
+.matchup-select option {
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+.week-select option:checked,
+.matchup-select option:checked {
+  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+  color: #121212;
+  font-weight: 600;
+}
+
+/* Container for the two roster tables */
+.rosters-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Individual roster section */
+.roster-section {
+  flex: 1;
+  min-width: 300px;
+  max-width: 480px;
+}
+
+/* Team title above each table */
+.team-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2ecc71;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Team score box */
+.team-score {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+  color: #121212;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  min-width: 30px;
+  max-width: 150px;
+  width: fit-content;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin: 0 auto 1rem auto;
+}
+
+/* Table styling */
+.roster-table {
+  width: 100%;
+  table-layout: fixed;
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  border-collapse: collapse;
+}
+
+/* Table headers and cells */
+.roster-table th,
+.roster-table td {
+  border: 1px solid #27ae60;
+  padding: 8px;
+  vertical-align: middle;
+}
+
+/* Table headers */
+.roster-table th {
+  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+  color: #121212;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Column widths for away table and default */
+.roster-table th.score-header,
+.roster-table .score-cell {
+  width: 20%;
+}
+
+.roster-table th.player-header,
+.roster-table .player-cell {
+  width: 80%;
+}
+
+/* Column widths for home table */
+#home-roster-table th.player-header,
+#home-roster-table .player-cell {
+  width: 80%;
+}
+
+#home-roster-table th.score-header,
+#home-roster-table .score-cell {
+  width: 20%;
+}
+
+/* Player cell alignment */
+.roster-table .player-cell {
+  text-align: left;
+}
+
+/* Score cell styling */
+.roster-table .score-cell {
+  text-align: center;
+  background: #1a1a1a;
+  color: #2ecc71;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* Row styling */
+.roster-row {
+  height: 80px;
+}
+
+.roster-row:hover {
+  background-color: #333333;
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Empty slot styling */
+.empty-slot {
+  font-size: 13px;
+  color: #b0b0b0;
+  text-align: center;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Message styling */
+.message {
+  text-align: center;
+  padding: 16px;
+  font-size: 1.1rem;
+  color: #e0e0e0;
+}
+
+.message.error {
+  color: #ff4444;
+}
+
+.message.info {
+  color: #b0b0b0;
+}
+
+/* Responsive table container */
+.table-responsive {
+  max-width: 480px;
+  margin: 0 auto;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .matchup-container {
+    padding: 12px;
+    max-width: 100%;
+  }
+
+  .matchup-title {
+    font-size: 1.3rem;
+  }
+
+  .matchup-controls {
+    gap: 8px;
+  }
+
+  .week-select,
+  .matchup-select {
+    font-size: 13px;
+    padding: 6px 10px;
+    max-width: 200px;
+  }
+
+  .roster-section {
+    min-width: 100%;
+  }
+
+  .team-title {
+    font-size: 1.1rem;
+  }
+
+  .team-score {
+    font-size: 14px;
+    padding: 3px 4px;
+    min-width: 28px;
+    max-width: 120px;
+    width: fit-content;
+  }
+
+  .roster-table {
+    font-size: 12px;
+  }
+
+  .roster-table th,
+  .roster-table td {
+    padding: 6px;
+  }
+
+  .roster-table th.score-header,
+  .roster-table .score-cell {
+    width: 20%;
+  }
+
+  .roster-table th.player-header,
+  .roster-table .player-cell {
+    width: 80%;
+  }
+
+  #home-roster-table th.player-header,
+  #home-roster-table .player-cell {
+    width: 80%;
+  }
+
+  #home-roster-table th.score-header,
+  #home-roster-table .score-cell {
+    width: 20%;
+  }
+
+  .roster-row {
+    height: 70px;
+  }
+
+  .empty-slot {
+    font-size: 12px;
+    min-height: 70px;
+  }
+
+  .message {
+    font-size: 1rem;
+    padding: 12px;
+  }
+
+  .table-responsive {
+    max-width: 100%;
+  }
+}
