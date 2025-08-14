@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import axiosInstance from '../../../api';
 import './ActivateLeagueComponent.css';
@@ -13,7 +12,6 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [canActivate, setCanActivate] = useState(false);
   const [memberCount, setMemberCount] = useState(null);
-  const navigate = useNavigate();
 
   // Clear message after 3 seconds with fade-out
   useEffect(() => {
@@ -31,11 +29,10 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
     }
   }, [message]);
 
-  // Fetch league member ID and check conditions
+  // Fetch league member ID and check activation conditions
   useEffect(() => {
     const checkLeagueConditions = async () => {
       if (!currentUser?.id || !currentLeague?.league_id) {
-        console.error('ActivateLeague: Missing currentUser.id or currentLeague.league_id', { currentUser, currentLeague });
         setMessage('User or league data is missing. Please try again.');
         setMessageType('error');
         setCanActivate(false);
@@ -44,15 +41,20 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
       }
 
       try {
+        // Fetch league members to check count
         const membersResponse = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
         const count = Array.isArray(membersResponse.data) ? membersResponse.data.length : 0;
         setMemberCount(count);
 
+        // Check if league is already active
         const leagueResponse = await axiosInstance.get(`/leagues/getLeagueById/${currentLeague.league_id}`);
         const isActive = leagueResponse.data.is_active;
 
+        // Verify user's commissioner role
         const memberResponse = await axiosInstance.get(`/league_members/getLeagueMembersByUserId/${currentUser.id}`);
-        const leagueMember = Array.isArray(memberResponse.data) ? memberResponse.data.find(member => member.league_id === currentLeague.league_id) : null;
+        const leagueMember = Array.isArray(memberResponse.data) 
+          ? memberResponse.data.find(member => member.league_id === currentLeague.league_id) 
+          : null;
 
         if (leagueMember && leagueMember.role === 'commish') {
           setLeagueMemberId(leagueMember.id);
@@ -61,9 +63,9 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
             setMessageType('error');
             setCanActivate(false);
           } else {
-            setCanActivate(count >= 10);
-            if (count < 10) {
-              setMessage('League requires 10 members to activate.');
+            setCanActivate(count === 10);
+            if (count !== 10) {
+              setMessage('League requires exactly 10 members to activate.');
               setMessageType('error');
             }
           }
@@ -73,7 +75,6 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
           setCanActivate(false);
         }
       } catch (error) {
-        console.error('ActivateLeague: Error checking league conditions:', error.response || error);
         setMessage('Error checking league conditions: ' + (error.response?.data?.message || error.message));
         setMessageType('error');
         setCanActivate(false);
@@ -84,6 +85,7 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
     checkLeagueConditions();
   }, [currentUser, currentLeague]);
 
+  // Handle league activation
   const handleActivateLeague = async (e) => {
     e.preventDefault();
     if (!leagueMemberId) {
@@ -95,12 +97,7 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
     setIsLoading(true);
 
     try {
-      const payload = {
-        league_member_id: leagueMemberId,
-        leagueMemberId: leagueMemberId, // Alternative key
-        user_id: currentUser.id // Fallback
-      };
-      const response = await axiosInstance.post(`/leagues/activate/${currentLeague.league_id}`, payload);
+      const response = await axiosInstance.post(`/leagues/activate/${currentLeague.league_id}/${leagueMemberId}`, {});
       if (response.data.status !== 'success') {
         throw new Error(response.data.message || 'Failed to activate league');
       }
@@ -108,10 +105,9 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
       setMessageType('success');
       setCanActivate(false);
       setTimeout(() => {
-        navigate('/dashboard');
+        window.location.reload();
       }, 2000);
     } catch (error) {
-      console.error('ActivateLeague: Error activating league:', error.response || error);
       setMessage('Failed to activate league: ' + (error.response?.data?.message || error.message));
       setMessageType('error');
     } finally {
@@ -125,9 +121,9 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
         <form onSubmit={handleActivateLeague}>
           <h3 className="text-center mb-4">Activate League</h3>
           {memberCount !== null && (
-            <p className="text-center mb-3" style={{ color: memberCount < 10 ? '#e74c3c' : '#2ecc71', fontFamily: 'Poppins, sans-serif', fontSize: '14px' }}>
-              {memberCount < 10
-                ? `League has ${memberCount} members. Need 10 members to activate.`
+            <p className="text-center mb-3" style={{ color: memberCount !== 10 ? '#e74c3c' : '#2ecc71', fontFamily: 'Poppins, sans-serif', fontSize: '14px' }}>
+              {memberCount !== 10
+                ? `League has ${memberCount} members. Need exactly 10 members to activate.`
                 : 'League has 10 members and is ready to activate.'}
             </p>
           )}
