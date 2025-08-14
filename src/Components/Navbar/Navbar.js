@@ -68,84 +68,98 @@ const NavBar = ({ currentUser, setCurrentUser, currentLeague, setCurrentLeague, 
                       <NavDropdown.Item
                         as={NavLink}
                         to="/waivers"
-                        className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
+                        className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
                       >
-                        Add Player
+                        Waivers
                       </NavDropdown.Item>
                       <NavDropdown.Item
                         as={NavLink}
-                        to="/view-waivers"
-                        className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
+                        to="/active-waiver-claims"
+                        className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
                       >
-                        Manage Waiver Claims
+                        Active Waiver Claims
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        as={NavLink}
+                        to="/waiver-priority"
+                        className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
+                      >
+                        Waiver Priority
+                      </NavDropdown.Item>
+                    </NavDropdown>
+                    {/* <Nav.Link
+                      as={NavLink}
+                      to="/edit-team-info"
+                      className={({ isActive }) => (isActive ? 'nav-link-custom active' : 'nav-link-custom')}
+                    >
+                      Edit Team Info
+                    </Nav.Link> */}
+                    <NavDropdown
+                      title="League Info"
+                      id="league-info-dropdown"
+                      className="nav-link-custom"
+                    >
+                      <NavDropdown.Item
+                        as={NavLink}
+                        to="/league-member-roster"
+                        className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
+                      >
+                        View League Rosters
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        as={NavLink}
+                        to="/scoring-rules"
+                        className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
+                      >
+                        Scoring Rules
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        as={NavLink}
+                        to="/roster-rules"
+                        className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
+                      >
+                        Roster Rules
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        as={NavLink}
+                        to="/waiver-rules"
+                        className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
+                      >
+                        Waiver Rules
                       </NavDropdown.Item>
                     </NavDropdown>
                   </>
                 )}
-                <NavDropdown
-                  title="League"
-                  id="league-dropdown"
-                  className="nav-link-custom"
-                >
-                  <NavDropdown.Item
-                    as={NavLink}
-                    to="/view-league-member-roster"
-                    className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
+                {isCommissioner && (
+                  <NavDropdown
+                    title="LM Tools"
+                    id="lm-tools-dropdown"
+                    className="nav-link-custom"
                   >
-                    View League Rosters
-                  </NavDropdown.Item>
-                  <NavDropdown.Item
-                    as={NavLink}
-                    to="/scoring-rules"
-                    className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
-                  >
-                    Scoring Rules
-                  </NavDropdown.Item>
-                  <NavDropdown.Item
-                    as={NavLink}
-                    to="/roster-rules"
-                    className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
-                  >
-                    Roster Rules
-                  </NavDropdown.Item>
-                  <NavDropdown.Item
-                    as={NavLink}
-                    to="/waiver-rules"
-                    className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
-                  >
-                    Waiver Rules
-                  </NavDropdown.Item>
-                </NavDropdown>
+                    <NavDropdown.Item
+                      as={NavLink}
+                      to="/add-member-to-league"
+                      className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
+                    >
+                      Add Member to League
+                    </NavDropdown.Item>
+                    <NavDropdown.Item
+                      as={NavLink}
+                      to="/add-player-to-team"
+                      className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
+                    >
+                      Add Player to Team
+                    </NavDropdown.Item>
+                    <NavDropdown.Item
+                      as={NavLink}
+                      to="/activate-league"
+                      className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
+                    >
+                      Activate League
+                    </NavDropdown.Item>
+                  </NavDropdown>
+                )}
               </>
-            )}
-            {isLoggedIn && hasSelectedLeague && isCommissioner && (
-              <NavDropdown
-                title="LM Tools"
-                id="lm-tools-dropdown"
-                className="nav-link-custom"
-              >
-                <NavDropdown.Item
-                  as={NavLink}
-                  to="/add-member-to-league"
-                  className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
-                >
-                  Add Member to League
-                </NavDropdown.Item>
-                <NavDropdown.Item
-                  as={NavLink}
-                  to="/add-player-to-team"
-                  className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
-                >
-                  Add Player to Team
-                </NavDropdown.Item>
-                <NavDropdown.Item
-                  as={NavLink}
-                  to="/activate-league"
-                  className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
-                >
-                  Activate League
-                </NavDropdown.Item>
-              </NavDropdown>
             )}
             {isLoggedIn && location.pathname !== '/register' && (
               <Nav.Link onClick={handleLogout} className="nav-link-custom">

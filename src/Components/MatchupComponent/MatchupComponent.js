@@ -156,7 +156,6 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
             setMessage('');
           }
         } catch (error) {
-          console.error('Error fetching rosters:', error.response || error);
           setMessage('Failed to load rosters: ' + (error.response?.data?.message || error.message));
           setMessageType('error');
         }
@@ -239,8 +238,6 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
       }
     });
 
-    console.log('constructRosterSlots - Normalized players:', normalizedPlayers);
-    console.log('constructRosterSlots - Output slots:', slots);
     return slots;
   };
 

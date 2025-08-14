@@ -1,59 +1,84 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import axiosInstance from '../../../api';
 import './ActivateLeagueComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
+  const [isMessageFading, setIsMessageFading] = useState(false);
+  const [leagueMemberId, setLeagueMemberId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [canActivate, setCanActivate] = useState(false);
   const [memberCount, setMemberCount] = useState(null);
-  const [leagueMemberId, setLeagueMemberId] = useState(null);
   const navigate = useNavigate();
 
+  // Clear message after 3 seconds with fade-out
+  useEffect(() => {
+    if (message) {
+      setIsMessageFading(false);
+      const timer = setTimeout(() => {
+        setIsMessageFading(true);
+        setTimeout(() => {
+          setMessage('');
+          setMessageType('');
+          setIsMessageFading(false);
+        }, 500); // Match animate__fadeOut duration
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
+  // Fetch league member ID and check conditions
   useEffect(() => {
     const checkLeagueConditions = async () => {
       if (!currentUser?.id || !currentLeague?.league_id) {
         console.error('ActivateLeague: Missing currentUser.id or currentLeague.league_id', { currentUser, currentLeague });
         setMessage('User or league data is missing. Please try again.');
+        setMessageType('error');
         setCanActivate(false);
+        setIsLoading(false);
         return;
       }
 
       try {
         const membersResponse = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
-        const count = membersResponse.data.length;
+        const count = Array.isArray(membersResponse.data) ? membersResponse.data.length : 0;
         setMemberCount(count);
-        console.log('ActivateLeague: Member count', count);
 
         const leagueResponse = await axiosInstance.get(`/leagues/getLeagueById/${currentLeague.league_id}`);
         const isActive = leagueResponse.data.is_active;
-        console.log('ActivateLeague: League is_active', isActive);
 
         const memberResponse = await axiosInstance.get(`/league_members/getLeagueMembersByUserId/${currentUser.id}`);
-        const leagueMember = memberResponse.data.find(member => member.league_id === currentLeague.league_id);
-        console.log('ActivateLeague: League member', leagueMember);
+        const leagueMember = Array.isArray(memberResponse.data) ? memberResponse.data.find(member => member.league_id === currentLeague.league_id) : null;
 
         if (leagueMember && leagueMember.role === 'commish') {
           setLeagueMemberId(leagueMember.id);
           if (isActive) {
             setMessage('League is already activated.');
+            setMessageType('error');
             setCanActivate(false);
           } else {
             setCanActivate(count >= 10);
             if (count < 10) {
               setMessage('League requires 10 members to activate.');
+              setMessageType('error');
             }
           }
         } else {
           setMessage('Only the league commissioner can activate the league.');
+          setMessageType('error');
           setCanActivate(false);
         }
       } catch (error) {
         console.error('ActivateLeague: Error checking league conditions:', error.response || error);
-        setMessage('Error checking league conditions. Please try again.');
+        setMessage('Error checking league conditions: ' + (error.response?.data?.message || error.message));
+        setMessageType('error');
         setCanActivate(false);
+      } finally {
+        setIsLoading(false);
       }
     };
     checkLeagueConditions();
@@ -61,25 +86,34 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
 
   const handleActivateLeague = async (e) => {
     e.preventDefault();
+    if (!leagueMemberId) {
+      setMessage('Cannot activate league: User is not a member.');
+      setMessageType('error');
+      return;
+    }
     setMessage('');
     setIsLoading(true);
 
     try {
-      const response = await axiosInstance.post(`/leagues/activate/${currentLeague.league_id}`, {
-        league_member_id: leagueMemberId
-      });
+      const payload = {
+        league_member_id: leagueMemberId,
+        leagueMemberId: leagueMemberId, // Alternative key
+        user_id: currentUser.id // Fallback
+      };
+      const response = await axiosInstance.post(`/leagues/activate/${currentLeague.league_id}`, payload);
       if (response.data.status !== 'success') {
         throw new Error(response.data.message || 'Failed to activate league');
       }
-
       setMessage('League activated successfully!');
+      setMessageType('success');
       setCanActivate(false);
       setTimeout(() => {
         navigate('/dashboard');
       }, 2000);
     } catch (error) {
       console.error('ActivateLeague: Error activating league:', error.response || error);
-      setMessage(error.message || `Error activating league. Please verify the backend server is running at ${axiosInstance.defaults.baseURL}.`);
+      setMessage('Failed to activate league: ' + (error.response?.data?.message || error.message));
+      setMessageType('error');
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +132,7 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
             </p>
           )}
           {message && (
-            <p className={`message mt-3 ${message.includes('successfully') ? 'success' : 'error'}`}>
+            <p className={`message mt-3 ${messageType} animate__animated ${isMessageFading ? 'animate__fadeOut' : 'animate__fadeIn'}`}>
               {message}
             </p>
           )}
@@ -114,6 +148,14 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
       </div>
     </div>
   );
+};
+
+ActivateLeagueComponent.propTypes = {
+  currentUser: PropTypes.object,
+  currentLeague: PropTypes.shape({
+    league_id: PropTypes.number,
+    name: PropTypes.string
+  }),
 };
 
 export default ActivateLeagueComponent;

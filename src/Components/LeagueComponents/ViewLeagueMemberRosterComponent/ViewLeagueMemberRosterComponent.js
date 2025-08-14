@@ -211,8 +211,6 @@ const ViewLeagueMemberRosterComponent = ({ currentUser, currentLeague }) => {
       }
     });
 
-    console.log('constructRosterSlots - Normalized players:', normalizedPlayers);
-    console.log('constructRosterSlots - Output slots:', slots);
     return slots;
   };
 

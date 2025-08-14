@@ -20,6 +20,15 @@
   font-family: 'Poppins', sans-serif;
 }
 
+.landing-content h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2ecc71;
+  letter-spacing: 0.5px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
 .landing-content h3 {
   font-size: 1.5rem;
   font-weight: 700;
