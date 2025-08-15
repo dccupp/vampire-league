@@ -2,6 +2,13 @@ import axiosInstance from '../api';
 
 export const createLeague = async (formData, userId) => {
   try {
+    // Fetch user to get first_name
+    const userResponse = await axiosInstance.get(`/users/getUserById/${userId}`);
+    if (!userResponse.data || !userResponse.data.first_name) {
+      throw new Error(userResponse.data.message || 'Failed to fetch user data or first name.');
+    }
+    const firstName = userResponse.data.first_name;
+
     // Create league
     const leagueResponse = await axiosInstance.post('/leagues/create', {
       name: formData.leagueName,
@@ -102,15 +109,19 @@ export const createLeague = async (formData, userId) => {
       throw new Error(waiverRulesResponse.data.message || 'Failed to create waiver rules');
     }
 
-    // Create league member (commissioner)
+    // Create league member (commissioner) with team_name and remaining_faab_budget
     const leagueMemberResponse = await axiosInstance.post('/league_members/create', {
       league_id: leagueId,
       user_id: userId,
       role: 'commish',
+      is_vamp: 0,
+      team_name: `Team ${firstName}`,
+      remaining_faab_budget: parseInt(formData.regular_beginning_faab)
     });
     if (leagueMemberResponse.data.status !== 'success') {
       throw new Error(leagueMemberResponse.data.message || 'Failed to add commissioner');
     }
+
   } catch (error) {
     throw new Error(error.response?.data?.message || error.message || 'An unexpected error occurred');
   }

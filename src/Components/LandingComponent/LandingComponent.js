@@ -19,6 +19,7 @@ const LandingComponent = ({ currentUser, setCurrentLeague, setIsCommissioner, ge
         try {
           const response = await getCachedMembership(currentUser.id);
           const memberships = Array.isArray(response) ? response : [];
+          // Filter out 'declined' memberships
           const filteredLeagues = memberships.filter(m => m.role === 'player' || m.role === 'commish');
           const filteredInvitations = memberships.filter(m => m.role === 'invited');
           setLeagues(filteredLeagues);
@@ -71,35 +72,92 @@ const LandingComponent = ({ currentUser, setCurrentLeague, setIsCommissioner, ge
     setIsLoading(true);
     setError('');
     try {
-      const response = await axiosInstance.put(`/league_members/updateRole/${invitation.league_id}/${currentUser.id}`, {
+      // Fetch league member to get is_vamp
+      const leagueMemberResponse = await axiosInstance.get(`/league_members/getLeagueMemberByLeagueAndUserId/${invitation.league_id}/${currentUser.id}`);
+      if (!leagueMemberResponse.data) {
+        throw new Error('Invalid league member response data');
+      }
+
+      const isVamp = leagueMemberResponse.data.is_vamp;
+
+      // Update role to 'player'
+      const roleResponse = await axiosInstance.put(`/league_members/updateRole/${invitation.league_id}/${currentUser.id}`, {
         role: 'player'
+      });
+      if (roleResponse.data.status !== 'success') {
+        throw new Error(roleResponse.data.message || 'Failed to accept invitation.');
+      }
+
+      // Update team name to "Team <first_name>"
+      const teamNameResponse = await axiosInstance.put(`/league_members/updateTeamName/${invitation.league_id}/${currentUser.id}`, {
+        team_name: `Team ${currentUser.first_name}`
+      });
+      if (teamNameResponse.data.status !== 'success') {
+        throw new Error(teamNameResponse.data.message || 'Failed to set team name.');
+      }
+
+      // Update remaining_faab_budget based on is_vamp
+      const rosterTypeId = isVamp === 1 ? 2 : 1;
+      const rosterRulesResponse = await axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${invitation.league_id}/${rosterTypeId}`);
+      if (!rosterRulesResponse.data || typeof rosterRulesResponse.data.beginning_faab !== 'number') {
+        throw new Error(`Roster rules for roster_type_id=${rosterTypeId} not found or invalid beginning_faab.`);
+      }
+      const beginningFaab = rosterRulesResponse.data.beginning_faab;
+
+      const faabResponse = await axiosInstance.put(`/league_members/updateRemainingFaabBudget/${invitation.league_id}/${currentUser.id}`, {
+        remaining_faab_budget: beginningFaab
+      });
+      if (faabResponse.data.status !== 'success') {
+        throw new Error(faabResponse.data.message || 'Failed to set FAAB budget.');
+      }
+
+      // Refresh memberships
+      const updatedMemberships = await getCachedMembership(currentUser.id);
+      const memberships = Array.isArray(updatedMemberships) ? updatedMemberships : [];
+      setLeagues(memberships.filter(m => m.role === 'player' || m.role === 'commish'));
+      setInvitations(memberships.filter(m => m.role === 'invited'));
+
+      // Automatically select the league after accepting the invitation
+      const acceptedLeague = memberships.find(m => m.league_id === invitation.league_id && m.user_id === currentUser.id);
+      if (acceptedLeague) {
+        const leagueResponse = await getCachedLeague(invitation.league_id);
+        if (leagueResponse && leagueResponse.league_id) {
+          setCurrentLeague(leagueResponse);
+          localStorage.setItem('league', JSON.stringify(leagueResponse));
+          setIsCommissioner(acceptedLeague.role === 'commish');
+          navigate('/dashboard');
+        } else {
+          throw new Error('Failed to fetch league details after accepting invitation');
+        }
+      } else {
+        throw new Error('Failed to find accepted league in memberships');
+      }
+    } catch (err) {
+      console.error('LandingComponent: Error accepting invitation:', err);
+      setError(err.message || err.response?.data?.message || 'Failed to accept invitation. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDenyInvitation = async (invitation) => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const response = await axiosInstance.put(`/league_members/updateRole/${invitation.league_id}/${currentUser.id}`, {
+        role: 'declined'
       });
       if (response.data.status === 'success') {
         const updatedMemberships = await getCachedMembership(currentUser.id);
         const memberships = Array.isArray(updatedMemberships) ? updatedMemberships : [];
         setLeagues(memberships.filter(m => m.role === 'player' || m.role === 'commish'));
         setInvitations(memberships.filter(m => m.role === 'invited'));
-        // Automatically select the league after accepting the invitation
-        const acceptedLeague = memberships.find(m => m.league_id === invitation.league_id && m.user_id === currentUser.id);
-        if (acceptedLeague) {
-          const leagueResponse = await getCachedLeague(invitation.league_id);
-          if (leagueResponse && leagueResponse.league_id) {
-            setCurrentLeague(leagueResponse);
-            localStorage.setItem('league', JSON.stringify(leagueResponse));
-            setIsCommissioner(acceptedLeague.role === 'commish');
-            navigate('/dashboard');
-          } else {
-            throw new Error('Failed to fetch league details after accepting invitation');
-          }
-        } else {
-          throw new Error('Failed to find accepted league in memberships');
-        }
       } else {
-        setError(response.data.message || 'Failed to accept invitation.');
+        setError(response.data.message || 'Failed to decline invitation.');
       }
     } catch (err) {
-      console.error('LandingComponent: Error accepting invitation:', err);
-      setError(err.response?.data?.message || 'Failed to accept invitation. Please try again.');
+      console.error('LandingComponent: Error declining invitation:', err);
+      setError(err.response?.data?.message || 'Failed to decline invitation. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -142,14 +200,23 @@ const LandingComponent = ({ currentUser, setCurrentLeague, setIsCommissioner, ge
               {invitations.length > 0 ? (
                 <ul className="league-list">
                   {invitations.map((invitation) => (
-                    <li key={invitation.league_id} className="league-item">
+                    <li key={invitation.league_id} className="league-item d-flex align-items-center">
+                      <span className="invitation-name me-3">{invitation.name}</span>
                       <button
-                        className={`league-link ${isLoading ? 'disabled' : ''}`}
-                        style={{ cursor: isLoading ? 'not-allowed' : 'pointer', background: 'none', border: 'none', padding: 0, textAlign: 'left' }}
+                        className={`btn btn-success me-2 ${isLoading ? 'disabled' : ''}`}
+                        style={{ cursor: isLoading ? 'not-allowed' : 'pointer' }}
                         onClick={() => !isLoading && handleAcceptInvitation(invitation)}
                         disabled={isLoading}
                       >
-                        {invitation.name}
+                        Accept
+                      </button>
+                      <button
+                        className={`btn btn-danger ${isLoading ? 'disabled' : ''}`}
+                        style={{ cursor: isLoading ? 'not-allowed' : 'pointer' }}
+                        onClick={() => !isLoading && handleDenyInvitation(invitation)}
+                        disabled={isLoading}
+                      >
+                        Decline
                       </button>
                     </li>
                   ))}
