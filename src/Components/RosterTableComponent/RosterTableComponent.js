@@ -133,8 +133,24 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
             },
           });
         });
-        // Return non-IR slots followed by IR slots (IR always at bottom)
-        return [...nonIrSlots, ...irSlots];
+
+        // --- BENCH row limiting logic ---
+        // After all slots are created, limit empty BENCH rows to bench_count
+        const benchCount = rosterRules.bench_count || 0;
+  // (removed unused irOnly variable)
+        let benchSlots = nonIrSlots.filter(s => s.position === 'BENCH');
+        let nonBenchNonIrSlots = nonIrSlots.filter(s => s.position !== 'BENCH' && s.position !== 'IR');
+        const filledBenchSlots = benchSlots.filter(s => s.player);
+        const emptyBenchSlots = benchSlots.filter(s => !s.player);
+        // Only keep up to bench_count empty BENCH slots
+        const limitedEmptyBenchSlots = emptyBenchSlots.slice(0, benchCount);
+        // Final slots: non-BENCH/non-IR + filled BENCH + limited empty BENCH + IR
+        return [
+          ...nonBenchNonIrSlots,
+          ...filledBenchSlots,
+          ...limitedEmptyBenchSlots,
+          ...irSlots
+        ];
       };
 
       const slots = constructRosterSlots();
