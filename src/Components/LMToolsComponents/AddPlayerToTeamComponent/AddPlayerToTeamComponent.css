@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
-.add-player-container {
+.apt-container {
   padding: 16px;
   background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
   border-radius: 8px;
@@ -11,21 +11,21 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.add-player-title {
-  font-size: 1.5rem;
+.apt-section-title {
+  font-size: 1.25rem;
   font-weight: 700;
   color: #2ecc71;
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-.add-player-sections {
+.apt-content {
   display: flex;
   gap: 16px;
 }
 
-.search-section,
-.roster-section {
+.apt-search-section,
+.apt-roster-section {
   flex: 1;
   max-width: 450px;
   min-width: 320px;
@@ -35,28 +35,20 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
-.section-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2ecc71;
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.filters-container {
+.apt-search-form {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-bottom: 1rem;
 }
 
-.filter-label {
+.apt-filter-label {
   font-size: 0.9rem;
   color: #e0e0e0;
 }
 
-.filter-input,
-.filter-select {
+.apt-filter-input,
+.apt-filter-select {
   background-color: #333333;
   border: 1px solid #27ae60;
   color: #e0e0e0;
@@ -67,7 +59,7 @@
   box-sizing: border-box;
 }
 
-.filter-select {
+.apt-filter-select {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -76,18 +68,18 @@
   background-position: right 8px center;
 }
 
-.filter-input:focus,
-.filter-select:focus {
+.apt-filter-input:focus,
+.apt-filter-select:focus {
   outline: none;
   border-color: #2ecc71;
   box-shadow: 0 0 6px rgba(46, 204, 113, 0.3);
 }
 
-.filter-input::placeholder {
+.apt-filter-input::placeholder {
   color: #b0b0b0;
 }
 
-.btn-add {
+.apt-btn-add {
   background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
   color: #1c1c1c;
   border: none;
@@ -101,17 +93,17 @@
   transition: background 0.2s ease-in-out;
 }
 
-.btn-add:hover {
+.apt-btn-add:hover {
   background: #27ae60;
 }
 
-.btn-add:disabled {
+.apt-btn-add:disabled {
   background: #666666;
   cursor: not-allowed;
 }
 
-.player-table,
-.roster-table {
+.apt-player-table,
+.apt-roster-table {
   width: 100%;
   border-collapse: collapse;
   background-color: #333333;
@@ -119,45 +111,46 @@
   font-size: 14px;
 }
 
-.player-table th,
-.player-table td,
-.roster-table th,
-.roster-table td {
+.apt-player-table th,
+.apt-player-table td,
+.apt-roster-table th,
+.apt-roster-table td {
   border: 1px solid #27ae60;
   padding: 4px;
   vertical-align: middle;
 }
 
-.player-table th,
-.roster-table th {
+.apt-player-table th,
+.apt-roster-table th {
   background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
   color: #1c1c1c;
   font-weight: 700;
   text-align: left;
 }
 
-.player-row,
-.roster-row {
+.apt-player-row,
+.apt-roster-row {
   height: 44px;
 }
 
-.player-row:hover,
-.roster-row:hover {
+.apt-player-row:hover,
+.apt-roster-row:hover {
   background-color: #3a3a3a;
   transition: background-color 0.2s ease-in-out;
 }
 
-.player-cell {
+.apt-player-cell {
   background: #2e2e2e;
   padding: 2px;
 }
 
-.slot-cell {
+.apt-slot-cell {
   font-weight: 600;
   width: 30%;
 }
 
-.empty-message {
+.apt-empty-message,
+.apt-loading-message {
   color: #b0b0b0;
   font-size: 13px;
   text-align: center;
@@ -167,7 +160,7 @@
   min-height: 40px;
 }
 
-.pagination {
+.apt-pagination {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -175,7 +168,7 @@
   margin-top: 1rem;
 }
 
-.pagination-btn {
+.apt-pagination-btn {
   background: #2ecc71;
   color: #1c1c1c;
   border: none;
@@ -190,27 +183,27 @@
   transition: background 0.2s ease-in-out;
 }
 
-.pagination-btn:hover {
+.apt-pagination-btn:hover {
   background: #27ae60;
 }
 
-.pagination-btn:disabled {
+.apt-pagination-btn:disabled {
   background: #666666;
   cursor: not-allowed;
 }
 
-.pagination-icon {
+.apt-pagination-icon {
   width: 16px;
   height: 16px;
 }
 
-.pagination-current {
+.apt-pagination-current {
   color: #e0e0e0;
   font-size: 13px;
   font-weight: 600;
 }
 
-.message {
+.apt-message {
   color: #27ae60;
   font-size: 14px;
   font-weight: 600;
@@ -227,120 +220,117 @@
   overflow: hidden;
 }
 
-.message.error {
+.apt-message-error {
   color: #e74c3c;
   background-color: rgba(231, 76, 60, 0.2);
   border-color: rgba(231, 76, 60, 0.4);
 }
 
-.message.success {
+.apt-message-success {
   color: #2ecc71;
   background-color: rgba(46, 204, 113, 0.2);
   border-color: rgba(46, 204, 113, 0.4);
 }
 
-.message.message-exit {
+.apt-message-exiting {
   height: 0;
   opacity: 0;
   margin: 0;
   padding: 0;
 }
 
-.table-responsive {
+.apt-table-responsive {
   overflow-x: auto;
 }
 
 @media (max-width: 768px) {
-  .add-player-container {
+  .apt-container {
     padding: 12px;
     margin: 12px auto;
   }
 
-  .add-player-title {
-    font-size: 1.3rem;
-  }
-
-  .add-player-sections {
+  .apt-content {
     flex-direction: column;
     gap: 12px;
   }
 
-  .search-section {
+  .apt-search-section {
     order: -1;
     margin-bottom: 12px;
   }
 
-  .roster-section {
+  .apt-roster-section {
     margin-bottom: 12px;
   }
 
-  .search-section,
-  .roster-section {
+  .apt-search-section,
+  .apt-roster-section {
     max-width: 100%;
     min-width: 0;
   }
 
-  .section-title {
+  .apt-section-title {
     font-size: 1.1rem;
   }
 
-  .filter-input,
-  .filter-select {
+  .apt-filter-input,
+  .apt-filter-select {
     padding: 6px;
     font-size: 13px;
   }
 
-  .btn-add {
+  .apt-btn-add {
     padding: 6px;
     font-size: 13px;
   }
 
-  .player-table,
-  .roster-table {
+  .apt-player-table,
+  .apt-roster-table {
     font-size: 13px;
   }
 
-  .player-table th,
-  .player-table td,
-  .roster-table th,
-  .roster-table td {
+  .apt-player-table th,
+  .apt-player-table td,
+  .apt-roster-table th,
+  .apt-roster-table td {
     padding: 2px;
   }
 
-  .player-row,
-  .roster-row {
+  .apt-player-row,
+  .apt-roster-row {
     height: 40px;
   }
 
-  .player-cell {
+  .apt-player-cell {
     padding: 1px;
   }
 
-  .empty-message {
+  .apt-empty-message,
+  .apt-loading-message {
     font-size: 12px;
     min-height: 36px;
   }
 
-  .pagination {
+  .apt-pagination {
     gap: 6px;
     margin-top: 0.8rem;
   }
 
-  .pagination-btn {
+  .apt-pagination-btn {
     width: 28px;
     height: 28px;
   }
 
-  .pagination-icon {
+  .apt-pagination-icon {
     width: 14px;
     height: 14px;
   }
 
-  .pagination-current {
+  .apt-pagination-current {
     font-size: 12px;
   }
 
-  .message {
+  .apt-message {
     font-size: 13px;
   }
 }

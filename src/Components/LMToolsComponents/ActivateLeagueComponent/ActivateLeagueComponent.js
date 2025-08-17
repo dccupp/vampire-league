@@ -41,10 +41,13 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
       }
 
       try {
-        // Fetch league members to check count
+        // Fetch league members to check count and roles
         const membersResponse = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
-        const count = Array.isArray(membersResponse.data) ? membersResponse.data.length : 0;
-        setMemberCount(count);
+        const members = Array.isArray(membersResponse.data) ? membersResponse.data : [];
+        const validMembers = members.filter(member => ['player', 'commish'].includes(member.role));
+        const commishCount = members.filter(member => member.role === 'commish').length;
+        const memberCount = validMembers.length;
+        setMemberCount(memberCount);
 
         // Check if league is already active
         const leagueResponse = await axiosInstance.get(`/leagues/getLeagueById/${currentLeague.league_id}`);
@@ -62,12 +65,16 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
             setMessage('League is already activated.');
             setMessageType('error');
             setCanActivate(false);
+          } else if (commishCount > 1) {
+            setMessage('League has multiple commissioners. Only one commissioner is allowed.');
+            setMessageType('error');
+            setCanActivate(false);
+          } else if (memberCount !== 10) {
+            setMessage(`League has ${memberCount} valid members (player or commish). Need exactly 10.`);
+            setMessageType('error');
+            setCanActivate(false);
           } else {
-            setCanActivate(count === 10);
-            if (count !== 10) {
-              setMessage('League requires exactly 10 members to activate.');
-              setMessageType('error');
-            }
+            setCanActivate(true);
           }
         } else {
           setMessage('Only the league commissioner can activate the league.');
@@ -123,8 +130,8 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }) => {
           {memberCount !== null && (
             <p className="text-center mb-3" style={{ color: memberCount !== 10 ? '#e74c3c' : '#2ecc71', fontFamily: 'Poppins, sans-serif', fontSize: '14px' }}>
               {memberCount !== 10
-                ? `League has ${memberCount} members. Need exactly 10 members to activate.`
-                : 'League has 10 members and is ready to activate.'}
+                ? `League has ${memberCount} valid members (player or commish). Need exactly 10.`
+                : 'League has 10 valid members and is ready to activate.'}
             </p>
           )}
           {message && (

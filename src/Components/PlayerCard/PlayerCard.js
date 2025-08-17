@@ -6,8 +6,29 @@ const PlayerCard = ({ player, index, onClick, isSelected }) => {
 
   return (
     <div className={`player-card ${isSelected ? 'selected' : ''}`} onClick={() => onClick(index)}>
-      <div className="player-info">
-        <span>{player.name} - {player.playingPosition} - {player.team}</span>
+      <div className="player-info-redesign">
+        {/* Row 1: Player Name (large) */}
+        <div className="player-name-row">
+          <span className="player-name-large">{player.name}</span>
+        </div>
+        {/* Row 2: Position and Team */}
+        <div className="player-pos-team-row">
+          <span className="player-position">{player.playingPosition}</span>
+          <span className="player-team">{player.team}</span>
+        </div>
+        {/* Row 3: Schedule Info */}
+        <div className="player-schedule-row">
+          {player.schedule ? (
+            <>
+              <span className="player-est-time">{player.schedule.est_time}</span>
+              <span className="player-day">{player.schedule.day}</span>
+              <span className="player-date">{player.schedule.date}</span>
+              <span className="player-location">{player.schedule.location}</span>
+            </>
+          ) : (
+            <span className="player-no-game">No game scheduled</span>
+          )}
+        </div>
       </div>
     </div>
   );
