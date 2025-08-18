@@ -9,12 +9,18 @@ const PlayerCard = ({ player, index, onClick, isSelected }) => {
       <div className="player-info-redesign">
         {/* Row 1: Player Name (large) */}
         <div className="player-name-row">
-          <span className="player-name-large">{player.name}</span>
+          <span className="player-name-large">
+            {player.name || player.player_name || player.player?.player_name || 'Unknown'}
+          </span>
         </div>
         {/* Row 2: Position and Team */}
         <div className="player-pos-team-row">
-          <span className="player-position">{player.playingPosition}</span>
-          <span className="player-team">{player.team}</span>
+          <span className="player-position">
+            {player.playingPosition || player.position || player.player?.position || 'N/A'}
+          </span>
+          <span className="player-team">
+            {player.team || player.player?.team || 'Unknown'}
+          </span>
         </div>
         {/* Row 3: Schedule Info */}
         <div className="player-schedule-row">

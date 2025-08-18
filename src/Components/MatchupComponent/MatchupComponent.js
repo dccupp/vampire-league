@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axiosInstance from '../../api';
 import { getCurrentFantasyWeek, getGamesByWeekAndYear } from '../../api/seasonService';
+import { calculateFantasyScores } from '../../api/calculateFantasyScores';
 import PlayerCard from '../PlayerCard/PlayerCard';
 import './MatchupComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -12,6 +13,8 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
   const [rosterRules, setRosterRules] = useState(null);
   const [homeRosterSlots, setHomeRosterSlots] = useState([]);
   const [awayRosterSlots, setAwayRosterSlots] = useState([]);
+  const [homeTeamScore, setHomeTeamScore] = useState(0);
+  const [awayTeamScore, setAwayTeamScore] = useState(0);
   const [selectedWeek, setSelectedWeek] = useState('');
   const [selectedMatchup, setSelectedMatchup] = useState('');
   const [weeks, setWeeks] = useState([]);
@@ -167,25 +170,48 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
             id: rosteredPlayer.id,
           }));
 
-          // Step 4: Add schedule data to home rostered players
+          // Step 4: Construct package for calculateFantasyScores for home rostered players ---
+          const fantasyScoresPayload = {
+            playerIds: homeCombinedRosteredPlayers.map(p => p.player.player_id),
+            week: week,
+            // season: year,
+            season: 2024,
+            leagueId: currentLeague.league_id,
+            includeYearlyStats: false
+          };
+
+          // Call calculateFantasyScores with the correct arguments
+          const fantasyScoresResult = await calculateFantasyScores(
+            fantasyScoresPayload.playerIds,
+            fantasyScoresPayload.week,
+            fantasyScoresPayload.season,
+            fantasyScoresPayload.leagueId,
+            fantasyScoresPayload.includeYearlyStats
+          );
+
+          // Step 5: Add schedule data to home rostered players
           const updatedHomeRosteredPlayers = homeCombinedRosteredPlayers.map(player => {
             const game = games.find(g => g.team === player.player.team);
+            let schedule = null;
             if (game) {
               const dateObj = new Date(game.date);
-              return {
-                ...player,
-                schedule: {
-                  date: game.date,
-                  day: dateObj.toLocaleString('en-US', { weekday: 'short' }),
-                  est_time: game.est_time || 'TBD',
-                  location: game.location || 'Unknown',
-                },
+              schedule = {
+                date: game.date,
+                day: dateObj.toLocaleString('en-US', { weekday: 'short' }),
+                est_time: game.est_time || 'TBD',
+                location: game.location || 'Unknown',
               };
             }
-            return { ...player, schedule: null };
+            const scoreObj = fantasyScoresResult.data.find(s => s.player_id === player.player.player_id);
+            return {
+              ...player,
+              schedule, // already present
+              fantasyScore: scoreObj ? scoreObj.fantasyScore : null,
+              weeklyStats: scoreObj ? scoreObj.weeklyStats : null
+            };
           });
 
-          // Step 5: Fetch away roster
+          // Step 6: Fetch away roster
           const awayResponse = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${matchup.away_league_member}`);
           const awayRosteredPlayersData = Array.isArray(awayResponse.data) ? awayResponse.data : [];
           const awayCombinedRosteredPlayers = awayRosteredPlayersData.map(rosteredPlayer => ({
@@ -193,31 +219,67 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
             id: rosteredPlayer.id,
           }));
 
-          // Step 6: Add schedule data to away rostered players
+          // Step 7: Construct package for calculateFantasyScores for away rostered players ---
+          const awayFantasyScoresPayload = {
+            playerIds: awayCombinedRosteredPlayers.map(p => p.player.player_id),
+            week: week,
+            // season: year,
+            season: 2024,
+            leagueId: currentLeague.league_id,
+            includeYearlyStats: false
+          };
+
+          // Call calculateFantasyScores with the correct arguments
+          const awayFantasyScoresResult = await calculateFantasyScores(
+            awayFantasyScoresPayload.playerIds,
+            awayFantasyScoresPayload.week,
+            awayFantasyScoresPayload.season,
+            awayFantasyScoresPayload.leagueId,
+            awayFantasyScoresPayload.includeYearlyStats
+          );
+
+          // Step 8: Add schedule data to away rostered players
           const updatedAwayRosteredPlayers = awayCombinedRosteredPlayers.map(player => {
             const game = games.find(g => g.team === player.player.team);
+            let schedule = null;
             if (game) {
               const dateObj = new Date(game.date);
-              return {
-                ...player,
-                schedule: {
-                  date: game.date,
-                  day: dateObj.toLocaleString('en-US', { weekday: 'short' }),
-                  est_time: game.est_time || 'TBD',
-                  location: game.location || 'Unknown',
-                },
+              schedule = {
+                date: game.date,
+                day: dateObj.toLocaleString('en-US', { weekday: 'short' }),
+                est_time: game.est_time || 'TBD',
+                location: game.location || 'Unknown',
               };
             }
-            return { ...player, schedule: null };
+            const scoreObj = awayFantasyScoresResult.data.find(s => s.player_id === player.player.player_id);
+            return {
+              ...player,
+              schedule, // already present
+              fantasyScore: scoreObj ? scoreObj.fantasyScore : null,
+              weeklyStats: scoreObj ? scoreObj.weeklyStats : null
+            };
           });
 
-          // Step 7: Construct roster slots for both teams
+          // Step 9: Construct roster slots for both teams
           const homeSlots = constructRosterSlots(rosterRules, updatedHomeRosteredPlayers);
           setHomeRosterSlots(homeSlots);
           const awaySlots = constructRosterSlots(rosterRules, updatedAwayRosteredPlayers);
           setAwayRosterSlots(awaySlots);
 
-          // Step 8: Set messages based on roster data
+          // Step 10: Calculate team totals
+          // Calculate home team total
+          const homeTotal = homeSlots
+            .filter(slot => slot.position !== 'BENCH' && slot.position !== 'IR' && slot.player && slot.player.fantasyScore != null)
+            .reduce((sum, slot) => sum + parseFloat(slot.player.fantasyScore), 0);
+          setHomeTeamScore(homeTotal);
+
+          // Calculate away team total
+          const awayTotal = awaySlots
+            .filter(slot => slot.position !== 'BENCH' && slot.position !== 'IR' && slot.player && slot.player.fantasyScore != null)
+            .reduce((sum, slot) => sum + parseFloat(slot.player.fantasyScore), 0);
+          setAwayTeamScore(awayTotal);
+
+          // Step 10: Set messages based on roster data
           if (homeRosteredPlayersData.length === 0 && awayRosteredPlayersData.length === 0) {
             setMessage('No players rostered for either team.');
             setMessageType('info');
@@ -243,7 +305,7 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
       }
     };
     fetchRosters();
-  }, [selectedMatchup, rosterRules, matchups]);
+  }, [currentLeague.league_id, selectedMatchup, rosterRules, matchups]);
 
   const constructRosterSlots = (rules, rosteredPlayers) => {
     const slots = [];
@@ -285,7 +347,6 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
       ...player,
       roster_position: positionMap[player.roster_position] || player.roster_position
     }));
-    console.log('normalizedRosteredPlayers:', normalizedRosteredPlayers);
 
     // Define position counts
     const positions = [
@@ -320,21 +381,9 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
         slot = slots.find(s => s.position === player.roster_position && !s.player);
       }
       if (slot) {
-        slot.player = {
-          id: player.player.player_id || null,
-          name: player.player.player_name || 'Unknown',
-          playingPosition: player.player.position || 'N/A',
-          team: player.player.team || 'N/A',
-          schedule: player.schedule ? {
-            est_time: player.schedule.est_time || '',
-            day: player.schedule.day || '',
-            date: player.schedule.date || '',
-            location: player.schedule.location || ''
-          } : null
-        };
+        slot.player = player;
       }
     });
-
     return slots;
   };
 
@@ -400,7 +449,7 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
         <div className="rosters-container">
           <div className="roster-section">
             <h3 className="team-title">{getTeamName(matchups.find(m => m.id === parseInt(selectedMatchup, 10))?.home_league_member)} Score</h3>
-            <div className="team-score">--</div>
+            <div className="team-score">{homeTeamScore.toFixed(2)}</div>
             <div className="table-responsive" id="home-roster-div">
               <table className="roster-table" id="home-roster-table">
                 <thead>
@@ -410,36 +459,78 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {homeRosterSlots.map((rosterEntry, index) => (
-                    <tr
-                      key={rosterEntry.sPosition}
-                      className="roster-row"
-                      {...(rosterEntry.position !== 'BENCH' ? { 'data-position': rosterEntry.sPosition } : {})}
-                    >
-                      <td className="player-cell">
-                        {rosterEntry.player ? (
-                          <PlayerCard
-                            player={rosterEntry.player}
-                            index={index}
-                            onClick={() => {}}
-                            isSelected={false}
-                          />
-                        ) : (
-                          <div className="empty-slot">
-                            Empty
-                          </div>
-                        )}
-                      </td>
-                      <td className="score-cell">--</td>
-                    </tr>
-                  ))}
+                  {homeRosterSlots
+                    .filter(rosterEntry => rosterEntry.position !== 'BENCH' && rosterEntry.position !== 'IR' && rosterEntry.sPosition)
+                    .map((rosterEntry, index) => (
+                      <tr
+                        key={rosterEntry.sPosition}
+                        className="roster-row"
+                        data-position={rosterEntry.sPosition}
+                      >
+                        <td className="player-cell">
+                          {rosterEntry.player ? (
+                            <PlayerCard
+                              player={rosterEntry.player}
+                              index={index}
+                              onClick={() => {}}
+                              isSelected={false}
+                            />
+                          ) : (
+                            <div className="empty-slot">
+                              Empty
+                            </div>
+                          )}
+                        </td>
+                        <td className="score-cell">
+                          {rosterEntry.player && rosterEntry.player.fantasyScore != null
+                            ? rosterEntry.player.fantasyScore
+                            : '--'}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="table-responsive" id="home-bench-div">
+              <h4 className="bench-title">Bench</h4>
+              <table className="roster-table" id="home-bench-table">
+                <thead>
+                  <tr>
+                    <th className="player-header">Player</th>
+                    <th className="score-header">Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {homeRosterSlots
+                    .filter(rosterEntry => rosterEntry.position === 'BENCH')
+                    .map((rosterEntry, index) => (
+                      <tr key={rosterEntry.sPosition} className="roster-row">
+                        <td className="player-cell">
+                          {rosterEntry.player ? (
+                            <PlayerCard
+                              player={rosterEntry.player}
+                              index={index}
+                              onClick={() => {}}
+                              isSelected={false}
+                            />
+                          ) : (
+                            <div className="empty-slot">Empty</div>
+                          )}
+                        </td>
+                        <td className="score-cell">
+                          {rosterEntry.player && rosterEntry.player.fantasyScore != null
+                            ? rosterEntry.player.fantasyScore
+                            : '--'}
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
           </div>
           <div className="roster-section">
             <h3 className="team-title">{getTeamName(matchups.find(m => m.id === parseInt(selectedMatchup, 10))?.away_league_member)} Score</h3>
-            <div className="team-score">--</div>
+            <div className="team-score">{awayTeamScore.toFixed(2)}</div>
             <div className="table-responsive" id="away-roster-div">
               <table className="roster-table" id="away-roster-table">
                 <thead>
@@ -449,29 +540,65 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {awayRosterSlots.map((rosterEntry, index) => (
-                    <tr
-                      key={rosterEntry.sPosition}
-                      className="roster-row"
-                      {...(rosterEntry.position !== 'BENCH' ? { 'data-position': rosterEntry.sPosition } : {})}
-                    >
-                      <td className="score-cell">--</td>
-                      <td className="player-cell">
-                        {rosterEntry.player ? (
-                          <PlayerCard
-                            player={rosterEntry.player}
-                            index={index}
-                            onClick={() => {}}
-                            isSelected={false}
-                          />
-                        ) : (
-                          <div className="empty-slot">
-                            Empty
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                  {awayRosterSlots
+                    .filter(rosterEntry => rosterEntry.position !== 'BENCH' && rosterEntry.position !== 'IR' && rosterEntry.sPosition)
+                    .map((rosterEntry, index) => (
+                      <tr key={rosterEntry.sPosition} className="roster-row" data-position={rosterEntry.sPosition}>
+                        <td className="score-cell">
+                          {rosterEntry.player && rosterEntry.player.fantasyScore != null
+                            ? rosterEntry.player.fantasyScore
+                            : '--'}
+                        </td>
+                        <td className="player-cell">
+                          {rosterEntry.player ? (
+                            <PlayerCard
+                              player={rosterEntry.player}
+                              index={index}
+                              onClick={() => {}}
+                              isSelected={false}
+                            />
+                          ) : (
+                            <div className="empty-slot">Empty</div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="table-responsive" id="away-bench-div">
+              <h4 className="bench-title">Bench</h4>
+              <table className="roster-table" id="away-bench-table">
+                <thead>
+                  <tr>
+                    <th className="score-header">Score</th>
+                    <th className="player-header">Player</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {awayRosterSlots
+                    .filter(rosterEntry => rosterEntry.position === 'BENCH')
+                    .map((rosterEntry, index) => (
+                      <tr key={rosterEntry.sPosition} className="roster-row">
+                        <td className="score-cell">
+                          {rosterEntry.player && rosterEntry.player.fantasyScore != null
+                            ? rosterEntry.player.fantasyScore
+                            : '--'}
+                        </td>
+                        <td className="player-cell">
+                          {rosterEntry.player ? (
+                            <PlayerCard
+                              player={rosterEntry.player}
+                              index={index}
+                              onClick={() => {}}
+                              isSelected={false}
+                            />
+                          ) : (
+                            <div className="empty-slot">Empty</div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -480,7 +607,7 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
       )}
     </div>
   );
-};
+}
 
 MatchupComponent.propTypes = {
   currentUser: PropTypes.object,

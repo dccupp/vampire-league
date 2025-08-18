@@ -112,6 +112,7 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
               team: player.player.team,
               schedule: player.schedule,
               is_injured: player.player.is_injured,
+              player_id: player.player.player_id, // Ensure player_id is included
             };
             assignedPlayers.splice(assignedPlayers.indexOf(player), 1);
           }
@@ -130,6 +131,7 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
               team: player.player.team,
               schedule: player.schedule,
               is_injured: player.player.is_injured,
+              player_id: player.player.player_id, // Add player_id
             },
           });
         });
@@ -269,104 +271,131 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
   }, [currentUser, currentLeague, transformRosteredPlayer]);
 
   // Handle moving a player to a target slot or swapping
-  const handleMovePlayer = async (sourceIndex, targetIndex) => {
-    const sourcePlayer = rosterSlots[sourceIndex]?.player;
-    const targetPlayer = rosterSlots[targetIndex]?.player;
-    const sourceRosteredPlayer = rosteredPlayers.find(p => p.player.player_name === sourcePlayer?.name && p.player.position === sourcePlayer?.playingPosition);
-    const targetRosteredPlayer = targetPlayer && rosteredPlayers.find(p => p.player.player_name === targetPlayer.name && p.player.position === targetPlayer.playingPosition);
 
-    if (!sourceRosteredPlayer || !isValidMove(sourceRosteredPlayer, rosterSlots[targetIndex].position)) {
-      setMessage('Invalid move.');
-      setMessageType('error');
-      setSelectedPlayerIndex(null);
-      return;
-    }
+const handleMovePlayer = async (sourceIndex, targetIndex) => {
+  const sourceSlot = rosterSlots[sourceIndex];
+  const targetSlot = rosterSlots[targetIndex];
+  const sourcePlayer = sourceSlot.player;
+  const targetPlayer = targetSlot.player;
 
-    try {
-      // Move to empty slot
-      if (!targetPlayer) {
-        await axiosInstance.put(`/rostered_players/update/${sourceRosteredPlayer.id}`, {
+  // Find full rostered player objects
+  const sourceRosteredPlayer = rosteredPlayers.find(p => p.player.player_id === sourcePlayer?.player_id);
+  const targetRosteredPlayer = targetPlayer
+    ? rosteredPlayers.find(p => p.player.player_id === targetPlayer.player_id)
+    : null;
+
+  // 1. Validate source player and league member
+  if (!sourcePlayer || !sourceRosteredPlayer || !leagueMemberId) {
+    setMessage('Invalid player or league data.');
+    setMessageType('error');
+    setSelectedPlayerIndex(null);
+    return;
+  }
+
+  // 2. If the source player cannot occupy the target slot, deny the move
+  console.log('[MOVE ATTEMPT] Comparing:', {
+    playerName: sourceRosteredPlayer?.player?.player_name,
+    playerPosition: sourceRosteredPlayer?.player?.position,
+    targetSlotPosition: targetSlot.position,
+    targetSlotSPosition: targetSlot.sPosition
+  });
+  if (!isValidMove(sourceRosteredPlayer, targetSlot.position)) {
+    setMessage('Invalid move for this player.');
+    setMessageType('error');
+    setSelectedPlayerIndex(null);
+    return;
+  }
+
+  try {
+    // 3. If both players can occupy each other's slots, swap them
+    if (
+      targetPlayer &&
+      targetRosteredPlayer &&
+      isValidMove(targetRosteredPlayer, sourceSlot.position)
+    ) {
+      await Promise.all([
+        axiosInstance.put(`/rostered_players/update/${sourceRosteredPlayer.id}`, {
           league_member_id: leagueMemberId,
           player_id: sourceRosteredPlayer.player.player_id,
-          roster_position: rosterSlots[targetIndex].position === 'BENCH' ? 'BENCH' : rosterSlots[targetIndex].sPosition,
+          roster_position: targetSlot.sPosition,
           is_rostered: 1,
-        });
-      } else {
-        // Check if swap is possible
-        const targetSlotValid = isValidMove(sourceRosteredPlayer, rosterSlots[targetIndex].position);
-        const sourceSlotValid = isValidMove(targetRosteredPlayer, rosterSlots[sourceIndex].position);
-
-        if (targetSlotValid && sourceSlotValid) {
-          // Swap players
-          await Promise.all([
-            axiosInstance.put(`/rostered_players/update/${sourceRosteredPlayer.id}`, {
-              league_member_id: leagueMemberId,
-              player_id: sourceRosteredPlayer.player.player_id,
-              roster_position: rosterSlots[targetIndex].position === 'BENCH' ? 'BENCH' : rosterSlots[targetIndex].sPosition,
-              is_rostered: 1,
-            }),
-            axiosInstance.put(`/rostered_players/update/${targetRosteredPlayer.id}`, {
-              league_member_id: leagueMemberId,
-              player_id: targetRosteredPlayer.player.player_id,
-              roster_position: rosterSlots[sourceIndex].position === 'BENCH' ? 'BENCH' : rosterSlots[sourceIndex].sPosition,
-              is_rostered: 1,
-            }),
-          ]);
-        } else {
-          // Move source to target, target to BENCH (no empty bench slot required)
-          await Promise.all([
-            axiosInstance.put(`/rostered_players/update/${sourceRosteredPlayer.id}`, {
-              league_member_id: leagueMemberId,
-              player_id: sourceRosteredPlayer.player.player_id,
-              roster_position: rosterSlots[targetIndex].position === 'BENCH' ? 'BENCH' : rosterSlots[targetIndex].sPosition,
-              is_rostered: 1,
-            }),
-            axiosInstance.put(`/rostered_players/update/${targetRosteredPlayer.id}`, {
-              league_member_id: leagueMemberId,
-              player_id: targetRosteredPlayer.player.player_id,
-              roster_position: 'BENCH',
-              is_rostered: 1,
-            }),
-          ]);
-        }
-      }
-
-      // Sync with backend
-      const rosterResponse = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${leagueMemberId}`);
-      const rosteredPlayersData = Array.isArray(rosterResponse.data) ? rosterResponse.data : [];
-      const updatedRosteredPlayers = rosteredPlayersData.map(rosteredPlayer => {
-        const existingPlayer = rosteredPlayers.find(p => p.player.player_id === rosteredPlayer.player_id);
-        return {
-          ...transformRosteredPlayer(rosteredPlayer),
-          id: rosteredPlayer.id,
-          schedule: existingPlayer?.schedule || null, // Preserve schedule data
-        };
-      });
-      setRosteredPlayers(updatedRosteredPlayers);
-      setMessage('Player moved successfully.');
-      setMessageType('success');
-      setSelectedPlayerIndex(null);
-    } catch (error) {
-      console.error('Error moving player:', error);
-      setMessage('Failed to move player.');
-      setMessageType('error');
-      setSelectedPlayerIndex(null);
+        }),
+        axiosInstance.put(`/rostered_players/update/${targetRosteredPlayer.id}`, {
+          league_member_id: leagueMemberId,
+          player_id: targetRosteredPlayer.player.player_id,
+          roster_position: sourceSlot.sPosition,
+          is_rostered: 1,
+        }),
+      ]);
     }
-  };
+    // 4. If source can move to target, but target cannot move to source, move target to BENCH (no need to check for available BENCH slot)
+    else if (
+      targetPlayer &&
+      targetRosteredPlayer &&
+      !isValidMove(targetRosteredPlayer, sourceSlot.position)
+    ) {
+      await Promise.all([
+        axiosInstance.put(`/rostered_players/update/${sourceRosteredPlayer.id}`, {
+          league_member_id: leagueMemberId,
+          player_id: sourceRosteredPlayer.player.player_id,
+          roster_position: targetSlot.sPosition,
+          is_rostered: 1,
+        }),
+        axiosInstance.put(`/rostered_players/update/${targetRosteredPlayer.id}`, {
+          league_member_id: leagueMemberId,
+          player_id: targetRosteredPlayer.player.player_id,
+          roster_position: 'BENCH',
+          is_rostered: 1,
+        }),
+      ]);
+    }
+    // 5. If target slot is empty, just move sourcePlayer
+    else if (!targetPlayer) {
+      await axiosInstance.put(`/rostered_players/update/${sourceRosteredPlayer.id}`, {
+        league_member_id: leagueMemberId,
+        player_id: sourceRosteredPlayer.player.player_id,
+        roster_position: targetSlot.sPosition,
+        is_rostered: 1,
+      });
+    }
+
+    // Sync with backend
+    const rosterResponse = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${leagueMemberId}`);
+    const rosteredPlayersData = Array.isArray(rosterResponse.data) ? rosterResponse.data : [];
+    const updatedRosteredPlayers = rosteredPlayersData.map(rosteredPlayer => {
+      const existingPlayer = rosteredPlayers.find(p => p.player.player_id === rosteredPlayer.player_id);
+      return {
+        ...transformRosteredPlayer(rosteredPlayer),
+        id: rosteredPlayer.id,
+        schedule: existingPlayer?.schedule || null,
+      };
+    });
+    setRosteredPlayers(updatedRosteredPlayers);
+    setMessage('Player moved successfully.');
+    setMessageType('success');
+    setSelectedPlayerIndex(null);
+  } catch (error) {
+    console.error('Error moving player:', {
+      message: error.response?.data?.message || error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
+    setMessage(error.response?.data?.message || 'Failed to move player.');
+    setMessageType('error');
+    setSelectedPlayerIndex(null);
+  }
+};
 
   // Handle moving a player to bench
   const handleMoveToBench = async () => {
     const sourcePlayer = modalPlayer;
     const sourceRosteredPlayer = rosteredPlayers.find(p => p.player.player_name === sourcePlayer.name && p.player.position === sourcePlayer.playingPosition);
-    const benchSlot = rosterSlots.find(s => s.position === 'BENCH' && !s.player);
-
-    if (!sourceRosteredPlayer || !benchSlot) {
-      setMessage('No empty bench slot available.');
+    if (!sourceRosteredPlayer) {
+      setMessage('Player not found.');
       setMessageType('error');
       setShowModal(false);
       return;
     }
-
     try {
       await axiosInstance.put(`/rostered_players/update/${sourceRosteredPlayer.id}`, {
         league_member_id: leagueMemberId,
@@ -532,11 +561,20 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
               ) {
                 highlight = true;
               }
+              // Compute data-position for all rows
+              let dataPosition = '';
+              if (rosterEntry.position === 'BENCH') {
+                // 1-based index among BENCH slots up to and including this row
+                const benchIndex = rosterSlots.slice(0, index + 1).filter(s => s.position === 'BENCH').length;
+                dataPosition = `BENCH${benchIndex}`;
+              } else {
+                dataPosition = rosterEntry.sPosition;
+              }
               return (
                 <tr
                   key={rosterEntry.sPosition}
                   className={`roster-row${selectedPlayerIndex === index ? ' selected-player' : ''}`}
-                  {...(rosterEntry.position !== 'BENCH' ? { 'data-position': rosterEntry.sPosition } : {})}
+                  data-position={dataPosition}
                 >
                   <td className="slot-cell">{rosterEntry.position}</td>
                   <td className={`player-cell${highlight ? ' valid-target' : ''}`}>
