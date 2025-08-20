@@ -81,7 +81,7 @@ const NavBar = ({ currentUser, setCurrentUser, currentLeague, setCurrentLeague, 
                       </NavDropdown.Item>
                       <NavDropdown.Item
                         as={NavLink}
-                        to="/waiver-priority"
+                        to="/manage-waiver-priority"
                         className={({ isActive }) => (isActive ? 'dropdown-item active' : 'dropdown-item')}
                       >
                         Waiver Priority

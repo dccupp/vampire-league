@@ -66,11 +66,11 @@ const WaiverClaimPriorityFormComponent = ({ currentUser, currentLeague }) => {
             if (type === 'rostered') {
               const rosterResponse = await axiosInstance.post('/rostered_players/getRosteredPlayerById', { id });
               if (rosterResponse.data?.player_id) {
-                const playerResponse = await axiosInstance.post('/players/getPlayerById', { player_id: rosterResponse.data.player_id });
+                const playerResponse = await axiosInstance.get(`/players/getPlayerById/${rosterResponse.data.player_id}`);
                 return { id, name: playerResponse.data.player_name || 'Unknown Player' };
               }
             } else {
-              const playerResponse = await axiosInstance.post('/players/getPlayerById', { player_id: id });
+              const playerResponse = await axiosInstance.get(`/players/getPlayerById/${id}`);
               return { id, name: playerResponse.data.player_name || 'Unknown Player' };
             }
           } catch {
@@ -171,7 +171,7 @@ const WaiverClaimPriorityFormComponent = ({ currentUser, currentLeague }) => {
     <div className="waiver-priority-container animate__animated animate__fadeIn">
       <div className="header-container">
         <h2 className="waiver-priority-title">{currentLeague?.name ? `${currentLeague.name} Waiver Claim Priorities` : 'Waiver Claim Priorities'}</h2>
-        <button className="view-claims-btn" onClick={() => navigate('/view-waivers')}>
+        <button className="view-claims-btn" onClick={() => navigate('/active-waiver-claims')}>
           View Claims
         </button>
       </div>

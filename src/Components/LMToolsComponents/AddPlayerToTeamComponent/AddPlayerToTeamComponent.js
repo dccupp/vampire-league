@@ -42,7 +42,7 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
 
   // Transform player data for PlayerCard
   const transformPlayer = useCallback(player => ({
-    player_id: player.player_id,
+    player_id: player.id,
     name: player.player_name || player.name || 'Unknown',
     playingPosition: player.position || player.playingPosition || 'N/A',
     team: player.team || 'N/A'
@@ -96,36 +96,79 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
 
       setRosterRules(rosterRulesRes.data);
       const slots = [];
-      const positions = [
-        { key: 'quarterback_count', position: 'QB' },
-        { key: 'running_back_count', position: 'RB' },
-        { key: 'wide_receiver_count', position: 'WR' },
-        { key: 'tight_end_count', position: 'TE' },
-        { key: 'wide_receiver_tight_end_count', position: 'WR/TE' },
-        { key: 'flex_count', position: 'FLEX' },
-        { key: 'bench_count', position: 'BENCH' }
+      const positionCounts = [
+        { position: 'QB', count: rosterRulesRes.data.quarterback_count || 0 },
+        { position: 'RB', count: rosterRulesRes.data.running_back_count || 0 },
+        { position: 'WR', count: rosterRulesRes.data.wide_receiver_count || 0 },
+        { position: 'TE', count: rosterRulesRes.data.tight_end_count || 0 },
+        { position: 'WRT', count: rosterRulesRes.data.wide_receiver_tight_end_count || 0 },
+        { position: 'FLEX', count: rosterRulesRes.data.flex_count || 0 },
+        { position: 'BENCH', count: rosterRulesRes.data.bench_count || 0 },
+        { position: 'IR', count: rosterRulesRes.data.ir_count || 0 },
       ];
-      positions.forEach(({ key, position }) => {
-        const count = rosterRulesRes.data[key] || 0;
-        for (let i = 1; i <= count; i++) {
-          slots.push({ sPosition: `${position}${i}`, position });
+      // Create all possible slots
+      positionCounts.forEach(({ position, count }) => {
+        for (let i = 0; i < count; i++) {
+          const sPosition = `${position}${i + 1}`;
+          slots.push({ position, sPosition, player: null });
         }
       });
-      setRosterSlots(slots);
 
-      const rosteredPlayersData = Array.isArray(rosteredPlayersRes.data) 
-        ? rosteredPlayersRes.data.filter(rp => rp.roster_position !== 'IR')
+      // Assign players to slots based on roster_position matching sPosition
+      const rosteredPlayersData = Array.isArray(rosteredPlayersRes.data)
+        ? rosteredPlayersRes.data
         : [];
-      const enrichedRosteredPlayers = rosteredPlayersData.map(rp => {
-        const playerDetails = players.find(p => p.player_id === rp.player_id) || {};
-        return {
-          ...rp,
-          name: playerDetails.name || 'Unknown',
-          playingPosition: playerDetails.playingPosition || 'N/A',
-          team: playerDetails.team || 'N/A'
-        };
+      const assignedPlayers = [...rosteredPlayersData];
+      slots.forEach(slot => {
+        const player = assignedPlayers.find(p => p.roster_position === slot.sPosition || (slot.position === 'BENCH' && p.roster_position === 'BENCH'));
+        if (player) {
+          const playerDetails = players.find(plyr => plyr.player_id === player.player_id) || {};
+          slot.player = {
+            ...player,
+            name: playerDetails.name || 'Unknown',
+            playingPosition: playerDetails.playingPosition || 'N/A',
+            team: playerDetails.team || 'N/A'
+          };
+          assignedPlayers.splice(assignedPlayers.indexOf(player), 1);
+        }
       });
-      setRosteredPlayers(enrichedRosteredPlayers);
+
+      // For any remaining players (beyond min BENCH), add extra BENCH rows above IR slots
+      let irSlots = slots.filter(s => s.position === 'IR');
+      let nonIrSlots = slots.filter(s => s.position !== 'IR');
+      assignedPlayers.forEach(player => {
+        const playerDetails = players.find(plyr => plyr.player_id === player.player_id) || {};
+        nonIrSlots.push({
+          position: 'BENCH',
+          sPosition: `BENCH${nonIrSlots.filter(s => s.position === 'BENCH').length + 1}`,
+          player: {
+            ...player,
+            name: playerDetails.name || 'Unknown',
+            playingPosition: playerDetails.playingPosition || 'N/A',
+            team: playerDetails.team || 'N/A'
+          }
+        });
+      });
+
+      // --- BENCH row limiting logic ---
+      const benchCount = rosterRulesRes.data.bench_count || 0;
+      let benchSlots = nonIrSlots.filter(s => s.position === 'BENCH');
+      let nonBenchNonIrSlots = nonIrSlots.filter(s => s.position !== 'BENCH' && s.position !== 'IR');
+      const filledBenchSlots = benchSlots.filter(s => s.player);
+      const emptyBenchSlots = benchSlots.filter(s => !s.player);
+      // Only keep up to bench_count empty BENCH slots
+      const limitedEmptyBenchSlots = emptyBenchSlots.slice(0, benchCount);
+      // Final slots: non-BENCH/non-IR + filled BENCH + limited empty BENCH + IR
+      const finalSlots = [
+        ...nonBenchNonIrSlots,
+        ...filledBenchSlots,
+        ...limitedEmptyBenchSlots,
+        ...irSlots
+      ];
+      setRosterSlots(finalSlots);
+
+      // Set rosteredPlayers for use elsewhere if needed
+      setRosteredPlayers(finalSlots.filter(s => s.player).map(s => s.player));
     } catch (error) {
       showMessage('Failed to load roster data.', 'error');
     } finally {
@@ -399,27 +442,29 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {populatedSlots.map(slot => (
-                    <tr
-                      key={slot.sPosition}
-                      className="apt-roster-row"
-                      {...(slot.position !== 'BENCH' ? { 'data-position': slot.sPosition } : {})}
-                    >
-                      <td className="apt-slot-cell">{slot.position}</td>
-                      <td className="apt-player-cell">
-                        {slot.player ? (
-                          <PlayerCard
-                            player={slot.player}
-                            index={slot.sPosition}
-                            onClick={() => {}}
-                            isSelected={false}
-                          />
-                        ) : (
-                          'Empty'
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                  {populatedSlots
+                    .filter(slot => slot.position !== 'IR')
+                    .map(slot => (
+                      <tr
+                        key={slot.sPosition}
+                        className="apt-roster-row"
+                        {...(slot.position !== 'BENCH' ? { 'data-position': slot.sPosition } : {})}
+                      >
+                        <td className="apt-slot-cell">{slot.position}</td>
+                        <td className="apt-player-cell">
+                          {slot.player ? (
+                            <PlayerCard
+                              player={slot.player}
+                              index={slot.sPosition}
+                              onClick={() => {}}
+                              isSelected={false}
+                            />
+                          ) : (
+                            'Empty'
+                          )}
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>

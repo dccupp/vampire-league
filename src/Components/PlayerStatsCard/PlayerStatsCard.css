@@ -41,34 +41,54 @@
   text-align: center;
 }
 
-.player-info {
+.card-content {
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .player-details {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
-  color: #2ecc71;
+  color: #e0e0e0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 4px;
 }
 
 .player-stats {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
 }
 
 .stat-item {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
+  color: #e0e0e0;
+}
+
+.fantasy-score-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+}
+
+.fantasy-score {
+  font-size: 24px;
+  font-weight: 700;
   color: #e0e0e0;
 }
 
@@ -79,10 +99,14 @@
   }
 
   .player-details {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .stat-item {
-    font-size: 10px;
+    font-size: 11px;
+  }
+
+  .fantasy-score {
+    font-size: 20px;
   }
 }

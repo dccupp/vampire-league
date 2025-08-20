@@ -293,12 +293,6 @@ const handleMovePlayer = async (sourceIndex, targetIndex) => {
   }
 
   // 2. If the source player cannot occupy the target slot, deny the move
-  console.log('[MOVE ATTEMPT] Comparing:', {
-    playerName: sourceRosteredPlayer?.player?.player_name,
-    playerPosition: sourceRosteredPlayer?.player?.position,
-    targetSlotPosition: targetSlot.position,
-    targetSlotSPosition: targetSlot.sPosition
-  });
   if (!isValidMove(sourceRosteredPlayer, targetSlot.position)) {
     setMessage('Invalid move for this player.');
     setMessageType('error');

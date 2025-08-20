@@ -1,8 +1,8 @@
 import axiosInstance from '../api';
 
-export const calculateFantasyScores = async (playerIds, week, season, leagueId, includeYearlyStats = false) => {
+export const calculateFantasyWeekScores = async (playerIds, week, season, leagueId, includeYearlyStats = false) => {
   // Log the received data package
-  console.log('calculateFantasyScores received:', {
+  console.log('calculateFantasyWeekScores received:', {
     playerIds,
     week,
     season,
@@ -98,6 +98,98 @@ export const calculateFantasyScores = async (playerIds, week, season, leagueId, 
     };
   } catch (error) {
     console.error('Error calculating fantasy scores:', error.response?.data?.message || error.message);
+    return {
+      status: 'error',
+      message: error.response?.data?.message || error.message || 'An unexpected error occurred',
+      data: [],
+    };
+  }
+};
+
+export const calculateFantasySeasonScores = async (playerIds, season, leagueId) => {
+  console.log('calculateFantasySeasonScores received:', {
+    playerIds,
+    season,
+    leagueId
+  });
+  try {
+    // Validate inputs
+    if (!Array.isArray(playerIds) || playerIds.length === 0) {
+      throw new Error('Player IDs must be a non-empty array');
+    }
+    if (!Number.isInteger(season) || season < 2000) {
+      throw new Error('Season must be a valid year');
+    }
+    if (!Number.isInteger(leagueId) || leagueId < 1) {
+      throw new Error('League ID must be a positive integer');
+    }
+
+    // Step 1: Fetch scoring rules
+    const scoringRulesResponse = await axiosInstance.get(`/scoring_rules/getScoringRulesByLeagueId/${leagueId}`);
+    if (scoringRulesResponse.data.status === 'error') {
+      throw new Error(scoringRulesResponse.data.message || 'Failed to fetch scoring rules');
+    }
+    const scoringRules = scoringRulesResponse.data;
+    console.log('Scoring Rules:', scoringRules);
+
+    // Step 2: Fetch all yearly stats for the season in one call
+    const yearlyStatsResponse = await axiosInstance.get(`/yearly_stats/getYearlyStatsBySeason/${season}`);
+    const allYearlyStats = Array.isArray(yearlyStatsResponse.data) ? yearlyStatsResponse.data : [];
+    console.log('All Yearly Stats:', allYearlyStats);
+
+    // Step 3: Calculate fantasy scores for the season
+    const defaultStats = {
+      passing_yards: 0,
+      passing_tds: 0,
+      interceptions: 0,
+      two_point_passes: 0,
+      rushing_yards: 0,
+      rushing_tds: 0,
+      two_point_rushes: 0,
+      receptions: 0,
+      receiving_yards: 0,
+      receiving_tds: 0,
+      two_point_receptions: 0,
+      special_teams_tds: 0
+    };
+
+    const playerScores = playerIds.map(playerId => {
+      const yearlyStat = allYearlyStats.find(stat => stat.player_id === playerId) || defaultStats;
+      let score = 0;
+
+      score += (yearlyStat.passing_yards || 0) * (scoringRules.passing_yards || 0);
+      score += (yearlyStat.passing_tds || 0) * (scoringRules.passing_touchdowns || 0);
+      score += (yearlyStat.interceptions || 0) * (scoringRules.interceptions_thrown || 0);
+      score += (yearlyStat.two_point_passes || 0) * (scoringRules.two_point_pass || 0);
+      if (yearlyStat.passing_yards >= 4000) score += scoringRules.passing_4000_plus || 0;
+      else if (yearlyStat.passing_yards >= 3000) score += scoringRules.passing_3000_3999 || 0;
+      score += (yearlyStat.rushing_yards || 0) * (scoringRules.rushing_yards || 0);
+      score += (yearlyStat.rushing_tds || 0) * (scoringRules.rushing_touchdowns || 0);
+      score += (yearlyStat.two_point_rushes || 0) * (scoringRules.two_point_rush || 0);
+      if (yearlyStat.rushing_yards >= 2000) score += scoringRules.rushing_2000_plus || 0;
+      else if (yearlyStat.rushing_yards >= 1000) score += scoringRules.rushing_1000_1999 || 0;
+      score += (yearlyStat.receptions || 0) * (scoringRules.receptions || 0);
+      score += (yearlyStat.receiving_yards || 0) * (scoringRules.receiving_yards || 0);
+      score += (yearlyStat.receiving_tds || 0) * (scoringRules.receiving_touchdowns || 0);
+      score += (yearlyStat.two_point_receptions || 0) * (scoringRules.two_point_reception || 0);
+      if (yearlyStat.receiving_yards >= 2000) score += scoringRules.receiving_2000_plus || 0;
+      else if (yearlyStat.receiving_yards >= 1000) score += scoringRules.receiving_1000_1999 || 0;
+      score += (yearlyStat.special_teams_tds || 0) * (scoringRules.kickoff_return_touchdown || 0);
+
+      return {
+        player_id: playerId,
+        fantasyScore: score.toFixed(2),
+        yearlyStats: yearlyStat,
+      };
+    });
+
+    console.log('Player Season Scores:', playerScores);
+    return {
+      status: 'success',
+      data: playerScores,
+    };
+  } catch (error) {
+    console.error('Error calculating fantasy season scores:', error.response?.data?.message || error.message);
     return {
       status: 'error',
       message: error.response?.data?.message || error.message || 'An unexpected error occurred',

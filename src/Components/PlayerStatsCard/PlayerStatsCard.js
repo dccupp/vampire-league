@@ -1,36 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import axiosInstance from '../../api';
+import React from 'react';
 import './PlayerStatsCard.css';
 
-const PlayerStatsCard = ({ player, index, onClick, isSelected, season = '2024' }) => {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      if (!player || !player.player_id) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await axiosInstance.get(`/yearly_stats/getYearlyStatsByPlayerId/${player.player_id}`);
-        const playerStats = response.data.find(stat => stat.season === (season || new Date().getFullYear()));
-        setStats(playerStats || {});
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to load player stats');
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, [player, season]);
-
+const PlayerStatsCard = ({ player, stats, fantasyScore, index, onClick, isSelected }) => {
   if (!player) return null;
-  if (loading) return <div className="player-stats-card">Loading...</div>;
-  if (error) return <div className="player-stats-card error">{error}</div>;
 
   const renderStats = () => {
     const position = player.position?.toUpperCase();
@@ -68,20 +40,27 @@ const PlayerStatsCard = ({ player, index, onClick, isSelected, season = '2024' }
     const fields = statFields[position] || [];
     return fields.map((field, idx) => (
       <span key={idx} className="stat-item">
-        {field.label}: {stats[field.key] || 0}
+        {field.label}: {stats && stats[field.key] ? stats[field.key] : 0}
       </span>
     ));
   };
 
   return (
     <div className={`player-stats-card ${isSelected ? 'selected' : ''}`} onClick={() => onClick(index)}>
-      <div className="player-info">
-        <span className="player-details">
-          {player.player_name} - {player.position} - {player.team}
-        </span>
-      </div>
-      <div className="player-stats">
-        {renderStats()}
+      <div className="card-content">
+        <div className="player-info">
+          <div className="player-details">
+            {player.player_name} - {player.position} - {player.team}
+          </div>
+          <div className="player-stats">
+            {renderStats()}
+          </div>
+        </div>
+        {fantasyScore !== undefined && fantasyScore !== null && (
+          <div className="fantasy-score-container">
+            <span className="fantasy-score">{fantasyScore}</span>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -8,6 +8,7 @@
 
 .layout-content {
   z-index: 1000; /* Ensure content is below navbar dropdowns */
+  margin-top: 2.5rem;
 }
 
 .fantasy-roster-container {

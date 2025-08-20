@@ -51,11 +51,11 @@ const ActiveWaiverClaimsComponent = ({ currentUser, currentLeague }) => {
         if (type === 'rostered') {
           const rosterResponse = await axiosInstance.post('/rostered_players/getRosteredPlayerById', { id });
           if (rosterResponse.data?.player_id) {
-            const playerResponse = await axiosInstance.post('/players/getPlayerById', { player_id: rosterResponse.data.player_id });
+            const playerResponse = await axiosInstance.get(`/players/getPlayerById/${rosterResponse.data.player_id}`);
             return { id, name: playerResponse.data.player_name || 'Unknown Player' };
           }
         } else {
-          const playerResponse = await axiosInstance.post('/players/getPlayerById', { player_id: id });
+          const playerResponse = await axiosInstance.get(`/players/getPlayerById/${id}`);
           return { id, name: playerResponse.data.player_name || 'Unknown Player' };
         }
       } catch {
@@ -141,7 +141,7 @@ const ActiveWaiverClaimsComponent = ({ currentUser, currentLeague }) => {
 
   const handleEditClaim = async (claim) => {
     try {
-      const playerResponse = await axiosInstance.post('/players/getPlayerById', { player_id: claim.player_id });
+      const playerResponse = await axiosInstance.get(`/players/getPlayerById/${claim.player_id}`);
       const playerData = playerResponse.data || {};
       setSelectedClaim({
         id: claim.id,

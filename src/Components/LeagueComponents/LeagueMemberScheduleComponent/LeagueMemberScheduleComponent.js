@@ -22,7 +22,7 @@ const LeagueMemberScheduleComponent = ({ currentUser, currentLeague }) => {
       try {
         // Fetch league member for the current user
         const memberResponse = await axiosInstance.get(`/league_members/getLeagueMembersByUserId/${currentUser.id}`);
-        const leagueMember = memberResponse.data.find(member => member.league_id === currentLeague.league_id);
+  const leagueMember = memberResponse.data.find(member => member.league_id === currentLeague.league_id);
         if (!leagueMember) {
           setError('You are not a member of this league.');
           setLoading(false);

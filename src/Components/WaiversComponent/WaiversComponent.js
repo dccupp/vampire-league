@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axiosInstance from '../../api';
-import PlayerCard from '../PlayerCard/PlayerCard';
+import { calculateFantasySeasonScores } from '../../api/calculateFantasyScores';
+import PlayerStatsCard from '../PlayerStatsCard/PlayerStatsCard';
 import WaiverClaimFormComponent from '../WaiverClaimFormComponent/WaiverClaimFormComponent';
 import './WaiversComponent.css';
 
@@ -14,6 +15,8 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
   const [error, setError] = useState(null);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [selectedLeagueMember, setSelectedLeagueMember] = useState(null);
+  const [allYearlyStats, setAllYearlyStats] = useState([]);
+  const [seasonScores, setSeasonScores] = useState([]);
   const itemsPerPage = 20;
   const pageWindow = 5;
 
@@ -71,35 +74,115 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
           .map(r => r.player_id)
       );
 
-      setFreeAgents(
-        allPlayers
-          .filter(p => !rosteredIds.has(p.player_id))
-          .map(p => ({
-            ...p,
-            name: p.player_name,
-            playingPosition: p.position
-          }))
-      );
+
+      // Use id from players table, but do not add player_id property (keep id as the unique key)
+      const validFreeAgents = allPlayers
+        .filter(p => p.id && !rosteredIds.has(p.id))
+        .map(p => ({
+          ...p,
+          name: p.player_name || 'Unknown Player',
+          playingPosition: p.position || 'Unknown'
+        }));
+
+      // Log for debugging duplicate player_ids
+      const playerIds = validFreeAgents.map(p => p.id);
+      const uniquePlayerIds = new Set(playerIds);
+      if (playerIds.length !== uniquePlayerIds.size) {
+        console.warn('Duplicate player IDs detected:', playerIds.filter((id, index) => playerIds.indexOf(id) !== index));
+      }
+
+      setFreeAgents(validFreeAgents);
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to load waiver data');
     }
   }, [currentUser?.id, currentLeague?.league_id]);
+
+
+  // Fetch all yearly stats for 2024 once
+  useEffect(() => {
+    const fetchAllYearlyStats = async () => {
+      try {
+        const res = await axiosInstance.get('/yearly_stats/getYearlyStatsBySeason/2024');
+        setAllYearlyStats(Array.isArray(res.data) ? res.data : []);
+      } catch (error) {
+        setAllYearlyStats([]);
+        console.error('Failed to fetch all yearly stats:', error);
+      }
+    };
+    fetchAllYearlyStats();
+  }, []);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
   const filteredFreeAgents = useMemo(() => {
-    return freeAgents.filter(player => {
-      const matchesName = player.name.toLowerCase().includes(nameFilter.toLowerCase());
-      const matchesTeam = teamFilter !== 'All' ? player.team.toUpperCase() === teamFilter.toUpperCase() : true;
-      const matchesPosition = positionFilter !== 'All' ? player.playingPosition === positionFilter : true;
+    // Log the raw freeAgents and filter values for debugging
+    const filtered = freeAgents.filter(player => {
+      // Defensive: handle missing/null/undefined properties
+      const playerName = (player.name || player.player_name || '').toString().toLowerCase();
+      const playerTeam = (player.team || player.nfl_team || '').toString().toUpperCase();
+      const playerPosition = (player.playingPosition || player.position || '').toString();
+
+      const matchesName = playerName.includes(nameFilter.toLowerCase());
+      const matchesTeam = teamFilter !== 'All' ? playerTeam === teamFilter.toUpperCase() : true;
+      const matchesPosition = positionFilter !== 'All' ? playerPosition === positionFilter : true;
       return matchesName && matchesTeam && matchesPosition;
     });
+
+    return filtered;
   }, [freeAgents, nameFilter, teamFilter, positionFilter]);
 
+  // Automatically calculate and log season fantasy scores for filtered free agents
+  useEffect(() => {
+    if (filteredFreeAgents.length > 0 && currentLeague?.league_id) {
+      const playerIds = filteredFreeAgents.map(player => player.id);
+      const season = 2024; // Hardcoded for now
+      const leagueId = currentLeague.league_id;
+      calculateFantasySeasonScores(playerIds, season, leagueId).then(result => {
+        if (result.status === 'success') {
+          setSeasonScores(result.data);
+        } else {
+          setSeasonScores([]);
+        }
+      });
+    } else {
+      setSeasonScores([]);
+    }
+  }, [filteredFreeAgents, currentLeague?.league_id]);
+
+  // Helper to get stats for a player by id
+  const getStatsForPlayer = (id) => {
+    const stats = allYearlyStats.find(stat => stat.player_id === id);
+    return stats || {
+      passing_yards: 0,
+      passing_tds: 0,
+      interceptions: 0,
+      two_point_passes: 0,
+      rushing_yards: 0,
+      rushing_tds: 0,
+      two_point_rushes: 0,
+      receptions: 0,
+      receiving_yards: 0,
+      receiving_tds: 0,
+      two_point_receptions: 0,
+      special_teams_tds: 0
+    };
+  };
+
   const totalPages = Math.ceil(filteredFreeAgents.length / itemsPerPage);
-  const currentFreeAgents = filteredFreeAgents.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Merge stats and fantasy score into each player for current page, using id as the unique key
+  const currentFreeAgents = filteredFreeAgents.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(player => {
+    const stats = getStatsForPlayer(player.id);
+    const scoreObj = seasonScores.find(s => s.player_id === player.id);
+    return {
+      ...player,
+      stats,
+      fantasyScore: scoreObj ? scoreObj.fantasyScore : null
+    };
+  });
+  console.log('currentFreeAgents:', currentFreeAgents);
 
   const pageNumbers = useMemo(() => {
     const pages = [];
@@ -172,21 +255,24 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
             <tbody>
               {currentFreeAgents.length > 0 ? (
                 currentFreeAgents.map((player, index) => (
-                  <tr key={player.player_id} className="waivers-row">
+                  <tr key={player.id} className="waivers-row">
                     <td className="player-cell">
-                      <PlayerCard
+                      <PlayerStatsCard
                         player={player}
+                        stats={player.stats}
+                        fantasyScore={player.fantasyScore}
                         index={index}
                         onClick={() => {
                           setSelectedPlayer(player);
                           setSelectedLeagueMember(userRoster.length ? userRoster[0].league_member : null);
                         }}
+                        isSelected={selectedPlayer?.id === player.id}
                       />
                     </td>
                   </tr>
                 ))
               ) : (
-                <tr>
+                <tr key="no-free-agents">
                   <td className="empty-message">No free agents available</td>
                 </tr>
               )}

@@ -199,7 +199,7 @@ const AppContent = () => {
             }
           />
           <Route
-            path="/waiver-priority"
+            path="manage-waiver-priority"
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
