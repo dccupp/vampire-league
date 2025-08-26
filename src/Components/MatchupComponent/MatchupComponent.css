@@ -3,7 +3,7 @@
 
 /* Container for the entire matchup component */
 .matchup-container {
-  padding: 16px;
+  padding: 8px; /* Reduced padding for mobile */
   background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
@@ -16,11 +16,11 @@
 
 /* Title for the matchup component */
 .matchup-title {
-  font-size: 1.5rem;
+  font-size: 1.3rem; /* Slightly smaller for mobile */
   font-weight: 700;
   color: #2ecc71;
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   letter-spacing: 0.5px;
 }
 
@@ -29,8 +29,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 1.5rem;
+  gap: 8px; /* Reduced gap */
+  margin-bottom: 1rem;
   flex-wrap: wrap;
 }
 
@@ -40,12 +40,12 @@
   background: #2a2a2a;
   color: #e0e0e0;
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  padding: 8px 12px;
+  font-size: 12px; /* Smaller font */
+  padding: 6px 8px; /* Reduced padding */
   border: 1px solid #27ae60;
   border-radius: 4px;
   cursor: pointer;
-  max-width: 250px;
+  max-width: 200px; /* Smaller dropdowns */
   width: 100%;
   transition: background 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
@@ -73,34 +73,34 @@
 .rosters-container {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 6px; /* Tighter gap */
+  flex-wrap: nowrap; /* Force side-by-side */
 }
 
 /* Individual roster section */
 .roster-section {
   flex: 1;
-  min-width: 300px;
-  max-width: 480px;
+  min-width: 150px; /* Minimum width for very small screens */
+  max-width: 49%; /* Ensure two sections fit */
 }
 
 /* Team title above each table */
 .team-title {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #2ecc71;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 
 /* Bench title above bench tables */
 .bench-title {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #2ecc71;
   text-align: center;
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
+  margin-top: 0.8rem;
+  margin-bottom: 0.6rem;
 }
 
 /* Team score box */
@@ -111,17 +111,16 @@
   background: #181f13;
   color: #2ecc71;
   font-weight: 700;
-  font-size: 2.2rem;
-  padding: 10px 18px;
-  border-radius: 8px;
-  min-width: 60px;
-  max-width: 220px;
+  font-size: 1.6rem; /* Smaller score box */
+  padding: 6px 10px;
+  border-radius: 6px;
+  min-width: 40px;
+  max-width: 80px;
   width: fit-content;
   text-align: center;
   box-shadow: 0 2px 8px rgba(46, 204, 113, 0.18);
-  margin: 0 auto 1.5rem auto;
-  letter-spacing: 1px;
-  transition: background 0.2s, color 0.2s;
+  margin: 0 auto 0.8rem auto;
+  letter-spacing: 0.5px;
 }
 
 /* Table styling */
@@ -131,7 +130,7 @@
   background-color: #2a2a2a;
   color: #e0e0e0;
   font-family: 'Poppins', sans-serif;
-  font-size: 13px;
+  font-size: 10px; /* Smaller font for tables */
   border-collapse: collapse;
 }
 
@@ -139,8 +138,11 @@
 .roster-table th,
 .roster-table td {
   border: 1px solid #27ae60;
-  padding: 8px;
+  padding: 3px; /* Tighter padding */
   vertical-align: middle;
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Truncate long text */
 }
 
 /* Table headers */
@@ -149,43 +151,18 @@
   color: #121212;
   font-weight: 700;
   text-align: center;
+  font-size: 10px;
 }
 
-/* Column widths for away table and default */
+/* Column widths for all tables */
 .roster-table th.score-header,
 .roster-table .score-cell {
-  width: 20%;
+  width: 30%; /* Increased to ensure score fits */
 }
 
 .roster-table th.player-header,
 .roster-table .player-cell {
-  width: 80%;
-}
-
-/* Column widths for home table */
-#home-roster-table th.player-header,
-#home-roster-table .player-cell,
-#home-bench-table th.player-header,
-#home-bench-table .player-cell {
-  width: 80%;
-}
-
-#home-roster-table th.score-header,
-#home-roster-table .score-cell,
-#home-bench-table th.score-header,
-#home-bench-table .score-cell {
-  width: 20%;
-}
-
-/* Column widths for away bench table */
-#away-bench-table th.score-header,
-#away-bench-table .score-cell {
-  width: 20%;
-}
-
-#away-bench-table th.player-header,
-#away-bench-table .player-cell {
-  width: 80%;
+  width: 70%; /* Reduced player column width */
 }
 
 /* Player cell alignment */
@@ -199,13 +176,13 @@
   background: #1a1a1a;
   color: #2ecc71;
   font-weight: 700;
-  font-size: 1.3rem;
-  letter-spacing: 0.5px;
+  font-size: 1rem; /* Smaller score text */
+  letter-spacing: 0.3px;
 }
 
 /* Row styling */
 .roster-row {
-  height: 80px;
+  height: 50px; /* Shorter rows */
 }
 
 .roster-row:hover {
@@ -215,20 +192,30 @@
 
 /* Empty slot styling */
 .empty-slot {
-  font-size: 13px;
+  font-size: 10px;
   color: #b0b0b0;
   text-align: center;
-  min-height: 80px;
+  min-height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* PlayerCard overrides to ensure it fits */
+.player-cell .PlayerCard {
+  font-size: 10px !important; /* Override PlayerCard font size */
+  padding: 2px !important; /* Reduce padding */
+  margin: 0 !important; /* Remove margins */
+  max-width: 100%; /* Ensure it fits container */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Message styling */
 .message {
   text-align: center;
-  padding: 16px;
-  font-size: 1.1rem;
+  padding: 8px;
+  font-size: 0.9rem;
   color: #e0e0e0;
 }
 
@@ -242,114 +229,150 @@
 
 /* Responsive table container */
 .table-responsive {
-  max-width: 480px;
-  margin: 0 auto;
-  border-radius: 6px;
-  overflow-x: auto;
+  max-width: 100%;
+  margin: 0;
+  border-radius: 4px;
+  overflow-x: auto; /* Enable horizontal scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
-/* Responsive adjustments */
+/* Responsive adjustments for mobile */
 @media (max-width: 768px) {
   .matchup-container {
-    padding: 12px;
+    padding: 6px;
     max-width: 100%;
   }
 
   .matchup-title {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
   }
 
   .matchup-controls {
-    gap: 8px;
+    gap: 6px;
+    flex-direction: column;
+    align-items: center;
   }
 
   .week-select,
   .matchup-select {
-    font-size: 13px;
-    padding: 6px 10px;
-    max-width: 200px;
+    font-size: 11px;
+    padding: 4px 6px;
+    max-width: 100%;
+  }
+
+  .rosters-container {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 4px; /* Minimal gap */
+    justify-content: space-between;
+    width: 100%;
   }
 
   .roster-section {
-    min-width: 100%;
+    min-width: 140px; /* Allow very small width */
+    max-width: 49.5%; /* Ensure two sections fit */
+    flex: 1;
   }
 
   .team-title {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
   }
 
   .bench-title {
-    font-size: 1rem;
-    margin-top: 1rem;
-    margin-bottom: 0.8rem;
+    font-size: 0.8rem;
+    margin-top: 0.6rem;
+    margin-bottom: 0.4rem;
   }
 
   .team-score {
-    font-size: 14px;
-    padding: 3px 4px;
-    min-width: 28px;
-    max-width: 120px;
-    width: fit-content;
+    font-size: 1.4rem;
+    padding: 4px 8px;
+    min-width: 30px;
+    max-width: 60px;
   }
 
   .roster-table {
-    font-size: 12px;
+    font-size: 9px; /* Very small font */
   }
 
   .roster-table th,
   .roster-table td {
-    padding: 6px;
+    padding: 2px; /* Minimal padding */
   }
 
   .roster-table th.score-header,
   .roster-table .score-cell {
-    width: 20%;
+    width: 30%;
   }
 
   .roster-table th.player-header,
   .roster-table .player-cell {
-    width: 80%;
+    width: 70%;
   }
 
-  #home-roster-table th.player-header,
-  #home-roster-table .player-cell,
-  #home-bench-table th.player-header,
-  #home-bench-table .player-cell {
-    width: 80%;
-  }
-
-  #home-roster-table th.score-header,
-  #home-roster-table .score-cell,
-  #home-bench-table th.score-header,
-  #home-bench-table .score-cell {
-    width: 20%;
-  }
-
-  #away-bench-table th.score-header,
-  #away-bench-table .score-cell {
-    width: 20%;
-  }
-
-  #away-bench-table th.player-header,
-  #away-bench-table .player-cell {
-    width: 80%;
+  .roster-table .score-cell {
+    font-size: 0.9rem;
   }
 
   .roster-row {
-    height: 70px;
+    height: 40px; /* Very compact rows */
   }
 
   .empty-slot {
-    font-size: 12px;
-    min-height: 70px;
+    font-size: 9px;
+    min-height: 40px;
   }
 
   .message {
-    font-size: 1rem;
-    padding: 12px;
+    font-size: 0.8rem;
+    padding: 6px;
   }
 
   .table-responsive {
     max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* Ensure PlayerCard is compact */
+  .player-cell .PlayerCard {
+    font-size: 9px !important;
+    padding: 1px !important;
+    margin: 0 !important;
+    max-width: 100%;
+  }
+}
+
+/* Extra small screens (e.g., <360px) */
+@media (max-width: 360px) {
+  .roster-section {
+    min-width: 120px;
+  }
+
+  .roster-table {
+    font-size: 8px;
+  }
+
+  .roster-table th,
+  .roster-table td {
+    padding: 1px;
+  }
+
+  .roster-table .score-cell {
+    font-size: 0.8rem;
+  }
+
+  .roster-row {
+    height: 35px;
+  }
+
+  .empty-slot {
+    font-size: 8px;
+    min-height: 35px;
+  }
+
+  .player-cell .PlayerCard {
+    font-size: 8px !important;
   }
 }

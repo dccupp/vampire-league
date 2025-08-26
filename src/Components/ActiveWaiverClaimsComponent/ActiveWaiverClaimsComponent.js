@@ -193,29 +193,35 @@ const ActiveWaiverClaimsComponent = ({ currentUser, currentLeague }) => {
           </thead>
           <tbody>
             {claimsWithNames.length > 0 ? (
-              claimsWithNames.map((claim, index) => (
-                <tr
-                  key={claim.id || index}
-                  className="waiver-claim-row"
-                  onClick={() => handleEditClaim(claim)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <td>{claim.player_name}</td>
-                  <td>${claim.faab_claim_amount || 0}</td>
-                  <td>{claim.rostered_player_to_drop_name}</td>
-                  <td>
-                    <button
-                      className="delete-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteClaim(claim.id);
-                      }}
-                    >
-                      Delete Claim
-                    </button>
-                  </td>
-                </tr>
-              ))
+              [...claimsWithNames]
+                .sort((a, b) => {
+                  const pa = a.league_member_priority !== undefined && a.league_member_priority !== null ? a.league_member_priority : Infinity;
+                  const pb = b.league_member_priority !== undefined && b.league_member_priority !== null ? b.league_member_priority : Infinity;
+                  return pa - pb;
+                })
+                .map((claim, index) => (
+                  <tr
+                    key={claim.id || index}
+                    className="waiver-claim-row"
+                    onClick={() => handleEditClaim(claim)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <td>{claim.player_name}</td>
+                    <td>${claim.faab_claim_amount || 0}</td>
+                    <td>{claim.rostered_player_to_drop_name}</td>
+                    <td>
+                      <button
+                        className="delete-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClaim(claim.id);
+                        }}
+                      >
+                        Delete Claim
+                      </button>
+                    </td>
+                  </tr>
+                ))
             ) : (
               <tr>
                 <td colSpan="4" className="empty-message">No active waiver claims available</td>

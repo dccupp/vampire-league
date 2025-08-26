@@ -189,25 +189,31 @@ const WaiverClaimPriorityFormComponent = ({ currentUser, currentLeague }) => {
           </thead>
           <tbody>
             {waiverClaims.length > 0 ? (
-              waiverClaims.map((claim) => (
-                <tr key={claim.id} className="waiver-priority-row">
-                  <td>{playerNames[claim.player_id] || 'Unknown Player'}</td>
-                  <td>${claim.faab_claim_amount || 0}</td>
-                  <td>{claim.rostered_player_to_drop ? playerNames[claim.rostered_player_to_drop] || 'Unknown Player' : 'None'}</td>
-                  <td>
-                    <select
-                      className="priority-select"
-                      value={priorities[claim.id] || ''}
-                      onChange={(e) => handlePriorityChange(claim.id, e.target.value)}
-                    >
-                      <option value="">Select Priority</option>
-                      {Array.from({ length: waiverClaims.length }, (_, i) => i + 1).map(num => (
-                        <option key={num} value={num}>{num}</option>
-                      ))}
-                    </select>
-                  </td>
-                </tr>
-              ))
+              [...waiverClaims]
+                .sort((a, b) => {
+                  const pa = priorities[a.id] !== '' && priorities[a.id] !== undefined ? priorities[a.id] : Infinity;
+                  const pb = priorities[b.id] !== '' && priorities[b.id] !== undefined ? priorities[b.id] : Infinity;
+                  return pa - pb;
+                })
+                .map((claim) => (
+                  <tr key={claim.id} className="waiver-priority-row">
+                    <td>{playerNames[claim.player_id] || 'Unknown Player'}</td>
+                    <td>${claim.faab_claim_amount || 0}</td>
+                    <td>{claim.rostered_player_to_drop ? playerNames[claim.rostered_player_to_drop] || 'Unknown Player' : 'None'}</td>
+                    <td>
+                      <select
+                        className="priority-select"
+                        value={priorities[claim.id] || ''}
+                        onChange={(e) => handlePriorityChange(claim.id, e.target.value)}
+                      >
+                        <option value="">Select Priority</option>
+                        {Array.from({ length: waiverClaims.length }, (_, i) => i + 1).map(num => (
+                          <option key={num} value={num}>{num}</option>
+                        ))}
+                      </select>
+                    </td>
+                  </tr>
+                ))
             ) : (
               <tr>
                 <td colSpan="4" className="empty-message">No active waiver claims available</td>

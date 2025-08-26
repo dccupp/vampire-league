@@ -50,8 +50,8 @@ const LeagueMemberScheduleComponent = ({ currentUser, currentLeague }) => {
                 const match = weekMatches[0];
                 const homeMember = membersResponse.data.find(m => m.id === match.home_league_member);
                 const awayMember = membersResponse.data.find(m => m.id === match.away_league_member);
-                const homeScore = match.home_score !== null ? match.home_score.toFixed(2) : '--';
-                const awayScore = match.away_score !== null ? match.away_score.toFixed(2) : '--';
+                const homeScore = (match.home_score !== null && !isNaN(match.home_score)) ? Number(match.home_score).toFixed(2) : '--';
+                const awayScore = (match.away_score !== null && !isNaN(match.away_score)) ? Number(match.away_score).toFixed(2) : '--';
                 fullSchedule.push({
                   week,
                   awayScore,
@@ -115,8 +115,8 @@ const LeagueMemberScheduleComponent = ({ currentUser, currentLeague }) => {
             const match = weekMatches[0];
             const homeMember = members.find(m => m.id === match.home_league_member);
             const awayMember = members.find(m => m.id === match.away_league_member);
-            const homeScore = match.home_score !== null ? match.home_score.toFixed(2) : '--';
-            const awayScore = match.away_score !== null ? match.away_score.toFixed(2) : '--';
+            const homeScore = (match.home_score !== null && !isNaN(match.home_score)) ? Number(match.home_score).toFixed(2) : '--';
+            const awayScore = (match.away_score !== null && !isNaN(match.away_score)) ? Number(match.away_score).toFixed(2) : '--';
             fullSchedule.push({
               week,
               awayScore,
