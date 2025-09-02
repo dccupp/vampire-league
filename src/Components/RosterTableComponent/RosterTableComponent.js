@@ -278,6 +278,9 @@ const handleMovePlayer = async (sourceIndex, targetIndex) => {
   const sourcePlayer = sourceSlot.player;
   const targetPlayer = targetSlot.player;
 
+  console.log("sourceSlot:", sourceSlot);
+  console.log("targetSlot:", targetSlot);
+
   // Find full rostered player objects
   const sourceRosteredPlayer = rosteredPlayers.find(p => p.player.player_id === sourcePlayer?.player_id);
   const targetRosteredPlayer = targetPlayer
@@ -307,17 +310,19 @@ const handleMovePlayer = async (sourceIndex, targetIndex) => {
       targetRosteredPlayer &&
       isValidMove(targetRosteredPlayer, sourceSlot.position)
     ) {
+      // If both source and target are BENCH, set roster_position to 'BENCH'
+      const bothBench = sourceSlot.position === 'BENCH' && targetSlot.position === 'BENCH';
       await Promise.all([
         axiosInstance.put(`/rostered_players/update/${sourceRosteredPlayer.id}`, {
           league_member_id: leagueMemberId,
           player_id: sourceRosteredPlayer.player.player_id,
-          roster_position: targetSlot.sPosition,
+          roster_position: bothBench ? 'BENCH' : targetSlot.sPosition,
           is_rostered: 1,
         }),
         axiosInstance.put(`/rostered_players/update/${targetRosteredPlayer.id}`, {
           league_member_id: leagueMemberId,
           player_id: targetRosteredPlayer.player.player_id,
-          roster_position: sourceSlot.sPosition,
+          roster_position: bothBench ? 'BENCH' : sourceSlot.sPosition,
           is_rostered: 1,
         }),
       ]);
@@ -383,7 +388,9 @@ const handleMovePlayer = async (sourceIndex, targetIndex) => {
   // Handle moving a player to bench
   const handleMoveToBench = async () => {
     const sourcePlayer = modalPlayer;
-    const sourceRosteredPlayer = rosteredPlayers.find(p => p.player.player_name === sourcePlayer.name && p.player.position === sourcePlayer.playingPosition);
+    const sourceRosteredPlayer = rosteredPlayers.find(
+      p => p.player.player_name === sourcePlayer.name && p.player.position === sourcePlayer.playingPosition
+    );
     if (!sourceRosteredPlayer) {
       setMessage('Player not found.');
       setMessageType('error');

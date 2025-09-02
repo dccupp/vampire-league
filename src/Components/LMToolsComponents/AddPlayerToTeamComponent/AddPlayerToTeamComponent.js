@@ -230,14 +230,32 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     )?.sPosition || null;
   }, [rosterRules, rosterSlots, rosteredPlayers]);
 
+  // --- Replace the populatedSlots logic with this ---
+  // This will ensure BENCH players are included in the roster table, similar to RosterTableComponent
   const populatedSlots = useMemo(() => {
-    if (!rosteredPlayers.length || !rosterSlots.length) {
-      return rosterSlots.map(slot => ({ ...slot, player: null }));
-    }
-    return rosterSlots.map(slot => ({
-      ...slot,
-      player: rosteredPlayers.find(player => player.roster_position === slot.sPosition) || null
-    }));
+    if (!rosterSlots.length) return [];
+    // Get all bench players (roster_position === 'BENCH')
+    const benchPlayers = rosteredPlayers.filter(p => p.roster_position === 'BENCH');
+    let benchIndex = 0;
+
+    return rosterSlots.map(slot => {
+      if (slot.position === 'BENCH') {
+        // Assign each BENCH slot a unique bench player
+        const player = benchPlayers[benchIndex] || null;
+        benchIndex += 1;
+        return {
+          ...slot,
+          player
+        };
+      } else {
+        // Non-bench slots: match by roster_position
+        const player = rosteredPlayers.find(p => p.roster_position === slot.sPosition) || null;
+        return {
+          ...slot,
+          player
+        };
+      }
+    });
   }, [rosterSlots, rosteredPlayers]);
 
   const handlePlayerSelect = (player) => {

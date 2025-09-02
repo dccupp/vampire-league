@@ -8,7 +8,7 @@ import RosterTableComponent from './Components/RosterTableComponent/RosterTableC
 import MatchupComponent from './Components/MatchupComponent/MatchupComponent';
 import WaiversComponent from './Components/WaiversComponent/WaiversComponent';
 import ActiveWaiverClaimsComponent from './Components/ActiveWaiverClaimsComponent/ActiveWaiverClaimsComponent';
-import WaiverClaimPriorityFormComponent from './Components/WaiverClaimPriorityFormComponent/WaiverClaimPriorityFormComponent';
+// import WaiverClaimPriorityFormComponent from './Components/WaiverClaimPriorityFormComponent/WaiverClaimPriorityFormComponent';
 import CreateLeagueForm from './Components/CreateLeague/CreateLeagueForm';
 import PrivateRoute from './Components/PrivateRoute/PrivateRoute';
 import LandingComponent from './Components/LandingComponent/LandingComponent';
@@ -198,7 +198,7 @@ const AppContent = () => {
               </PrivateRoute>
             }
           />
-          <Route
+          {/* <Route
             path="manage-waiver-priority"
             element={
               <PrivateRoute>
@@ -212,7 +212,7 @@ const AppContent = () => {
                 )}
               </PrivateRoute>
             }
-          />
+          /> */}
           <Route
             path="/edit-team-info"
             element={

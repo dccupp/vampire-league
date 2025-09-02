@@ -1,14 +1,7 @@
 import axiosInstance from '../api';
 
 export const calculateFantasyWeekScores = async (playerIds, week, season, leagueId, includeYearlyStats = false) => {
-  // Log the received data package
-  console.log('calculateFantasyWeekScores received:', {
-    playerIds,
-    week,
-    season,
-    leagueId,
-    includeYearlyStats
-  });
+
   try {
     // Validate inputs
     if (!Array.isArray(playerIds) || playerIds.length === 0) {
@@ -30,7 +23,6 @@ export const calculateFantasyWeekScores = async (playerIds, week, season, league
       throw new Error(scoringRulesResponse.data.message || 'Failed to fetch scoring rules');
     }
     const scoringRules = scoringRulesResponse.data;
-    console.log('Scoring Rules:', scoringRules);
 
     // Step 2: Fetch weekly stats
     const weeklyStatsResponse = await axiosInstance.post('/weekly_stats/getWeeklyStatsByPlayerIdsSeasonAndWeek', {
@@ -39,7 +31,6 @@ export const calculateFantasyWeekScores = async (playerIds, week, season, league
       week,
     });
     const weeklyStats = Array.isArray(weeklyStatsResponse.data) ? weeklyStatsResponse.data : [];
-    console.log('Weekly Stats:', weeklyStats);
 
     // Step 3: Fetch yearly stats (if requested)
     let yearlyStats = [];
@@ -54,7 +45,6 @@ export const calculateFantasyWeekScores = async (playerIds, week, season, league
       );
       const yearlyStatsResponses = await Promise.all(yearlyStatsPromises);
       yearlyStats = yearlyStatsResponses.flat().filter(stat => stat.season === season);
-      console.log('Yearly Stats:', yearlyStats);
     }
 
     // Step 4: Calculate fantasy scores
@@ -91,7 +81,6 @@ export const calculateFantasyWeekScores = async (playerIds, week, season, league
       };
     });
 
-    console.log('Player Scores:', playerScores);
     return {
       status: 'success',
       data: playerScores,
@@ -107,11 +96,7 @@ export const calculateFantasyWeekScores = async (playerIds, week, season, league
 };
 
 export const calculateFantasySeasonScores = async (playerIds, season, leagueId) => {
-  console.log('calculateFantasySeasonScores received:', {
-    playerIds,
-    season,
-    leagueId
-  });
+
   try {
     // Validate inputs
     if (!Array.isArray(playerIds) || playerIds.length === 0) {
@@ -130,12 +115,10 @@ export const calculateFantasySeasonScores = async (playerIds, season, leagueId) 
       throw new Error(scoringRulesResponse.data.message || 'Failed to fetch scoring rules');
     }
     const scoringRules = scoringRulesResponse.data;
-    console.log('Scoring Rules:', scoringRules);
 
     // Step 2: Fetch all yearly stats for the season in one call
     const yearlyStatsResponse = await axiosInstance.get(`/yearly_stats/getYearlyStatsBySeason/${season}`);
     const allYearlyStats = Array.isArray(yearlyStatsResponse.data) ? yearlyStatsResponse.data : [];
-    console.log('All Yearly Stats:', allYearlyStats);
 
     // Step 3: Calculate fantasy scores for the season
     const defaultStats = {
@@ -183,7 +166,6 @@ export const calculateFantasySeasonScores = async (playerIds, season, leagueId) 
       };
     });
 
-    console.log('Player Season Scores:', playerScores);
     return {
       status: 'success',
       data: playerScores,

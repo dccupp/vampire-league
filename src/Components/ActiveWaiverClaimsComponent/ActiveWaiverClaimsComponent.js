@@ -176,9 +176,9 @@ const ActiveWaiverClaimsComponent = ({ currentUser, currentLeague }) => {
     <div className="active-waiver-claims-container animate__animated animate__fadeIn">
       <div className="header-container">
         <h2 className="active-waiver-claims-title">{currentLeague?.name ? `${currentLeague.name} Active Waiver Claims` : 'Active Waiver Claims'}</h2>
-        <button className="manage-priorities-btn" onClick={() => navigate('/manage-waiver-priority')}>
+        {/* <button className="manage-priorities-btn" onClick={() => navigate('/manage-waiver-priority')}>
           Manage Priorities
-        </button>
+        </button> */}
       </div>
       {error && <div className="error-message">{error}</div>}
       <div className="table-wrapper">

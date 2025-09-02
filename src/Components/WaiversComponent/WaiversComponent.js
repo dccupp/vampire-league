@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axiosInstance from '../../api';
+import axios from 'axios';
 import { calculateFantasySeasonScores } from '../../api/calculateFantasyScores';
 import PlayerStatsCard from '../PlayerStatsCard/PlayerStatsCard';
 import WaiverClaimFormComponent from '../WaiverClaimFormComponent/WaiverClaimFormComponent';
+import DirectAddPlayerComponent from '../DirectAddPlayerComponent/DirectAddPlayerComponent';
 import './WaiversComponent.css';
 
 const WaiversComponent = ({ currentUser, currentLeague }) => {
@@ -17,6 +19,10 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
   const [selectedLeagueMember, setSelectedLeagueMember] = useState(null);
   const [allYearlyStats, setAllYearlyStats] = useState([]);
   const [seasonScores, setSeasonScores] = useState([]);
+  const [waiverRules, setWaiverRules] = useState(null);
+  const [fantasyWeeks, setFantasyWeeks] = useState([]);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [isAfterWaiverDay, setIsAfterWaiverDay] = useState(false);
   const itemsPerPage = 20;
   const pageWindow = 5;
 
@@ -31,6 +37,64 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
     if (!currentUser?.id || !currentLeague?.league_id) {
       setError('Missing user or league information');
       return;
+    }
+
+    // Get current date and time
+    const now = new Date();
+    const formattedNow = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    setCurrentDateTime(now);
+
+    // Fetch waiver rules for this league
+    try {
+      const waiverRulesResponse = await axios.get(
+        `/waiver_rules/getWaiverRulesByLeagueId/${currentLeague.league_id}`
+      );
+      // If the response is an array, use the first record
+      const waiverRulesArray = Array.isArray(waiverRulesResponse.data) ? waiverRulesResponse.data : [];
+      const firstWaiverRule = waiverRulesArray[0] || {};
+      const waiverDay = firstWaiverRule.waiver_day;
+      setWaiverRules({ waiver_day: waiverDay });
+    } catch (error) {
+      console.error('Error fetching waiver rules:', error);
+      setWaiverRules(null);
+    }
+
+    // Fetch all fantasy weeks
+    let fantasyWeeksData = [];
+    try {
+      const fantasyWeeksResponse = await axios.get(`/fantasy_weeks/getFantasyWeeks`);
+      fantasyWeeksData = fantasyWeeksResponse.data;
+      setFantasyWeeks(fantasyWeeksData);
+
+      // Determine current fantasy week
+      if (Array.isArray(fantasyWeeksData)) {
+        const currentYear = now.getFullYear();
+        const weeksForYear = fantasyWeeksData.filter(week =>
+          new Date(week.begin_datetime).getFullYear() === currentYear
+        );
+        const sortedWeeks = [...weeksForYear].sort(
+          (a, b) => new Date(a.begin_datetime) - new Date(b.begin_datetime)
+        );
+        const earliestWeek = sortedWeeks[0];
+
+        let currentWeek = fantasyWeeksData.find(week => {
+          const begin = new Date(week.begin_datetime);
+          const end = new Date(week.end_datetime);
+          return now >= begin && now <= end;
+        });
+
+        // If before the first week, use week one
+        if (!currentWeek && earliestWeek && now < new Date(earliestWeek.begin_datetime)) {
+          currentWeek = earliestWeek;
+        } else {
+          if (!currentWeek) {
+            console.warn('No matching fantasy week found for current datetime:', formattedNow);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching fantasy weeks:', error);
+      setFantasyWeeks([]);
     }
 
     try {
@@ -182,7 +246,6 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
       fantasyScore: scoreObj ? scoreObj.fantasyScore : null
     };
   });
-  console.log('currentFreeAgents:', currentFreeAgents);
 
   const pageNumbers = useMemo(() => {
     const pages = [];
@@ -199,6 +262,70 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
 
     return pages;
   }, [currentPage, totalPages]);
+
+  useEffect(() => {
+    if (
+      waiverRules &&
+      waiverRules.waiver_day &&
+      Array.isArray(fantasyWeeks) &&
+      fantasyWeeks.length > 0 &&
+      currentDateTime
+    ) {
+      const now = currentDateTime;
+      const formattedNow = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+      // Find the current week
+      const currentYear = now.getFullYear();
+      const weeksForYear = fantasyWeeks.filter(week =>
+        new Date(week.begin_datetime).getFullYear() === currentYear
+      );
+      const sortedWeeks = [...weeksForYear].sort(
+        (a, b) => new Date(a.begin_datetime) - new Date(b.begin_datetime)
+      );
+      const earliestWeek = sortedWeeks[0];
+
+      let currentWeek = fantasyWeeks.find(week => {
+        const begin = new Date(week.begin_datetime);
+        const end = new Date(week.end_datetime);
+        return now >= begin && now <= end;
+      });
+
+      if (!currentWeek && earliestWeek && now < new Date(earliestWeek.begin_datetime)) {
+        currentWeek = earliestWeek;
+      } else {
+        if (!currentWeek) {
+          console.warn('No matching fantasy week found for current datetime:', formattedNow);
+        }
+      }
+
+      // Waiver day logic
+      if (currentWeek && waiverRules.waiver_day) {
+        const waiverDay = waiverRules.waiver_day;
+        const begin = new Date(currentWeek.begin_datetime);
+        const end = new Date(currentWeek.end_datetime);
+        let waiverDate = null;
+        let iter = new Date(begin);
+        while (iter <= end) {
+          const dayName = iter.toLocaleString('en-US', { weekday: 'long' });
+          if (dayName === waiverDay) {
+            waiverDate = new Date(iter);
+            break;
+          }
+          iter.setDate(iter.getDate() + 1);
+        }
+        if (waiverDate) {
+          if (now < waiverDate) {
+            setIsAfterWaiverDay(false);
+          } else {
+            setIsAfterWaiverDay(true);
+          }
+        } else {
+          setIsAfterWaiverDay(false);
+          console.warn(`Waiver day (${waiverDay}) not found in current fantasy week range.`);
+        }
+      }
+    }
+  }, [waiverRules, fantasyWeeks, currentDateTime]);
 
   return (
     <div className="waivers-container">
@@ -322,8 +449,26 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
           )}
         </div>
       </div>
-      {selectedPlayer && selectedLeagueMember && (
+      {/* Show WaiverClaimFormComponent if before waiver day */}
+      {selectedPlayer && selectedLeagueMember && !isAfterWaiverDay && (
         <WaiverClaimFormComponent
+          player={selectedPlayer}
+          league_member={selectedLeagueMember}
+          userRoster={userRoster}
+          onClose={() => {
+            setSelectedPlayer(null);
+            setSelectedLeagueMember(null);
+          }}
+          onClaimSuccess={() => {
+            setSelectedPlayer(null);
+            setSelectedLeagueMember(null);
+            fetchData();
+          }}
+        />
+      )}
+      {/* Show DirectAddPlayerComponent if after waiver day */}
+      {selectedPlayer && selectedLeagueMember && isAfterWaiverDay && (
+        <DirectAddPlayerComponent
           player={selectedPlayer}
           league_member={selectedLeagueMember}
           userRoster={userRoster}
