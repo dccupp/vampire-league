@@ -174,8 +174,8 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
           const fantasyScoresPayload = {
             playerIds: homeCombinedRosteredPlayers.map(p => p.player.player_id),
             week: week,
-            // season: year,
-            season: 2024,
+            season: year,
+            // season: 2024,
             leagueId: currentLeague.league_id,
             includeYearlyStats: false
           };
@@ -223,8 +223,8 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
           const awayFantasyScoresPayload = {
             playerIds: awayCombinedRosteredPlayers.map(p => p.player.player_id),
             week: week,
-            // season: year,
-            season: 2024,
+            season: year,
+            // season: 2024,
             leagueId: currentLeague.league_id,
             includeYearlyStats: false
           };
