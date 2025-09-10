@@ -238,12 +238,11 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
         const updatedRosteredPlayers = combinedRosteredPlayers.map(player => {
           const game = games.find(g => g.team === player.player.team);
           if (game) {
-            const dateObj = new Date(game.date);
             return {
               ...player,
               schedule: {
                 date: game.date,
-                day: dateObj.toLocaleString('en-US', { weekday: 'short' }),
+                day: game.day,
                 est_time: game.est_time || 'TBD',
                 location: game.location || 'Unknown',
               },
@@ -271,15 +270,11 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
   }, [currentUser, currentLeague, transformRosteredPlayer]);
 
   // Handle moving a player to a target slot or swapping
-
 const handleMovePlayer = async (sourceIndex, targetIndex) => {
   const sourceSlot = rosterSlots[sourceIndex];
   const targetSlot = rosterSlots[targetIndex];
   const sourcePlayer = sourceSlot.player;
   const targetPlayer = targetSlot.player;
-
-  console.log("sourceSlot:", sourceSlot);
-  console.log("targetSlot:", targetSlot);
 
   // Find full rostered player objects
   const sourceRosteredPlayer = rosteredPlayers.find(p => p.player.player_id === sourcePlayer?.player_id);

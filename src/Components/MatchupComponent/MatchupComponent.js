@@ -175,7 +175,6 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
             playerIds: homeCombinedRosteredPlayers.map(p => p.player.player_id),
             week: week,
             season: year,
-            // season: 2024,
             leagueId: currentLeague.league_id,
             includeYearlyStats: false
           };
@@ -194,10 +193,9 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
             const game = games.find(g => g.team === player.player.team);
             let schedule = null;
             if (game) {
-              const dateObj = new Date(game.date);
               schedule = {
                 date: game.date,
-                day: dateObj.toLocaleString('en-US', { weekday: 'short' }),
+                day: game.day,
                 est_time: game.est_time || 'TBD',
                 location: game.location || 'Unknown',
               };
@@ -224,7 +222,6 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
             playerIds: awayCombinedRosteredPlayers.map(p => p.player.player_id),
             week: week,
             season: year,
-            // season: 2024,
             leagueId: currentLeague.league_id,
             includeYearlyStats: false
           };
@@ -243,10 +240,9 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
             const game = games.find(g => g.team === player.player.team);
             let schedule = null;
             if (game) {
-              const dateObj = new Date(game.date);
               schedule = {
                 date: game.date,
-                day: dateObj.toLocaleString('en-US', { weekday: 'short' }),
+                day: game.day,
                 est_time: game.est_time || 'TBD',
                 location: game.location || 'Unknown',
               };
