@@ -162,11 +162,11 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
   }, [currentUser?.id, currentLeague?.league_id]);
 
 
-  // Fetch all yearly stats for 2024 once
+  // Fetch all yearly stats for the current year once
   useEffect(() => {
     const fetchAllYearlyStats = async () => {
       try {
-        const res = await axiosInstance.get('/yearly_stats/getYearlyStatsBySeason/2024');
+        const res = await axiosInstance.get('/yearly_stats/getYearlyStatsBySeason/' + currentDateTime.getFullYear());
         setAllYearlyStats(Array.isArray(res.data) ? res.data : []);
       } catch (error) {
         setAllYearlyStats([]);
@@ -174,7 +174,7 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
       }
     };
     fetchAllYearlyStats();
-  }, []);
+  }, [currentDateTime]);
 
   useEffect(() => {
     fetchData();
@@ -201,7 +201,7 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
   useEffect(() => {
     if (filteredFreeAgents.length > 0 && currentLeague?.league_id) {
       const playerIds = filteredFreeAgents.map(player => player.id);
-      const season = 2024; // Hardcoded for now
+      const season = 2025; // Hardcoded for now
       const leagueId = currentLeague.league_id;
       calculateFantasySeasonScores(playerIds, season, leagueId).then(result => {
         if (result.status === 'success') {
@@ -237,15 +237,19 @@ const WaiversComponent = ({ currentUser, currentLeague }) => {
   const totalPages = Math.ceil(filteredFreeAgents.length / itemsPerPage);
 
   // Merge stats and fantasy score into each player for current page, using id as the unique key
-  const currentFreeAgents = filteredFreeAgents.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(player => {
-    const stats = getStatsForPlayer(player.id);
-    const scoreObj = seasonScores.find(s => s.player_id === player.id);
-    return {
-      ...player,
-      stats,
-      fantasyScore: scoreObj ? scoreObj.fantasyScore : null
-    };
-  });
+  const sortedFreeAgents = filteredFreeAgents
+    .map(player => {
+      const stats = getStatsForPlayer(player.id);
+      const scoreObj = seasonScores.find(s => s.player_id === player.id);
+      return {
+        ...player,
+        stats,
+        fantasyScore: scoreObj ? scoreObj.fantasyScore : 0
+      };
+    })
+    .sort((a, b) => (b.fantasyScore || 0) - (a.fantasyScore || 0));
+
+  const currentFreeAgents = sortedFreeAgents.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const pageNumbers = useMemo(() => {
     const pages = [];
