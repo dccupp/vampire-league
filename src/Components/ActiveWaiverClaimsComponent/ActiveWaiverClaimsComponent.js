@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api';
 import WaiverClaimFormComponent from '../WaiverClaimFormComponent/WaiverClaimFormComponent';
 import './ActiveWaiverClaimsComponent.css';
@@ -12,7 +11,6 @@ const ActiveWaiverClaimsComponent = ({ currentUser, currentLeague }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedClaim, setSelectedClaim] = useState(null);
   const [userRoster, setUserRoster] = useState([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchLeagueMember = async () => {
@@ -49,7 +47,7 @@ const ActiveWaiverClaimsComponent = ({ currentUser, currentLeague }) => {
     const namePromises = Array.from(ids).map(async ({ type, id }) => {
       try {
         if (type === 'rostered') {
-          const rosterResponse = await axiosInstance.post('/rostered_players/getRosteredPlayerById', { id });
+          const rosterResponse = await axiosInstance.get(`/rostered_players/getRosteredPlayerById/${id}`);
           if (rosterResponse.data?.player_id) {
             const playerResponse = await axiosInstance.get(`/players/getPlayerById/${rosterResponse.data.player_id}`);
             return { id, name: playerResponse.data.player_name || 'Unknown Player' };

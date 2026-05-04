@@ -107,12 +107,12 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
           const player = assignedPlayers.find(p => p.roster_position === slot.sPosition || (slot.position === 'BENCH' && p.roster_position === 'BENCH'));
           if (player) {
             slot.player = {
-              name: player.player.player_name,
-              playingPosition: player.player.position,
+              player_name: player.player.player_name,
+              position: player.player.position,
               team: player.player.team,
               schedule: player.schedule,
               is_injured: player.player.is_injured,
-              player_id: player.player.player_id, // Ensure player_id is included
+              player_id: player.player.player_id,
             };
             assignedPlayers.splice(assignedPlayers.indexOf(player), 1);
           }
@@ -126,12 +126,12 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
             position: 'BENCH',
             sPosition: `BENCH${nonIrSlots.filter(s => s.position === 'BENCH').length + 1}`,
             player: {
-              name: player.player.player_name,
-              playingPosition: player.player.position,
+              player_name: player.player.player_name,
+              position: player.player.position,
               team: player.player.team,
               schedule: player.schedule,
               is_injured: player.player.is_injured,
-              player_id: player.player.player_id, // Add player_id
+              player_id: player.player.player_id,
             },
           });
         });
@@ -144,8 +144,8 @@ const RosterTableComponent = ({ currentUser, currentLeague }) => {
         let nonBenchNonIrSlots = nonIrSlots.filter(s => s.position !== 'BENCH' && s.position !== 'IR');
         const filledBenchSlots = benchSlots.filter(s => s.player);
         const emptyBenchSlots = benchSlots.filter(s => !s.player);
-        // Only keep up to bench_count empty BENCH slots
-        const limitedEmptyBenchSlots = emptyBenchSlots.slice(0, benchCount);
+        const emptyBenchCount = Math.max(0, benchCount - filledBenchSlots.length);
+        const limitedEmptyBenchSlots = emptyBenchSlots.slice(0, emptyBenchCount);
         // Final slots: non-BENCH/non-IR + filled BENCH + limited empty BENCH + IR
         return [
           ...nonBenchNonIrSlots,
@@ -384,7 +384,7 @@ const handleMovePlayer = async (sourceIndex, targetIndex) => {
   const handleMoveToBench = async () => {
     const sourcePlayer = modalPlayer;
     const sourceRosteredPlayer = rosteredPlayers.find(
-      p => p.player.player_name === sourcePlayer.name && p.player.position === sourcePlayer.playingPosition
+      p => p.player.player_name === sourcePlayer.player_name && p.player.position === sourcePlayer.position
     );
     if (!sourceRosteredPlayer) {
       setMessage('Player not found.');
@@ -427,7 +427,7 @@ const handleMovePlayer = async (sourceIndex, targetIndex) => {
   // Handle dropping a player
   const handleDropPlayer = async () => {
     const sourcePlayer = modalPlayer;
-    const sourceRosteredPlayer = rosteredPlayers.find(p => p.player.player_name === sourcePlayer.name && p.player.position === sourcePlayer.playingPosition);
+    const sourceRosteredPlayer = rosteredPlayers.find(p => p.player.player_name === sourcePlayer.player_name && p.player.position === sourcePlayer.position);
 
     if (!sourceRosteredPlayer) {
       setMessage('Player not found.');
@@ -599,8 +599,8 @@ const handleMovePlayer = async (sourceIndex, targetIndex) => {
             {modalMode === 'playerInfo' && (
               <>
                 <h3 className="modal-title">Player Information</h3>
-                <p><strong>Name:</strong> {modalPlayer.name}</p>
-                <p><strong>Position:</strong> {modalPlayer.playingPosition}</p>
+                <p><strong>Name:</strong> {modalPlayer.player_name}</p>
+                <p><strong>Position:</strong> {modalPlayer.position}</p>
                 <p><strong>Team:</strong> {modalPlayer.team}</p>
                 {modalPlayer.schedule && (
                   <div>
@@ -624,7 +624,7 @@ const handleMovePlayer = async (sourceIndex, targetIndex) => {
             {modalMode === 'confirmDrop' && (
               <>
                 <h3 className="modal-title">Confirm Drop Player</h3>
-                <p>Are you sure you want to drop {modalPlayer.name}?</p>
+                <p>Are you sure you want to drop {modalPlayer.player_name}?</p>
                 <div className="modal-buttons">
                   <button className="confirm-btn" onClick={handleDropPlayer}>
                     Confirm
@@ -638,7 +638,7 @@ const handleMovePlayer = async (sourceIndex, targetIndex) => {
             {modalMode === 'confirmBench' && (
               <>
                 <h3 className="modal-title">Confirm Move to Bench</h3>
-                <p>Are you sure you want to move {modalPlayer.name} to the bench?</p>
+                <p>Are you sure you want to move {modalPlayer.player_name} to the bench?</p>
                 <div className="modal-buttons">
                   <button className="confirm-btn" onClick={handleMoveToBench}>
                     Confirm

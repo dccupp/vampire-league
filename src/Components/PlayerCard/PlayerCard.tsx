@@ -1,7 +1,23 @@
 import React from 'react';
 import './PlayerCard.css';
 
-const PlayerCard = ({ player, index, onClick, isSelected }) => {
+interface PlayerCardData {
+  player_name?: string | null;
+  name?: string | null;
+  position?: string | null;
+  playingPosition?: string | null;
+  team?: string | null;
+  schedule?: { est_time: string; day: string; date: string; location: string } | null;
+}
+
+interface PlayerCardProps {
+  player: PlayerCardData;
+  index: number | string;
+  onClick: (index: number | string) => void;
+  isSelected: boolean;
+}
+
+const PlayerCard = ({ player, index, onClick, isSelected }: PlayerCardProps) => {
   if (!player) return null;
 
   return (
@@ -10,16 +26,16 @@ const PlayerCard = ({ player, index, onClick, isSelected }) => {
         {/* Row 1: Player Name (large) */}
         <div className="player-name-row">
           <span className="player-name-large">
-            {player.name || player.player_name || player.player?.player_name || 'Unknown'}
+            {player.player_name || player.name || 'Unknown'}
           </span>
         </div>
         {/* Row 2: Position and Team */}
         <div className="player-pos-team-row">
           <span className="player-position">
-            {player.playingPosition || player.position || player.player?.position || 'N/A'}
+            {player.position || player.playingPosition || 'N/A'}
           </span>
           <span className="player-team">
-            {player.team || player.player?.team || 'Unknown'}
+            {player.team || 'Unknown'}
           </span>
         </div>
         {/* Row 3: Schedule Info */}

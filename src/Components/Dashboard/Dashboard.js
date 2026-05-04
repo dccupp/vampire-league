@@ -61,7 +61,7 @@ const Dashboard = ({ currentUser, currentLeague }) => {
               <span className="team-info-divider">|</span>
               <span className="team-owner ms-3 me-3">Team Owner: {currentUser?.first_name} {currentUser?.last_name || 'Team Owner Name'}</span>
               <span className="team-info-divider">|</span>
-              <NavLink to="/budget" className="dashboard-link ms-3">Free Agent Budget (${teamData.remaining_faab_budget})</NavLink>
+              <span className="dashboard-link ms-3">Free Agent Budget (${teamData.remaining_faab_budget})</span>
             </div>
           </Card.Body>
         </Card>

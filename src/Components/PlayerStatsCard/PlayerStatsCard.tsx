@@ -1,12 +1,24 @@
 import React from 'react';
 import './PlayerStatsCard.css';
+import {RosteredPlayer, YearlyStat, } from '../../types';
 
-const PlayerStatsCard = ({ player, stats, fantasyScore, index, onClick, isSelected }) => {
+interface PlayerStatsCardProps {
+  player: RosteredPlayer;
+  stats: YearlyStat;
+  fantasyScore: number | null;
+  index: number;
+  onClick: (index: number) => void;
+  isSelected: boolean;
+}
+
+const PlayerStatsCard = ({ player, stats, fantasyScore, index, onClick, isSelected }: PlayerStatsCardProps) => {
   if (!player) return null;
+
+  type StatField = { key: keyof YearlyStat, label: string }
 
   const renderStats = () => {
     const position = player.position?.toUpperCase();
-    const statFields = {
+    const statFields: Record<string, StatField[]> = {
       QB: [
         { key: 'passing_yards', label: 'Pass Yds' },
         { key: 'passing_tds', label: 'Pass TD' },

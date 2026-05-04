@@ -250,4 +250,13 @@
     gap: 6px;
     padding: 4px 0;
   }
+
+  .bye-tbd {
+    font-weight: 700;
+    color: #f39c12;
+    background: rgba(243, 156, 18, 0.2);
+    padding: 6px 12px;
+    border-radius: 4px;
+    display: inline-block;
+  }
 }

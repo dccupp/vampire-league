@@ -1,36 +1,62 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
 import PlayerCard from '../../PlayerCard/PlayerCard';
+import { CurrentUser, CurrentLeague, RosterRules, LeagueMember } from '../../../types';
 import './AddPlayerToTeamComponent.css';
 
-const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
-  const [nameFilter, setNameFilter] = useState('');
-  const [teamFilter, setTeamFilter] = useState('All');
-  const [positionFilter, setPositionFilter] = useState('All');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [players, setPlayers] = useState([]);
-  const [leagueMembers, setLeagueMembers] = useState([]);
-  const [selectedMember, setSelectedMember] = useState('');
-  const [rosterRules, setRosterRules] = useState(null);
-  const [rosterSlots, setRosterSlots] = useState([]);
-  const [rosteredPlayers, setRosteredPlayers] = useState([]);
-  const [leagueRosteredPlayerIds, setLeagueRosteredPlayerIds] = useState([]);
-  const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState('');
-  const [isMessageExiting, setIsMessageExiting] = useState(false);
-  const [isLoadingRoster, setIsLoadingRoster] = useState(false);
+interface AddPlayerToTeamComponentProps {
+  currentUser: CurrentUser;
+  currentLeague: CurrentLeague;
+}
+
+interface TransformedPlayer {
+  player_id: number;
+  name: string;
+  playingPosition: string;
+  team: string;
+}
+
+interface AptRosterSlot {
+  position: string;
+  sPosition: string;
+  player: any | null;
+}
+
+const transformPlayer = (player: any): TransformedPlayer => ({
+  player_id: player.id,
+  name: player.player_name || player.name || 'Unknown',
+  playingPosition: player.position || player.playingPosition || 'N/A',
+  team: player.team || 'N/A',
+});
+
+const nflTeams = [
+  'All', 'ARI', 'ATL', 'BAL', 'BUF', 'CAR', 'CHI', 'CIN', 'CLE',
+  'DAL', 'DEN', 'DET', 'GB', 'HOU', 'IND', 'JAX', 'KC', 'LAC',
+  'LAR', 'LV', 'MIA', 'MIN', 'NE', 'NO', 'NYG', 'NYJ', 'PHI',
+  'PIT', 'SEA', 'SF', 'TB', 'TEN', 'WAS',
+];
+
+const AddPlayerToTeamComponent = ({ currentUser, currentLeague }: AddPlayerToTeamComponentProps) => {
+  const [nameFilter, setNameFilter] = useState<string>('');
+  const [teamFilter, setTeamFilter] = useState<string>('All');
+  const [positionFilter, setPositionFilter] = useState<string>('All');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [selectedPlayer, setSelectedPlayer] = useState<TransformedPlayer | null>(null);
+  const [players, setPlayers] = useState<TransformedPlayer[]>([]);
+  const [leagueMembers, setLeagueMembers] = useState<LeagueMember[]>([]);
+  const [selectedMember, setSelectedMember] = useState<string>('');
+  const [rosterRules, setRosterRules] = useState<RosterRules | null>(null);
+  const [rosterSlots, setRosterSlots] = useState<AptRosterSlot[]>([]);
+  const [rosteredPlayers, setRosteredPlayers] = useState<any[]>([]);
+  const [leagueRosteredPlayerIds, setLeagueRosteredPlayerIds] = useState<number[]>([]);
+  const [message, setMessage] = useState<string>('');
+  const [messageType, setMessageType] = useState<string>('');
+  const [isMessageExiting, setIsMessageExiting] = useState<boolean>(false);
+  const [isLoadingRoster, setIsLoadingRoster] = useState<boolean>(false);
   const itemsPerPage = 20;
 
-  const nflTeams = useMemo(() => [
-    'All', 'ARI', 'ATL', 'BAL', 'BUF', 'CAR', 'CHI', 'CIN', 'CLE',
-    'DAL', 'DEN', 'DET', 'GB', 'HOU', 'IND', 'JAX', 'KC', 'LAC',
-    'LAR', 'LV', 'MIA', 'MIN', 'NE', 'NO', 'NYG', 'NYJ', 'PHI',
-    'PIT', 'SEA', 'SF', 'TB', 'TEN', 'WAS'
-  ], []);
-
-  // Utility to show messages with timeout
-  const showMessage = useCallback((msg, type) => {
+  const showMessage = useCallback((msg: string, type: string) => {
     setMessage(msg);
     setMessageType(type);
     setIsMessageExiting(false);
@@ -40,16 +66,6 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     }, 5000);
   }, []);
 
-  // Transform player data for PlayerCard
-  const transformPlayer = useCallback(player => ({
-    player_id: player.id,
-    name: player.player_name || player.name || 'Unknown',
-    playingPosition: player.position || player.playingPosition || 'N/A',
-    team: player.team || 'N/A'
-  }), []);
-
-  // Fetch initial data
-  // eslint-disable-next-line no-unused-vars
   const fetchData = useCallback(async () => {
     if (!currentLeague?.league_id) {
       showMessage('Missing league information', 'error');
@@ -60,22 +76,22 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
       const [playersRes, membersRes, leagueRosteredRes] = await Promise.all([
         axiosInstance.get('/players/getPlayers'),
         axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`),
-        axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueId/${currentLeague.league_id}`)
+        axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueId/${currentLeague.league_id}`),
       ]);
 
       setPlayers(Array.isArray(playersRes.data) ? playersRes.data.map(transformPlayer) : []);
       setLeagueMembers(Array.isArray(membersRes.data) ? membersRes.data : []);
       setLeagueRosteredPlayerIds(
         Array.isArray(leagueRosteredRes.data)
-          ? leagueRosteredRes.data.filter(player => player.is_rostered === 1).map(player => player.player_id)
+          ? leagueRosteredRes.data.filter((p: any) => p.is_rostered === 1).map((p: any) => p.player_id)
           : []
       );
     } catch (error) {
-      showMessage('Failed to load data.', 'error');
+      const msg = isAxiosError(error) ? error.response?.data?.message || error.message : 'Failed to load data.';
+      showMessage(msg, 'error');
     }
-  }, [currentLeague, showMessage, transformPlayer]);
+  }, [currentLeague?.league_id, showMessage]);
 
-  // Fetch roster rules and rostered players
   const fetchMemberData = useCallback(async () => {
     if (!selectedMember || !currentLeague?.league_id) {
       setRosterRules(null);
@@ -88,104 +104,90 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     setIsLoadingRoster(true);
     try {
       const selectedMemberData = leagueMembers.find(member => member.id === parseInt(selectedMember));
-      const rosterTypeId = selectedMemberData?.is_vamp === 1 ? 2 : 1;
+      const rosterTypeId = selectedMemberData?.is_vamp ? 2 : 1;
+
       const [rosterRulesRes, rosteredPlayersRes] = await Promise.all([
         axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/${rosterTypeId}`),
-        axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${selectedMember}`)
+        axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${selectedMember}`),
       ]);
 
       setRosterRules(rosterRulesRes.data);
-      const slots = [];
+
+      const slots: AptRosterSlot[] = [];
       const positionCounts = [
-        { position: 'QB', count: rosterRulesRes.data.quarterback_count || 0 },
-        { position: 'RB', count: rosterRulesRes.data.running_back_count || 0 },
-        { position: 'WR', count: rosterRulesRes.data.wide_receiver_count || 0 },
-        { position: 'TE', count: rosterRulesRes.data.tight_end_count || 0 },
-        { position: 'WRT', count: rosterRulesRes.data.wide_receiver_tight_end_count || 0 },
-        { position: 'FLEX', count: rosterRulesRes.data.flex_count || 0 },
-        { position: 'BENCH', count: rosterRulesRes.data.bench_count || 0 },
-        { position: 'IR', count: rosterRulesRes.data.ir_count || 0 },
+        { position: 'QB',    count: rosterRulesRes.data.quarterback_count             || 0 },
+        { position: 'RB',    count: rosterRulesRes.data.running_back_count            || 0 },
+        { position: 'WR',    count: rosterRulesRes.data.wide_receiver_count           || 0 },
+        { position: 'TE',    count: rosterRulesRes.data.tight_end_count               || 0 },
+        { position: 'WRT',   count: rosterRulesRes.data.wide_receiver_tight_end_count || 0 },
+        { position: 'FLEX',  count: rosterRulesRes.data.flex_count                    || 0 },
+        { position: 'BENCH', count: rosterRulesRes.data.bench_count                   || 0 },
+        { position: 'IR',    count: rosterRulesRes.data.ir_count                      || 0 },
       ];
-      // Create all possible slots
+
       positionCounts.forEach(({ position, count }) => {
         for (let i = 0; i < count; i++) {
-          const sPosition = `${position}${i + 1}`;
-          slots.push({ position, sPosition, player: null });
+          slots.push({ position, sPosition: `${position}${i + 1}`, player: null });
         }
       });
 
-      // Assign players to slots based on roster_position matching sPosition
-      const rosteredPlayersData = Array.isArray(rosteredPlayersRes.data)
-        ? rosteredPlayersRes.data
-        : [];
+      const rosteredPlayersData: any[] = Array.isArray(rosteredPlayersRes.data) ? rosteredPlayersRes.data : [];
       const assignedPlayers = [...rosteredPlayersData];
+
       slots.forEach(slot => {
-        const player = assignedPlayers.find(p => p.roster_position === slot.sPosition || (slot.position === 'BENCH' && p.roster_position === 'BENCH'));
+        const player = assignedPlayers.find(
+          p => p.roster_position === slot.sPosition || (slot.position === 'BENCH' && p.roster_position === 'BENCH')
+        );
         if (player) {
-          const playerDetails = players.find(plyr => plyr.player_id === player.player_id) || {};
+          const playerDetails = players.find(plyr => plyr.player_id === player.player_id);
           slot.player = {
             ...player,
-            name: playerDetails.name || 'Unknown',
-            playingPosition: playerDetails.playingPosition || 'N/A',
-            team: playerDetails.team || 'N/A'
+            name: playerDetails?.name || 'Unknown',
+            playingPosition: playerDetails?.playingPosition || 'N/A',
+            team: playerDetails?.team || 'N/A',
           };
           assignedPlayers.splice(assignedPlayers.indexOf(player), 1);
         }
       });
 
-      // For any remaining players (beyond min BENCH), add extra BENCH rows above IR slots
-      let irSlots = slots.filter(s => s.position === 'IR');
-      let nonIrSlots = slots.filter(s => s.position !== 'IR');
+      const irSlots = slots.filter(s => s.position === 'IR');
+      const nonIrSlots = slots.filter(s => s.position !== 'IR');
+
       assignedPlayers.forEach(player => {
-        const playerDetails = players.find(plyr => plyr.player_id === player.player_id) || {};
+        const playerDetails = players.find(plyr => plyr.player_id === player.player_id);
         nonIrSlots.push({
           position: 'BENCH',
           sPosition: `BENCH${nonIrSlots.filter(s => s.position === 'BENCH').length + 1}`,
           player: {
             ...player,
-            name: playerDetails.name || 'Unknown',
-            playingPosition: playerDetails.playingPosition || 'N/A',
-            team: playerDetails.team || 'N/A'
-          }
+            name: playerDetails?.name || 'Unknown',
+            playingPosition: playerDetails?.playingPosition || 'N/A',
+            team: playerDetails?.team || 'N/A',
+          },
         });
       });
 
-      // --- BENCH row limiting logic ---
-      const benchCount = rosterRulesRes.data.bench_count || 0;
-      let benchSlots = nonIrSlots.filter(s => s.position === 'BENCH');
-      let nonBenchNonIrSlots = nonIrSlots.filter(s => s.position !== 'BENCH' && s.position !== 'IR');
-      const filledBenchSlots = benchSlots.filter(s => s.player);
-      const emptyBenchSlots = benchSlots.filter(s => !s.player);
-      // Only keep up to bench_count empty BENCH slots
-      const limitedEmptyBenchSlots = emptyBenchSlots.slice(0, benchCount);
-      // Final slots: non-BENCH/non-IR + filled BENCH + limited empty BENCH + IR
-      const finalSlots = [
-        ...nonBenchNonIrSlots,
-        ...filledBenchSlots,
-        ...limitedEmptyBenchSlots,
-        ...irSlots
-      ];
-      setRosterSlots(finalSlots);
+      const benchCount: number = rosterRulesRes.data.bench_count || 0;
+      const nonBenchNonIr = nonIrSlots.filter(s => s.position !== 'BENCH');
+      const filledBench   = nonIrSlots.filter(s => s.position === 'BENCH' && s.player);
+      const emptyBench    = nonIrSlots.filter(s => s.position === 'BENCH' && !s.player).slice(0, benchCount);
+      const finalSlots    = [...nonBenchNonIr, ...filledBench, ...emptyBench, ...irSlots];
 
-      // Set rosteredPlayers for use elsewhere if needed
+      setRosterSlots(finalSlots);
       setRosteredPlayers(finalSlots.filter(s => s.player).map(s => s.player));
     } catch (error) {
-      showMessage('Failed to load roster data.', 'error');
+      const msg = isAxiosError(error) ? error.response?.data?.message || error.message : 'Failed to load roster data.';
+      showMessage(msg, 'error');
     } finally {
       setIsLoadingRoster(false);
     }
-  }, [selectedMember, currentLeague, leagueMembers, players, showMessage]);
+  }, [selectedMember, currentLeague?.league_id, leagueMembers, players, showMessage]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  useEffect(() => {
-    fetchMemberData();
-  }, [fetchMemberData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { fetchMemberData(); }, [fetchMemberData]);
 
   const filteredPlayers = useMemo(() => {
-    return players.filter(player => 
+    return players.filter(player =>
       !leagueRosteredPlayerIds.includes(player.player_id) &&
       (nameFilter ? player.name.toLowerCase().includes(nameFilter.toLowerCase()) : true) &&
       (teamFilter !== 'All' ? player.team === teamFilter : true) &&
@@ -199,22 +201,17 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     currentPage * itemsPerPage
   );
 
-  const findAvailableSlot = useCallback((playerPosition) => {
+  const findAvailableSlot = useCallback((playerPosition: string): string | null => {
     if (!rosterRules || !rosterSlots.length) return null;
 
-    const positionCounts = rosteredPlayers.reduce((counts, player) => {
+    const positionCounts = rosteredPlayers.reduce<Record<string, number>>((counts, player) => {
       counts[player.playingPosition] = (counts[player.playingPosition] || 0) + 1;
       return counts;
     }, {});
 
-    const maxCounts = {
-      QB: rosterRules.max_qb_count || 4,
-      RB: rosterRules.max_rb_count || 8,
-      WR: rosterRules.max_wr_count || 8,
-      TE: rosterRules.max_te_count || 4
-    };
+    const maxCounts: Record<string, number> = { QB: 4, RB: 8, WR: 8, TE: 4 };
 
-    if ((positionCounts[playerPosition] || 0) >= maxCounts[playerPosition]) {
+    if ((positionCounts[playerPosition] || 0) >= (maxCounts[playerPosition] ?? Infinity)) {
       return null;
     }
 
@@ -224,50 +221,38 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
     }
     validPositions.push('BENCH');
 
-    return rosterSlots.find(slot => 
-      validPositions.includes(slot.position) && 
+    return rosterSlots.find(slot =>
+      validPositions.includes(slot.position) &&
       !rosteredPlayers.some(player => player.roster_position === slot.sPosition)
-    )?.sPosition || null;
+    )?.sPosition ?? null;
   }, [rosterRules, rosterSlots, rosteredPlayers]);
 
-  // --- Replace the populatedSlots logic with this ---
-  // This will ensure BENCH players are included in the roster table, similar to RosterTableComponent
-  const populatedSlots = useMemo(() => {
+  const populatedSlots = useMemo((): AptRosterSlot[] => {
     if (!rosterSlots.length) return [];
-    // Get all bench players (roster_position === 'BENCH')
     const benchPlayers = rosteredPlayers.filter(p => p.roster_position === 'BENCH');
     let benchIndex = 0;
 
     return rosterSlots.map(slot => {
       if (slot.position === 'BENCH') {
-        // Assign each BENCH slot a unique bench player
-        const player = benchPlayers[benchIndex] || null;
-        benchIndex += 1;
-        return {
-          ...slot,
-          player
-        };
-      } else {
-        // Non-bench slots: match by roster_position
-        const player = rosteredPlayers.find(p => p.roster_position === slot.sPosition) || null;
-        return {
-          ...slot,
-          player
-        };
+        return { ...slot, player: benchPlayers[benchIndex++] ?? null };
       }
+      return {
+        ...slot,
+        player: rosteredPlayers.find(p => p.roster_position === slot.sPosition) ?? null,
+      };
     });
   }, [rosterSlots, rosteredPlayers]);
 
-  const handlePlayerSelect = (player) => {
+  const handlePlayerSelect = (player: TransformedPlayer) => {
     setSelectedPlayer(player);
   };
 
-  const handleMemberSelect = (e) => {
+  const handleMemberSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedMember(e.target.value);
     setSelectedPlayer(null);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedPlayer || !selectedMember) {
       showMessage('Please select a player and a league member.', 'error');
@@ -285,33 +270,35 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
         league_member_id: selectedMember,
         player_id: selectedPlayer.player_id,
         roster_position: rosterPosition,
-        is_rostered: 1
+        is_rostered: 1,
       });
 
       if (response.data.status === 'success') {
         showMessage(`Successfully added ${selectedPlayer.name} to roster.`, 'success');
         setSelectedPlayer(null);
+
         const rosteredPlayersRes = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${selectedMember}`);
-        const enrichedRosteredPlayers = Array.isArray(rosteredPlayersRes.data) 
+        const enriched: any[] = Array.isArray(rosteredPlayersRes.data)
           ? rosteredPlayersRes.data
-              .filter(rp => rp.roster_position !== 'IR')
-              .map(rp => {
-                const playerDetails = players.find(p => p.player_id === rp.player_id) || {};
+              .filter((rp: any) => rp.roster_position !== 'IR')
+              .map((rp: any) => {
+                const playerDetails = players.find(p => p.player_id === rp.player_id);
                 return {
                   ...rp,
-                  name: playerDetails.name || 'Unknown',
-                  playingPosition: playerDetails.playingPosition || 'N/A',
-                  team: playerDetails.team || 'N/A'
+                  name: playerDetails?.name || 'Unknown',
+                  playingPosition: playerDetails?.playingPosition || 'N/A',
+                  team: playerDetails?.team || 'N/A',
                 };
               })
           : [];
-        setRosteredPlayers(enrichedRosteredPlayers);
+        setRosteredPlayers(enriched);
         setLeagueRosteredPlayerIds(prev => [...prev, selectedPlayer.player_id]);
       } else {
         showMessage(response.data.message || 'Failed to add player.', 'error');
       }
     } catch (error) {
-      showMessage('Failed to add player.', 'error');
+      const msg = isAxiosError(error) ? error.response?.data?.message || error.message : 'Failed to add player.';
+      showMessage(msg, 'error');
     }
   };
 
@@ -379,7 +366,7 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
                   <option value="">Select a league member</option>
                   {leagueMembers.map(member => (
                     <option key={member.id} value={member.id}>
-                      {member.username} - {member.team_name || 'No Team Name'}
+                      {member.team_name || 'No Team Name'}
                     </option>
                   ))}
                 </select>
@@ -408,7 +395,7 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }) => {
                         player={player}
                         index={index}
                         onClick={() => handlePlayerSelect(player)}
-                        isSelected={selectedPlayer && selectedPlayer.player_id === player.player_id}
+                        isSelected={selectedPlayer?.player_id === player.player_id}
                       />
                     </td>
                   </tr>

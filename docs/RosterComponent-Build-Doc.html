@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RosterComponent — Build Documentation</title>
+  <style>
+    body {
+      font-family: Calibri, 'Segoe UI', sans-serif;
+      font-size: 11pt;
+      color: #1a1a1a;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 40px;
+      line-height: 1.6;
+    }
+    h1 { font-size: 22pt; color: #1a472a; border-bottom: 3px solid #2ecc71; padding-bottom: 8px; }
+    h2 { font-size: 16pt; color: #1a472a; margin-top: 36px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+    h3 { font-size: 13pt; color: #2d6a4f; margin-top: 24px; }
+    h4 { font-size: 11pt; color: #40916c; margin-top: 18px; }
+    p { margin: 8px 0; }
+    ul, ol { margin: 8px 0 8px 24px; }
+    li { margin: 4px 0; }
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 10pt;
+      background: #f4f4f4;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 1px 5px;
+    }
+    pre {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 10pt;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin: 12px 0;
+      overflow-x: auto;
+      line-height: 1.5;
+      white-space: pre;
+    }
+    pre .comment  { color: #6a9955; }
+    pre .keyword  { color: #569cd6; }
+    pre .string   { color: #ce9178; }
+    pre .fn       { color: #dcdcaa; }
+    pre .jsx-tag  { color: #4ec9b0; }
+    pre .jsx-attr { color: #9cdcfe; }
+    pre .const    { color: #4fc1ff; }
+    .callout {
+      background: #f0fff4;
+      border-left: 4px solid #2ecc71;
+      padding: 10px 16px;
+      border-radius: 0 6px 6px 0;
+      margin: 12px 0;
+    }
+    .callout.warning {
+      background: #fff8e1;
+      border-left-color: #f39c12;
+    }
+    .flow-box {
+      background: #f8f8f8;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 12px 20px;
+      margin: 12px 0;
+      font-family: 'Consolas', monospace;
+      font-size: 10pt;
+      line-height: 2;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 12px 0;
+      font-size: 10pt;
+    }
+    th {
+      background: #2ecc71;
+      color: #1a1a1a;
+      font-weight: 700;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    td {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+    }
+    tr:nth-child(even) { background: #f9f9f9; }
+    .label {
+      display: inline-block;
+      background: #2ecc71;
+      color: #1a1a1a;
+      font-size: 9pt;
+      font-weight: 700;
+      border-radius: 3px;
+      padding: 1px 6px;
+      margin-right: 6px;
+    }
+    .label.blue  { background: #3498db; color: #fff; }
+    .label.gray  { background: #95a5a6; color: #fff; }
+    .label.red   { background: #e74c3c; color: #fff; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 32px 0; }
+  </style>
+</head>
+<body>
+
+<h1>RosterComponent — Build Documentation</h1>
+<p><strong>Project:</strong> Vampire Fantasy Football League — React Frontend</p>
+<p><strong>Component:</strong> <code>src/Components/RosterComponent/RosterComponent.js</code></p>
+<p><strong>Purpose:</strong> Full rewrite of the legacy <code>RosterTableComponent</code>. Displays the logged-in user's fantasy roster in a styled table, with roster slot structure derived from their league's roster rules.</p>
+
+<hr />
+
+<h2>1. Context — Why Rewrite?</h2>
+<p>The original <code>RosterTableComponent</code> had several structural issues inherited from early development:</p>
+<ul>
+  <li>Fetched the league member by getting <em>all</em> members for a user then filtering the array in JavaScript — one extra unnecessary call</li>
+  <li>Used a chained <code>useEffect</code> pattern where each effect set state that triggered the next effect — causing extra render cycles</li>
+  <li>Used <code>useEffect + setState</code> for roster slot construction (pure derivation with no side effects) — which should be <code>useMemo</code></li>
+  <li>Made API calls sequentially that could have been parallelised</li>
+</ul>
+<div class="callout">
+  The new component applies the same design principles established during the <strong>MatchupComponent refactor</strong> — single useEffect for all data fetching, Promise.all for parallel calls, and useMemo for derived data.
+</div>
+
+<hr />
+
+<h2>2. File Structure</h2>
+<pre>src/
+└── Components/
+    ├── RosterTableComponent/        ← original, kept as reference
+    │   ├── RosterTableComponent.js
+    │   └── RosterTableComponent.css
+    └── RosterComponent/             ← new component
+        ├── RosterComponent.js
+        └── RosterComponent.css</pre>
+
+<p><strong>App.js</strong> — the <code>/roster</code> route was updated to render the new component:</p>
+<pre><span class="comment">// Before</span>
+<span class="keyword">import</span> RosterTableComponent <span class="keyword">from</span> <span class="string">'./Components/RosterTableComponent/RosterTableComponent'</span>;
+
+<span class="comment">// After</span>
+<span class="keyword">import</span> RosterComponent <span class="keyword">from</span> <span class="string">'./Components/RosterComponent/RosterComponent'</span>;</pre>
+
+<hr />
+
+<h2>3. State Variables</h2>
+<table>
+  <thead><tr><th>Variable</th><th>Initial Value</th><th>What it holds</th></tr></thead>
+  <tbody>
+    <tr><td><code>leagueMember</code></td><td><code>null</code></td><td>The logged-in user's league member record (id, team_name, is_vamp, role, etc.)</td></tr>
+    <tr><td><code>rosterRules</code></td><td><code>null</code></td><td>The roster rules for this member's roster type (slot counts per position)</td></tr>
+    <tr><td><code>rosteredPlayers</code></td><td><code>[]</code></td><td>The member's rostered players, each with NFL schedule data attached</td></tr>
+    <tr><td><code>isLoading</code></td><td><code>true</code></td><td>Controls the loading state display — true until all API calls complete</td></tr>
+    <tr><td><code>error</code></td><td><code>null</code></td><td>Holds an error message string if any API call fails</td></tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2>4. Data Fetching — fetchRosterData useEffect</h2>
+
+<h3>Dependency Array</h3>
+<pre><span class="keyword">useEffect</span>(() => { ... }, [currentUser?.id, currentLeague?.league_id]);</pre>
+<p>Runs once on mount. Only re-runs if the logged-in user or active league actually changes — which would mean a completely fresh set of data is needed anyway.</p>
+
+<h3>Why One useEffect?</h3>
+<p>Chaining multiple <code>useEffect</code> hooks where each one sets state that triggers the next creates unnecessary render cycles and makes the data flow hard to follow. A single effect that owns all fetching keeps the sequence explicit and predictable.</p>
+
+<h3>Fetch Sequence</h3>
+<div class="flow-box">
+  Step 1 &nbsp;→&nbsp; <strong>await</strong> league member &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sequential — need is_vamp + member.id first)<br/>
+  Step 2 &nbsp;→&nbsp; <strong>Promise.all</strong>([ roster rules, rostered players, fantasy week ])&nbsp;&nbsp;(parallel — independent)<br/>
+  Step 3 &nbsp;→&nbsp; <strong>await</strong> NFL schedule &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sequential — needs year/week from step 2)<br/>
+  Step 4 &nbsp;→&nbsp; map schedule onto players &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pure JS — no API call)
+</div>
+
+<h3>Step 1 — League Member</h3>
+<pre><span class="keyword">const</span> memberResponse = <span class="keyword">await</span> axiosInstance.<span class="fn">get</span>(
+  <span class="string">`/league_members/getLeagueMemberByLeagueAndUserId/<span class="const">${currentLeague.league_id}</span>/<span class="const">${currentUser.id}</span>`</span>
+);
+<span class="keyword">const</span> member = memberResponse.data;
+<span class="fn">setLeagueMember</span>(member);</pre>
+<div class="callout">
+  <strong>Improvement over old component:</strong> The old component called <code>getLeagueMembersByUserId</code> which returned an array of all leagues the user belongs to, then filtered it in JavaScript to find the right one. The new component uses <code>getLeagueMemberByLeagueAndUserId</code> — a direct lookup that returns exactly one record.
+</div>
+
+<h3>Step 2 — Parallel Fetches with Promise.all</h3>
+<pre><span class="keyword">const</span> rosterTypeId = member.is_vamp ? <span class="string">2</span> : <span class="string">1</span>;
+<span class="keyword">const</span> [rulesResponse, rosterResponse, weekResponse] = <span class="keyword">await</span> Promise.<span class="fn">all</span>([
+  axiosInstance.<span class="fn">get</span>(<span class="string">`/roster_rules/getRosterRulesByLeagueId/<span class="const">${currentLeague.league_id}</span>/<span class="const">${rosterTypeId}</span>`</span>),
+  axiosInstance.<span class="fn">get</span>(<span class="string">`/rostered_players/getRosteredPlayersByLeagueMemberId/<span class="const">${member.id}</span>`</span>),
+  <span class="fn">getCurrentFantasyWeek</span>(),
+]);</pre>
+<p><code>Promise.all</code> fires all three requests at the same time and waits for all three to finish before proceeding. Since none of these depend on each other's response, there's no reason to wait for one before starting the next.</p>
+<p>The <code>is_vamp</code> field from Step 1 determines which roster type to use — type <code>1</code> for standard members, type <code>2</code> for the vampire member.</p>
+
+<h3>Step 3 — NFL Schedule</h3>
+<pre><span class="keyword">const</span> { year, week } = weekResponse.data;
+<span class="keyword">const</span> scheduleResponse = <span class="keyword">await</span> <span class="fn">getGamesByWeekAndYear</span>(year, week);
+<span class="keyword">const</span> games = scheduleResponse.data || [];</pre>
+<p>This must be sequential because the URL requires <code>year</code> and <code>week</code>, which only become available once the <code>getCurrentFantasyWeek()</code> call in Step 2 completes.</p>
+
+<h3>Step 4 — Map Schedule onto Players</h3>
+<pre><span class="keyword">const</span> playersWithSchedule = players.<span class="fn">map</span>(player => {
+  <span class="keyword">const</span> game = games.<span class="fn">find</span>(g => g.team === player.team);
+  <span class="keyword">return</span> {
+    ...player,
+    schedule: game ? {
+      date: game.date,
+      day: game.day,
+      est_time: game.est_time || <span class="string">'TBD'</span>,
+      location: game.location || <span class="string">'Unknown'</span>,
+    } : <span class="keyword">null</span>,
+  };
+});</pre>
+<p>No API call — pure JavaScript. Uses <code>Array.find</code> to match each rostered player's NFL team to that team's game entry, then spreads the game details onto the player object as a <code>schedule</code> property.</p>
+
+<h3>Error Handling and finally</h3>
+<pre><span class="keyword">try</span> {
+  <span class="comment">// ... all fetch steps</span>
+} <span class="keyword">catch</span> (err) {
+  <span class="fn">setError</span>(err.response?.data?.message || err.message || <span class="string">'Failed to load roster data.'</span>);
+} <span class="keyword">finally</span> {
+  <span class="fn">setIsLoading</span>(<span class="keyword">false</span>);
+}</pre>
+<p>The <code>finally</code> block guarantees <code>isLoading</code> is always set to <code>false</code> — whether the fetch succeeded, failed, or threw an unexpected error. Without <code>finally</code>, a crash inside the <code>try</code> block could leave the component stuck in the loading state.</p>
+
+<hr />
+
+<h2>5. Roster Slot Construction — useMemo</h2>
+
+<h3>Why useMemo Instead of useEffect?</h3>
+<p>The old <code>RosterTableComponent</code> used a <code>useEffect</code> that watched <code>rosterRules</code> and <code>rosteredPlayers</code>, computed the slots, then called <code>setRosterSlots(slots)</code>. This is a pattern where pure computation (no side effects, no API calls) is being done inside an effect — which causes an unnecessary extra render cycle.</p>
+<p><code>useMemo</code> computes the value <em>during</em> the render rather than <em>after</em> it, eliminating that extra cycle and keeping the derived value in sync with its dependencies automatically.</p>
+
+<pre><span class="keyword">const</span> rosterSlots = <span class="fn">useMemo</span>(() => {
+  <span class="keyword">if</span> (!rosterRules) <span class="keyword">return</span> [];
+
+  <span class="keyword">const</span> positionCounts = [
+    { position: <span class="string">'QB'</span>,    count: rosterRules.quarterback_count             || <span class="string">0</span> },
+    { position: <span class="string">'RB'</span>,    count: rosterRules.running_back_count            || <span class="string">0</span> },
+    { position: <span class="string">'WR'</span>,    count: rosterRules.wide_receiver_count           || <span class="string">0</span> },
+    { position: <span class="string">'TE'</span>,    count: rosterRules.tight_end_count               || <span class="string">0</span> },
+    { position: <span class="string">'WRT'</span>,   count: rosterRules.wide_receiver_tight_end_count || <span class="string">0</span> },
+    { position: <span class="string">'FLEX'</span>,  count: rosterRules.flex_count                    || <span class="string">0</span> },
+    { position: <span class="string">'BENCH'</span>, count: rosterRules.bench_count                   || <span class="string">0</span> },
+    { position: <span class="string">'IR'</span>,    count: rosterRules.ir_count                      || <span class="string">0</span> },
+  ];
+
+  <span class="keyword">const</span> slots = [];
+  positionCounts.<span class="fn">forEach</span>(({ position, count }) => {
+    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="string">0</span>; i &lt; count; i++) {
+      slots.<span class="fn">push</span>({ position, sPosition: <span class="string">`<span class="const">${position}</span><span class="const">${i + 1}</span>`</span>, player: <span class="keyword">null</span> });
+    }
+  });
+
+  <span class="keyword">return</span> slots;
+}, [rosterRules]);</pre>
+
+<h3>Output Structure</h3>
+<p>Each entry in <code>rosterSlots</code> is an object with three properties:</p>
+<table>
+  <thead><tr><th>Property</th><th>Example value</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>position</code></td><td><code>'RB'</code></td><td>The position type — used for validation and display</td></tr>
+    <tr><td><code>sPosition</code></td><td><code>'RB2'</code></td><td>The specific slot identifier — used as the React key and for player assignment</td></tr>
+    <tr><td><code>player</code></td><td><code>null</code></td><td>Placeholder — will hold the player object once assignment logic is added</td></tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2>6. Conditional Rendering — isLoading and error</h2>
+<pre><span class="keyword">if</span> (isLoading) <span class="keyword">return</span> &lt;<span class="jsx-tag">div</span> <span class="jsx-attr">className</span>=<span class="string">"roster-container"</span>&gt;Loading...&lt;/<span class="jsx-tag">div</span>&gt;;
+<span class="keyword">if</span> (error)     <span class="keyword">return</span> &lt;<span class="jsx-tag">div</span> <span class="jsx-attr">className</span>=<span class="string">"roster-container"</span>&gt;{error}&lt;/<span class="jsx-tag">div</span>&gt;;
+
+<span class="keyword">return</span> (
+  &lt;<span class="jsx-tag">div</span> <span class="jsx-attr">className</span>=<span class="string">"roster-container"</span>&gt;
+    <span class="comment">// ... main content</span>
+  &lt;/<span class="jsx-tag">div</span>&gt;
+);</pre>
+<p>React evaluates the function top to bottom on every render. The two early returns act as guards — if either condition is true, React renders that simple element and stops. The main <code>return</code> at the bottom is only reached when both conditions are false (loading is done, no error occurred).</p>
+
+<hr />
+
+<h2>7. Styling</h2>
+<p>CSS conventions ported from <code>RosterTableComponent.css</code> and adapted into <code>RosterComponent.css</code>.</p>
+
+<h3>Color Palette</h3>
+<table>
+  <thead><tr><th>Role</th><th>Value</th><th>Used for</th></tr></thead>
+  <tbody>
+    <tr><td>Primary accent</td><td><code style="background:#2ecc71;color:#000;">#2ecc71</code></td><td>Headers, borders, active states, title text</td></tr>
+    <tr><td>Dark accent</td><td><code style="background:#27ae60;color:#fff;">#27ae60</code></td><td>Hover states, gradient end</td></tr>
+    <tr><td>Background dark</td><td><code style="background:#1c1c1c;color:#fff;">#1c1c1c</code></td><td>Slot cells, modal backgrounds</td></tr>
+    <tr><td>Background mid</td><td><code style="background:#333333;color:#fff;">#333333</code></td><td>Table rows, card backgrounds</td></tr>
+    <tr><td>Background hover</td><td><code style="background:#3a3a3a;color:#fff;">#3a3a3a</code></td><td>Row hover state</td></tr>
+    <tr><td>Body text</td><td><code style="background:#e0e0e0;color:#000;">#e0e0e0</code></td><td>Main text on dark backgrounds</td></tr>
+    <tr><td>Muted text</td><td><code style="background:#b0b0b0;color:#000;">#b0b0b0</code></td><td>Empty slot text, secondary labels</td></tr>
+  </tbody>
+</table>
+
+<h3>Key CSS Classes</h3>
+<table>
+  <thead><tr><th>Class</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>.roster-container</code></td><td>Outer wrapper — dark gradient, rounded, centered, max-width 700px</td></tr>
+    <tr><td><code>.roster-title</code></td><td>Team name heading — green, Poppins font, centered</td></tr>
+    <tr><td><code>.table-responsive</code></td><td>Scroll wrapper for the table on small screens</td></tr>
+    <tr><td><code>.roster-table</code></td><td>The table — dark background, green borders, Poppins font</td></tr>
+    <tr><td><code>.roster-row</code></td><td>Table row — fixed 80px height, hover transition</td></tr>
+    <tr><td><code>.slot-cell</code></td><td>Position label cell — 80px wide, dark bg, green text, centered</td></tr>
+    <tr><td><code>.player-cell</code></td><td>Player content cell — vertically centered</td></tr>
+    <tr><td><code>.empty-slot</code></td><td>Placeholder shown when no player is assigned — muted text, dark bg, min-height 60px</td></tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2>8. Current JSX Output</h2>
+<pre>&lt;<span class="jsx-tag">div</span> <span class="jsx-attr">className</span>=<span class="string">"roster-container"</span>&gt;
+  &lt;<span class="jsx-tag">h2</span> <span class="jsx-attr">className</span>=<span class="string">"roster-title"</span>&gt;{leagueMember?.team_name || <span class="string">'My Roster'</span>}&lt;/<span class="jsx-tag">h2</span>&gt;
+  &lt;<span class="jsx-tag">div</span> <span class="jsx-attr">className</span>=<span class="string">"table-responsive"</span>&gt;
+    &lt;<span class="jsx-tag">table</span> <span class="jsx-attr">className</span>=<span class="string">"roster-table"</span>&gt;
+      &lt;<span class="jsx-tag">thead</span>&gt;
+        &lt;<span class="jsx-tag">tr</span>&gt;
+          &lt;<span class="jsx-tag">th</span>&gt;Slot&lt;/<span class="jsx-tag">th</span>&gt;
+          &lt;<span class="jsx-tag">th</span>&gt;Player&lt;/<span class="jsx-tag">th</span>&gt;
+        &lt;/<span class="jsx-tag">tr</span>&gt;
+      &lt;/<span class="jsx-tag">thead</span>&gt;
+      &lt;<span class="jsx-tag">tbody</span>&gt;
+        {rosterSlots.<span class="fn">map</span>(slot => (
+          &lt;<span class="jsx-tag">tr</span> <span class="jsx-attr">key</span>={slot.sPosition} <span class="jsx-attr">className</span>=<span class="string">"roster-row"</span>&gt;
+            &lt;<span class="jsx-tag">td</span> <span class="jsx-attr">className</span>=<span class="string">"slot-cell"</span>&gt;{slot.position}&lt;/<span class="jsx-tag">td</span>&gt;
+            &lt;<span class="jsx-tag">td</span> <span class="jsx-attr">className</span>=<span class="string">"player-cell"</span>&gt;
+              &lt;<span class="jsx-tag">div</span> <span class="jsx-attr">className</span>=<span class="string">"empty-slot"</span>&gt;Empty&lt;/<span class="jsx-tag">div</span>&gt;
+            &lt;/<span class="jsx-tag">td</span>&gt;
+          &lt;/<span class="jsx-tag">tr</span>&gt;
+        ))}
+      &lt;/<span class="jsx-tag">tbody</span>&gt;
+    &lt;/<span class="jsx-tag">table</span>&gt;
+  &lt;/<span class="jsx-tag">div</span>&gt;
+&lt;/<span class="jsx-tag">div</span>&gt;</pre>
+
+<hr />
+
+<h2>9. Pending Work</h2>
+<ol>
+  <li>Extend <code>rosterSlots</code> useMemo to assign <code>rosteredPlayers</code> to their matching slots by <code>roster_position</code></li>
+  <li>Replace <code>&lt;div class="empty-slot"&gt;</code> with a player card component when a slot has a player</li>
+  <li>Add move / swap / drop player interactions</li>
+  <li>Add message/toast state for action feedback</li>
+</ol>
+
+<hr />
+<p style="color:#999; font-size:9pt; text-align:center;">Generated during RosterComponent build session · Vampire Fantasy Football League</p>
+
+</body>
+</html>

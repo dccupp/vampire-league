@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Login from './Components/Login/Login';
 import Registration from './Components/Registration/Registration';
 import Dashboard from './Components/Dashboard/Dashboard';
-import RosterTableComponent from './Components/RosterTableComponent/RosterTableComponent';
+import RosterComponent from './Components/RosterComponent/RosterComponent';
 import MatchupComponent from './Components/MatchupComponent/MatchupComponent';
 import WaiversComponent from './Components/WaiversComponent/WaiversComponent';
 import ActiveWaiverClaimsComponent from './Components/ActiveWaiverClaimsComponent/ActiveWaiverClaimsComponent';
-// import WaiverClaimPriorityFormComponent from './Components/WaiverClaimPriorityFormComponent/WaiverClaimPriorityFormComponent';
 import CreateLeagueForm from './Components/CreateLeague/CreateLeagueForm';
 import PrivateRoute from './Components/PrivateRoute/PrivateRoute';
 import LandingComponent from './Components/LandingComponent/LandingComponent';
@@ -23,12 +22,17 @@ import AddPlayerToTeamComponent from './Components/LMToolsComponents/AddPlayerTo
 import ViewLeagueMemberRosterComponent from './Components/LeagueComponents/ViewLeagueMemberRosterComponent/ViewLeagueMemberRosterComponent';
 import ActivateLeagueComponent from './Components/LMToolsComponents/ActivateLeagueComponent/ActivateLeagueComponent';
 import axiosInstance from './api';
+import { CurrentUser, CurrentLeague, LeagueMember, League } from './types';
 
-const ErrorBoundary = ({ children }) => {
-  const [hasError, setHasError] = useState(false);
+interface ErrorBoundaryProps {
+  children: ReactNode;
+}
+
+const ErrorBoundary = ({ children }: ErrorBoundaryProps) => {
+  const [hasError, setHasError] = useState<boolean>(false);
 
   useEffect(() => {
-    const errorHandler = (error) => {
+    const errorHandler = (_event: ErrorEvent) => {
       setHasError(true);
     };
     window.addEventListener('error', errorHandler);
@@ -38,41 +42,29 @@ const ErrorBoundary = ({ children }) => {
   if (hasError) {
     return <h1>Something went wrong. Please refresh the page.</h1>;
   }
-  return children;
+  return <>{children}</>;
 };
 
 const AppContent = () => {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [currentLeague, setCurrentLeague] = useState(null);
-  const [isCommissioner, setIsCommissioner] = useState(false);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [currentLeague, setCurrentLeague] = useState<CurrentLeague | null>(null);
+  const [isCommissioner, setIsCommissioner] = useState<boolean>(false);
 
   useEffect(() => {
     const user = localStorage.getItem('user');
     const league = localStorage.getItem('league');
-    if (user) {
-      setCurrentUser(JSON.parse(user));
-    }
-    if (league) {
-      setCurrentLeague(JSON.parse(league));
-    }
+    if (user) setCurrentUser(JSON.parse(user));
+    if (league) setCurrentLeague(JSON.parse(league));
   }, []);
 
-  const getCachedMembership = async (userId) => {
-    try {
-      const response = await axiosInstance.get(`/league_members/getLeagueMembersByUserId/${userId}`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+  const getCachedMembership = async (userId: number): Promise<LeagueMember[]> => {
+    const response = await axiosInstance.get(`/league_members/getLeagueMembersByUserId/${userId}`);
+    return response.data;
   };
 
-  const getCachedLeague = async (leagueId) => {
-    try {
-      const response = await axiosInstance.get(`/leagues/getLeagueById/${leagueId}`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+  const getCachedLeague = async (leagueId: number): Promise<League> => {
+    const response = await axiosInstance.get(`/leagues/getLeagueById/${leagueId}`);
+    return response.data;
   };
 
   useEffect(() => {
@@ -80,9 +72,11 @@ const AppContent = () => {
       if (currentUser?.id && currentLeague?.league_id) {
         try {
           const response = await axiosInstance.get(`/league_members/getLeagueMembersByUserId/${currentUser.id}`);
-          const membership = response.data.find(m => m.league_id === currentLeague.league_id);
+          const membership: LeagueMember | undefined = (response.data as LeagueMember[]).find(
+            m => m.league_id === currentLeague.league_id
+          );
           setIsCommissioner(membership?.role === 'commish');
-        } catch (error) {
+        } catch {
           setIsCommissioner(false);
         }
       } else {
@@ -90,7 +84,7 @@ const AppContent = () => {
       }
     };
     checkCommissionerStatus();
-  }, [currentUser, currentLeague]);
+  }, [currentUser?.id, currentLeague?.league_id]);
 
   return (
     <ErrorBoundary>
@@ -103,8 +97,8 @@ const AppContent = () => {
           isCommissioner={isCommissioner}
         />
         <Routes>
-          <Route path="/login" element={<Login setCurrentUser={setCurrentUser} />} />
-          <Route path="/register" element={<Registration setCurrentUser={setCurrentUser} />} />
+          <Route path="/login" element={<Login setCurrentUser={setCurrentUser} currentUser={currentUser} />} />
+          <Route path="/register" element={<Registration />} />
           <Route
             path="/landing"
             element={
@@ -128,10 +122,7 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
-                  <Dashboard
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <Dashboard currentUser={currentUser} currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -143,10 +134,7 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
-                  <RosterTableComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <RosterComponent currentUser={currentUser} currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -158,10 +146,7 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
-                  <MatchupComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <MatchupComponent currentUser={currentUser} currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -173,10 +158,7 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
-                  <WaiversComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <WaiversComponent currentUser={currentUser} currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -188,40 +170,19 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
-                  <ActiveWaiverClaimsComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <ActiveWaiverClaimsComponent currentUser={currentUser} currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
               </PrivateRoute>
             }
           />
-          {/* <Route
-            path="manage-waiver-priority"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <WaiverClaimPriorityFormComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          /> */}
           <Route
             path="/edit-team-info"
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
-                  <EditTeamInfoComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <EditTeamInfoComponent currentUser={currentUser} currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -233,10 +194,7 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
-                  <LeagueMemberScheduleComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <LeagueMemberScheduleComponent currentUser={currentUser} currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -248,10 +206,7 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
-                  <ViewLeagueMemberRosterComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <ViewLeagueMemberRosterComponent currentUser={currentUser} currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -263,10 +218,7 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
-                  <ScoringRulesDisplayComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <ScoringRulesDisplayComponent currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -278,10 +230,7 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
-                  <RosterRulesDisplayComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <RosterRulesDisplayComponent currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -293,10 +242,7 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
-                  <WaiverRulesDisplayComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <WaiverRulesDisplayComponent currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -308,9 +254,7 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser ? (
-                  <CreateLeagueForm
-                    currentUser={currentUser}
-                  />
+                  <CreateLeagueForm currentUser={currentUser} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -322,10 +266,7 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser && currentLeague && isCommissioner ? (
-                  <AddMemberToLeagueComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <AddMemberToLeagueComponent currentUser={currentUser} currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -337,10 +278,7 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser && currentLeague && isCommissioner ? (
-                  <AddPlayerToTeamComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <AddPlayerToTeamComponent currentUser={currentUser} currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -352,10 +290,7 @@ const AppContent = () => {
             element={
               <PrivateRoute>
                 {currentUser && currentLeague ? (
-                  <ActivateLeagueComponent
-                    currentUser={currentUser}
-                    currentLeague={currentLeague}
-                  />
+                  <ActivateLeagueComponent currentUser={currentUser} currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}
@@ -367,7 +302,7 @@ const AppContent = () => {
       </div>
     </ErrorBoundary>
   );
-}
+};
 
 function App() {
   return (

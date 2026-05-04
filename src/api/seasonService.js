@@ -5,10 +5,13 @@ export const getCurrentFantasyWeek = async () => {
     // Get current date and time in EST
     const now = new Date();
     const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-    const year = estDate.getFullYear();
+
+    // determine if test mode is active
+    const testMode = process.env.REACT_APP_TEST_MODE === 'true';
+    const year = testMode ? parseInt(process.env.REACT_APP_TEST_YEAR) : estDate.getFullYear();
     
     // Format date to match database format (YYYY-MM-DD HH:MM:SS)
-    const formattedDate = estDate.toISOString().slice(0, 19).replace('T', ' ');
+    const formattedDate = testMode ? '2025-12-12 00:00:00' :  estDate.toISOString().slice(0, 19).replace('T', ' ');
 
     // Fetch all fantasy weeks for the current year
     const response = await axiosInstance.get(`/fantasy_weeks/getFantasyWeeksByYear/${year}`);
@@ -18,14 +21,14 @@ export const getCurrentFantasyWeek = async () => {
     }
 
     const weeks = response.data;
-    
+
     // Find the week where the current date falls between begin_datetime and end_datetime
     let currentWeek = weeks.find(week => {
       const begin = new Date(week.begin_datetime);
       const end = new Date(week.end_datetime);
       const current = new Date(formattedDate);
       return current >= begin && current <= end;
-    });
+    }) || false;
 
     // If no week is found and the current date is before all begin_datetime values, use week 1
     if (!currentWeek) {
@@ -33,7 +36,7 @@ export const getCurrentFantasyWeek = async () => {
         const begin = new Date(week.begin_datetime);
         const current = new Date(formattedDate);
         return current < begin;
-      });
+      }) || false;
 
       if (isBeforeAllWeeks) {
         currentWeek = weeks.find(week => week.week === 1);
@@ -87,19 +90,10 @@ export const getTeamCurrentWeekMatchup = async (team) => {
   }
 };
 
-export const getGamesByWeekAndYear = async () => {
+export const getGamesByWeekAndYear = async (year, week) => {
   try {
-    // Get the current fantasy week
-    const weekResponse = await getCurrentFantasyWeek();
-    if (weekResponse.status !== 'success') {
-      throw new Error(weekResponse.message || 'Failed to fetch current fantasy week');
-    }
-
-    const { year, week } = weekResponse.data;
-
-    // Fetch all NFL schedules for the current year and week
     const scheduleResponse = await axiosInstance.get(`/nfl_schedules/getNFLSchedulesByYearAndWeek/${year}/${week}`);
-    
+
     if (scheduleResponse.data.status === 'error') {
       throw new Error(scheduleResponse.data.message || 'Failed to fetch NFL schedules');
     }
