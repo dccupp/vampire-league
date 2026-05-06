@@ -1,15 +1,17 @@
+import { isAxiosError } from 'axios';
 import axiosInstance from '../api';
 
-export const createLeague = async (formData, userId) => {
+export const createLeague = async (
+  formData: Record<string, string>,
+  userId: number
+): Promise<void> => {
   try {
-    // Fetch user to get first_name
     const userResponse = await axiosInstance.get(`/users/getUserById/${userId}`);
     if (!userResponse.data || !userResponse.data.first_name) {
       throw new Error(userResponse.data.message || 'Failed to fetch user data or first name.');
     }
-    const firstName = userResponse.data.first_name;
+    const firstName: string = userResponse.data.first_name;
 
-    // Create league
     const leagueResponse = await axiosInstance.post('/leagues/create', {
       name: formData.leagueName,
       is_active: 0,
@@ -17,12 +19,11 @@ export const createLeague = async (formData, userId) => {
     if (leagueResponse.data.status !== 'success') {
       throw new Error(leagueResponse.data.message || 'Failed to create league');
     }
-    const leagueId = leagueResponse.data.league_id;
+    const leagueId: number = leagueResponse.data.league_id;
 
-    // Create regular roster rules
     const regularRosterResponse = await axiosInstance.post('/roster_rules/create', {
       league_id: leagueId,
-      roster_type_id: 1, // Regular
+      roster_type_id: 1,
       quarterback_count: parseInt(formData.regular_quarterback_count),
       running_back_count: parseInt(formData.regular_running_back_count),
       wide_receiver_count: parseInt(formData.regular_wide_receiver_count),
@@ -39,13 +40,14 @@ export const createLeague = async (formData, userId) => {
       beginning_faab: parseInt(formData.regular_beginning_faab),
     });
     if (regularRosterResponse.data.status !== 'success') {
-      throw new Error(regularRosterResponse.data.message || 'Failed to create regular roster rules');
+      throw new Error(
+        regularRosterResponse.data.message || 'Failed to create regular roster rules'
+      );
     }
 
-    // Create vampire roster rules
     const vampireRosterResponse = await axiosInstance.post('/roster_rules/create', {
       league_id: leagueId,
-      roster_type_id: 2, // Vampire
+      roster_type_id: 2,
       quarterback_count: parseInt(formData.vampire_quarterback_count),
       running_back_count: parseInt(formData.vampire_running_back_count),
       wide_receiver_count: parseInt(formData.vampire_wide_receiver_count),
@@ -62,10 +64,11 @@ export const createLeague = async (formData, userId) => {
       beginning_faab: parseInt(formData.vampire_beginning_faab),
     });
     if (vampireRosterResponse.data.status !== 'success') {
-      throw new Error(vampireRosterResponse.data.message || 'Failed to create vampire roster rules');
+      throw new Error(
+        vampireRosterResponse.data.message || 'Failed to create vampire roster rules'
+      );
     }
 
-    // Create scoring rules
     const scoringResponse = await axiosInstance.post('/scoring_rules/create', {
       league_id: leagueId,
       passing_yards: parseFloat(formData.passing_yards),
@@ -99,7 +102,6 @@ export const createLeague = async (formData, userId) => {
       throw new Error(scoringResponse.data.message || 'Failed to create scoring rules');
     }
 
-    // Create waiver rules
     const waiverRulesResponse = await axiosInstance.post('/waiver_rules/create', {
       league_id: leagueId,
       waivers_length: parseInt(formData.waivers_length),
@@ -109,20 +111,23 @@ export const createLeague = async (formData, userId) => {
       throw new Error(waiverRulesResponse.data.message || 'Failed to create waiver rules');
     }
 
-    // Create league member (commissioner) with team_name and remaining_faab_budget
     const leagueMemberResponse = await axiosInstance.post('/league_members/create', {
       league_id: leagueId,
       user_id: userId,
       role: 'commish',
       is_vamp: 0,
       team_name: `Team ${firstName}`,
-      remaining_faab_budget: parseInt(formData.regular_beginning_faab)
+      remaining_faab_budget: parseInt(formData.regular_beginning_faab),
     });
     if (leagueMemberResponse.data.status !== 'success') {
       throw new Error(leagueMemberResponse.data.message || 'Failed to add commissioner');
     }
-
-  } catch (error) {
-    throw new Error(error.response?.data?.message || error.message || 'An unexpected error occurred');
+  } catch (err: unknown) {
+    if (isAxiosError(err)) {
+      throw new Error(err.response?.data?.message || err.message || 'An unexpected error occurred');
+    }
+    throw new Error(
+      err instanceof Error ? err.message : 'An unexpected error occurred'
+    );
   }
 };

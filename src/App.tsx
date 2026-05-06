@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, useCallback, ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Login from './Components/Login/Login';
@@ -57,15 +57,15 @@ const AppContent = () => {
     if (league) setCurrentLeague(JSON.parse(league));
   }, []);
 
-  const getCachedMembership = async (userId: number): Promise<LeagueMember[]> => {
+  const getCachedMembership = useCallback(async (userId: number): Promise<LeagueMember[]> => {
     const response = await axiosInstance.get(`/league_members/getLeagueMembersByUserId/${userId}`);
     return response.data;
-  };
+  }, []);
 
-  const getCachedLeague = async (leagueId: number): Promise<League> => {
+  const getCachedLeague = useCallback(async (leagueId: number): Promise<League> => {
     const response = await axiosInstance.get(`/leagues/getLeagueById/${leagueId}`);
     return response.data;
-  };
+  }, []);
 
   useEffect(() => {
     const checkCommissionerStatus = async () => {

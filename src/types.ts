@@ -2,6 +2,10 @@
 
 export interface CurrentUser {
   id: number;
+  username?: string;
+  email_address?: string;
+  first_name?: string;
+  last_name?: string;
 }
 
 export interface CurrentLeague {
@@ -27,6 +31,7 @@ export interface LeagueMember {
   is_vamp: boolean;
   role: string;
   is_active: boolean;
+  name?: string;
 }
 
 // ─── Roster Rules ─────────────────────────────────────────────────────────────
@@ -150,6 +155,7 @@ export interface RosteredPlayer {
   schedule: GameSchedule | null;
   fantasyScore?: number | null;
   weeklyStats?: any | null;
+  season_points?: number;
 }
 
 // ─── Roster Slots (computed structure, not a direct API response) ─────────────

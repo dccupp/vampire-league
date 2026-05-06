@@ -1,7 +1,19 @@
-import React from 'react';
+interface LeagueInfoStepProps {
+  formData: Record<string, string>;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  setError: (msg: string) => void;
+  onNext: () => void;
+  isLoading: boolean;
+}
 
-const LeagueInfoStep = ({ formData, handleInputChange, setError, onNext, isLoading }) => {
-  const validateStep = () => {
+const LeagueInfoStep = ({
+  formData,
+  handleInputChange,
+  setError,
+  onNext,
+  isLoading,
+}: LeagueInfoStepProps) => {
+  const validateStep = (): boolean => {
     if (!formData.leagueName) {
       setError('Please fill in the league name');
       return false;

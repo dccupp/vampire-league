@@ -1,17 +1,24 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { isAxiosError } from 'axios';
+import axiosInstance from '../../api';
+import { CurrentUser } from '../../types';
 import './Login.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axiosInstance from '../../api';
 
-const Login = ({ setCurrentUser, currentUser }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+interface LoginProps {
+  setCurrentUser: (user: CurrentUser) => void;
+  currentUser: CurrentUser | null;
+}
+
+const Login = ({ setCurrentUser, currentUser }: LoginProps) => {
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [message, setMessage] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage('');
     setIsLoading(true);
@@ -26,43 +33,46 @@ const Login = ({ setCurrentUser, currentUser }) => {
     try {
       const response = await axiosInstance.post('/users/login', {
         username: trimmedUsername,
-        password
+        password,
       });
 
       if (response.data.status === 'success') {
-        const userData = {
+        const userData: CurrentUser = {
           id: response.data.data.id,
           username: response.data.data.username,
           email_address: response.data.data.email_address,
           first_name: response.data.data.first_name,
-          last_name: response.data.data.last_name
+          last_name: response.data.data.last_name,
         };
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.removeItem('league');
         setCurrentUser(userData);
         setMessage('Login successful! Redirecting to landing...');
-        setTimeout(() => {
-          navigate('/landing');
-        }, 500);
+        setTimeout(() => navigate('/landing'), 500);
       } else {
         setMessage(response.data.message || 'Error logging in. Please try again.');
       }
     } catch (error) {
       console.error('Login error:', error);
-      if (error.response) {
-        if (error.response.status === 404) {
-          setMessage(`Error: API endpoint not found. Ensure the backend server is running at ${axiosInstance.defaults.baseURL}.`);
-        } else if (error.response.status === 401) {
-          setMessage('Invalid username or password.');
-        } else if (error.response.status === 500) {
-          setMessage('Server error: ' + (error.response.data.message || 'Unknown server issue.'));
+      if (isAxiosError(error)) {
+        if (error.response) {
+          const status = error.response.status;
+          if (status === 404) {
+            setMessage(`Error: API endpoint not found. Ensure the backend server is running at ${axiosInstance.defaults.baseURL}.`);
+          } else if (status === 401) {
+            setMessage('Invalid username or password.');
+          } else if (status === 500) {
+            setMessage('Server error: ' + (error.response.data?.message || 'Unknown server issue.'));
+          } else {
+            setMessage('Error: ' + (error.response.data?.message || 'Failed to connect to the server.'));
+          }
+        } else if (error.request) {
+          setMessage(`No response from server. Ensure the backend is running at ${axiosInstance.defaults.baseURL}.`);
         } else {
-          setMessage('Error: ' + (error.response.data.message || 'Failed to connect to the server.'));
+          setMessage('Error: ' + error.message);
         }
-      } else if (error.request) {
-        setMessage(`No response from server. Ensure the backend is running at ${axiosInstance.defaults.baseURL}.`);
       } else {
-        setMessage('Error: ' + error.message);
+        setMessage('An unexpected error occurred. Please try again.');
       }
     } finally {
       setIsLoading(false);
@@ -72,6 +82,19 @@ const Login = ({ setCurrentUser, currentUser }) => {
   if (currentUser) {
     return <Navigate to="/landing" />;
   }
+
+  const name: string = "";
+  const isAdmin: boolean = true;
+  const notifications: number = 0;
+
+  const nameDisplay = name || "Guest";
+  console.log(nameDisplay);
+
+  const adminDisplay = isAdmin && "Admin Access Granted";
+  console.log(adminDisplay);
+
+  const notificationDisplay = notifications || "No Notifications";
+  console.log(notificationDisplay);
 
   return (
     <div className="login-container">
@@ -100,11 +123,7 @@ const Login = ({ setCurrentUser, currentUser }) => {
               disabled={isLoading}
             />
           </div>
-          <button
-            type="submit"
-            className="btn btn-success w-100"
-            disabled={isLoading}
-          >
+          <button type="submit" className="btn btn-success w-100" disabled={isLoading}>
             {isLoading ? 'Logging in...' : 'Login'}
           </button>
           {message && (

@@ -1,6 +1,9 @@
-import React from 'react';
+interface ProgressBarProps {
+  step: number;
+  totalSteps: number;
+}
 
-const ProgressBar = ({ step, totalSteps }) => {
+const ProgressBar = ({ step, totalSteps }: ProgressBarProps) => {
   const progress = (step / totalSteps) * 100;
 
   return (
@@ -10,9 +13,9 @@ const ProgressBar = ({ step, totalSteps }) => {
         role="progressbar"
         style={{ width: `${progress}%` }}
         aria-valuenow={progress}
-        aria-valuemin="0"
-        aria-valuemax="100"
-      ></div>
+        aria-valuemin={0}
+        aria-valuemax={100}
+      />
     </div>
   );
 };

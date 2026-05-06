@@ -1,7 +1,27 @@
-import React from 'react';
+interface ScoringRulesStepProps {
+  formData: Record<string, string>;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  setError: (msg: string) => void;
+  onNext: () => void;
+  onBack: () => void;
+  isLoading: boolean;
+}
 
-const ScoringRulesStep = ({ formData, handleInputChange, setError, onNext, onBack, isLoading }) => {
-  const validateStep = () => {
+interface FieldDef {
+  name: string;
+  label: string;
+  step: number;
+}
+
+const ScoringRulesStep = ({
+  formData,
+  handleInputChange,
+  setError,
+  onNext,
+  onBack,
+  isLoading,
+}: ScoringRulesStepProps) => {
+  const validateStep = (): boolean => {
     const scoringFields = [
       'passing_yards', 'passing_touchdowns', 'interceptions_thrown', 'two_point_pass',
       'passing_300_399', 'passing_400_plus', 'rushing_yards', 'rushing_touchdowns',
@@ -10,7 +30,7 @@ const ScoringRulesStep = ({ formData, handleInputChange, setError, onNext, onBac
       'receiving_200_plus', 'kickoff_return_touchdown', 'punt_return_touchdown',
       'fumble_recovered_touchdown', 'fumbles_lost', 'interception_return_touchdown',
       'fumble_return_touchdown', 'blocked_return_touchdown', 'two_point_return',
-      'one_point_safety'
+      'one_point_safety',
     ];
     for (const field of scoringFields) {
       if (formData[field] === '' || isNaN(parseFloat(formData[field]))) {
@@ -28,7 +48,7 @@ const ScoringRulesStep = ({ formData, handleInputChange, setError, onNext, onBac
     }
   };
 
-  const fields = [
+  const fields: FieldDef[] = [
     { name: 'passing_yards', label: 'Passing Yards (per yard)', step: 0.01 },
     { name: 'passing_touchdowns', label: 'Passing Touchdowns', step: 1 },
     { name: 'interceptions_thrown', label: 'Interceptions Thrown', step: 1 },

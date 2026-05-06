@@ -1,55 +1,94 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axiosInstance from '../../api';
+import { LeagueMember, RosterRules } from '../../types';
 import './DirectAddPlayerComponent.css';
 
-const DirectAddPlayerComponent = ({ player, league_member, userRoster, onClose, onClaimSuccess }) => {
-  const [rosterRules, setRosterRules] = useState([]);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
-  const [showDropPlayerForm, setShowDropPlayerForm] = useState(false);
-  const [playerToDrop, setPlayerToDrop] = useState('');
-  const [showFinalConfirmForm, setShowFinalConfirmForm] = useState(false);
+interface DirectAddPlayer {
+  id: number | string;
+  player_id?: string;
+  player_name?: string | null;
+  name?: string;
+  position?: string | null;
+  team?: string | null;
+  playingPosition?: string;
+}
+
+interface RosterEntry {
+  id: number | string;
+  player_id?: string;
+  name?: string;
+  player_name?: string;
+  position?: string | null;
+  playingPosition?: string;
+  team?: string | null;
+  is_rostered?: boolean | number;
+  league_member?: LeagueMember;
+}
+
+interface DirectAddPlayerProps {
+  player: DirectAddPlayer;
+  league_member: LeagueMember;
+  userRoster: RosterEntry[];
+  onClose: () => void;
+  onClaimSuccess?: () => void;
+}
+
+const DirectAddPlayerComponent = ({
+  player,
+  league_member,
+  userRoster,
+  onClose,
+  onClaimSuccess,
+}: DirectAddPlayerProps) => {
+  const [rosterRules, setRosterRules] = useState<RosterRules | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showDropPlayerForm, setShowDropPlayerForm] = useState<boolean>(false);
+  const [playerToDrop, setPlayerToDrop] = useState<string>('');
+  const [showFinalConfirmForm, setShowFinalConfirmForm] = useState<boolean>(false);
 
   useEffect(() => {
     const rosterType = league_member.is_vamp ? 2 : 1;
     const fetchRosterRules = async () => {
       try {
-        const response = await axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${league_member.league_id}/${rosterType}`);
-        setRosterRules(response.data || []);
-      } catch (error) {
-        console.error('Error fetching roster rules:', error);
+        const response = await axiosInstance.get(
+          `/roster_rules/getRosterRulesByLeagueId/${league_member.league_id}/${rosterType}`
+        );
+        setRosterRules(response.data || null);
+      } catch (err: unknown) {
+        console.error('Error fetching roster rules:', err);
       }
     };
     fetchRosterRules();
   }, [league_member, userRoster]);
 
-  // Helper to get player info from userRoster
-  const getPlayerInfoById = (id) => {
-    return userRoster.find(p => String(p.id) === String(id)) || {};
+  const getPlayerInfoById = (id: string | number): Partial<RosterEntry> => {
+    return userRoster.find(p => String(p.id) === String(id)) ?? {};
   };
 
-  // Helper to add or update rostered player
   const addOrUpdateRosteredPlayer = async () => {
     try {
-      // Fetch the latest free agents list
       const freeAgentsRes = await axiosInstance.get('/players/getPlayers');
-      const leagueRosteredRes = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueId/${league_member.league_id}`);
-      const rosteredIds = new Set(
-        (Array.isArray(leagueRosteredRes.data) ? leagueRosteredRes.data : [])
-          .filter(r => r.is_rostered === 1)
-          .map(r => r.player_id)
+      const leagueRosteredRes = await axiosInstance.get(
+        `/rostered_players/getRosteredPlayersByLeagueId/${league_member.league_id}`
       );
-      const validFreeAgents = (Array.isArray(freeAgentsRes.data) ? freeAgentsRes.data : [])
-        .filter(p => p.id && !rosteredIds.has(p.id));
+      const rosteredIds = new Set<string | number>(
+        (Array.isArray(leagueRosteredRes.data) ? leagueRosteredRes.data : [])
+          .filter((r: { is_rostered: number }) => r.is_rostered === 1)
+          .map((r: { player_id: string | number }) => r.player_id)
+      );
+      const validFreeAgents = (Array.isArray(freeAgentsRes.data) ? freeAgentsRes.data : []).filter(
+        (p: { id: string | number }) => p.id && !rosteredIds.has(p.id)
+      );
 
-      // Check if the selected player is still a free agent
-      const isStillFreeAgent = validFreeAgents.some(p => String(p.id) === String(player.id));
+      const isStillFreeAgent = validFreeAgents.some(
+        (p: { id: string | number }) => String(p.id) === String(player.id)
+      );
       if (!isStillFreeAgent) {
         setError('This player is no longer available to be added from waivers.');
         return;
       }
 
-      // If there is a player to drop, update their rostered_players record
       if (playerToDrop) {
         const dropPlayerInfo = getPlayerInfoById(playerToDrop);
         const dropBody = {
@@ -62,8 +101,7 @@ const DirectAddPlayerComponent = ({ player, league_member, userRoster, onClose, 
         await axiosInstance.put(`/rostered_players/update/${playerToDrop}`, dropBody);
       }
 
-      // Try to get the rostered player record
-      let existingId = null;
+      let existingId: number | null = null;
       try {
         const checkResponse = await axiosInstance.get(
           `/rostered_players/getRosteredPlayerByLeagueAndPlayerId/${league_member.league_id}/${player.id}`
@@ -71,45 +109,42 @@ const DirectAddPlayerComponent = ({ player, league_member, userRoster, onClose, 
         if (checkResponse.data && checkResponse.data.id) {
           existingId = checkResponse.data.id;
         }
-      } catch (err) {
-        // If not found, just proceed to create
+      } catch {
         console.log('Rostered player not found, will create new record.');
       }
 
       if (existingId) {
-        const updateBody = {
+        await axiosInstance.put(`/rostered_players/update/${existingId}`, {
           league_member_id: league_member.id,
           player_id: player.id,
           roster_position: 'BENCH',
           is_rostered: 1,
-        };
-        await axiosInstance.put(`/rostered_players/update/${existingId}`, updateBody);
+        });
         setSuccessMessage('Player updated and added to your roster!');
       } else {
-        const createBody = {
+        await axiosInstance.post('/rostered_players/create', {
           league_member_id: league_member.id,
           player_id: player.id,
           roster_position: 'BENCH',
           is_rostered: 1,
-        };
-        await axiosInstance.post('/rostered_players/create', createBody);
+        });
         setSuccessMessage('Player added to your roster!');
       }
       setShowFinalConfirmForm(false);
       setShowDropPlayerForm(false);
       setPlayerToDrop('');
-      if (onClaimSuccess) onClaimSuccess(); // <-- Restore this here
-    } catch (err) {
+      if (onClaimSuccess) onClaimSuccess();
+    } catch (err: unknown) {
       setError('Error adding player to roster.');
       console.error(err);
     }
   };
 
-  const handleConfirm = async (e) => {
+  const handleConfirm = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setError(null);
 
-    const maxRosterSize = rosterRules.max_roster_size;
+    const maxRosterSize = rosterRules?.max_roster_size;
     const currentRosterCount = userRoster.length;
 
     if (typeof maxRosterSize === 'number' && currentRosterCount >= maxRosterSize) {
@@ -117,11 +152,10 @@ const DirectAddPlayerComponent = ({ player, league_member, userRoster, onClose, 
       return;
     }
 
-    // Add or update rostered player record
     await addOrUpdateRosteredPlayer();
   };
 
-  const handleDropSelect = (e) => {
+  const handleDropSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPlayerToDrop(e.target.value);
     if (e.target.value) {
       setShowFinalConfirmForm(true);
@@ -130,7 +164,7 @@ const DirectAddPlayerComponent = ({ player, league_member, userRoster, onClose, 
     }
   };
 
-  const handleFinalConfirm = async (e) => {
+  const handleFinalConfirm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await addOrUpdateRosteredPlayer();
   };
@@ -145,7 +179,6 @@ const DirectAddPlayerComponent = ({ player, league_member, userRoster, onClose, 
 
   if (!player || !league_member) return null;
 
-  // Get info for the player to drop
   const dropPlayerInfo = getPlayerInfoById(playerToDrop);
 
   return (
@@ -171,7 +204,6 @@ const DirectAddPlayerComponent = ({ player, league_member, userRoster, onClose, 
               </div>
             </div>
           )}
-          {/* Initial confirmation */}
           {!showDropPlayerForm && !showFinalConfirmForm && (
             <>
               <div className="player-info-card">
@@ -193,16 +225,20 @@ const DirectAddPlayerComponent = ({ player, league_member, userRoster, onClose, 
               </div>
               <div className="confirm-section">
                 <p className="confirm-message">
-                  Are you sure you want to add <strong>{player.player_name || player.name}</strong> to your roster?
+                  Are you sure you want to add{' '}
+                  <strong>{player.player_name || player.name}</strong> to your roster?
                 </p>
                 <div className="form-buttons">
-                  <button type="button" className="submit-btn" onClick={handleConfirm}>Confirm</button>
-                  <button type="button" className="cancel-btn" onClick={handleCancel}>Cancel</button>
+                  <button type="button" className="submit-btn" onClick={handleConfirm}>
+                    Confirm
+                  </button>
+                  <button type="button" className="cancel-btn" onClick={handleCancel}>
+                    Cancel
+                  </button>
                 </div>
               </div>
             </>
           )}
-          {/* Drop player selection form */}
           {showDropPlayerForm && !showFinalConfirmForm && (
             <form className="drop-player-form">
               <h3 className="form-section-title">Drop a Player</h3>
@@ -218,19 +254,20 @@ const DirectAddPlayerComponent = ({ player, league_member, userRoster, onClose, 
                   required
                 >
                   <option value="">Select a player to drop</option>
-                  {userRoster.map((rosteredPlayer) => (
-                    <option key={rosteredPlayer.id} value={rosteredPlayer.id}>
+                  {userRoster.map(rosteredPlayer => (
+                    <option key={String(rosteredPlayer.id)} value={String(rosteredPlayer.id)}>
                       {rosteredPlayer.name} ({rosteredPlayer.playingPosition}, {rosteredPlayer.team})
                     </option>
                   ))}
                 </select>
               </label>
               <div className="form-buttons">
-                <button type="button" className="cancel-btn" onClick={handleCancel}>Cancel</button>
+                <button type="button" className="cancel-btn" onClick={handleCancel}>
+                  Cancel
+                </button>
               </div>
             </form>
           )}
-          {/* Final confirmation form */}
           {showFinalConfirmForm && (
             <form className="final-confirm-form" onSubmit={handleFinalConfirm}>
               <h3 className="form-section-title">Confirm Drop & Add</h3>
@@ -238,7 +275,9 @@ const DirectAddPlayerComponent = ({ player, league_member, userRoster, onClose, 
                 <div className="player-info-grid">
                   <div className="info-item">
                     <span className="info-label">Player to Add:</span>
-                    <span className="info-value">{player.player_name || player.name} ({player.playingPosition}, {player.team})</span>
+                    <span className="info-value">
+                      {player.player_name || player.name} ({player.playingPosition}, {player.team})
+                    </span>
                   </div>
                   <div className="info-item">
                     <span className="info-label">Player to Drop:</span>
@@ -252,7 +291,8 @@ const DirectAddPlayerComponent = ({ player, league_member, userRoster, onClose, 
               </div>
               <div className="confirm-section">
                 <p className="confirm-message">
-                  Confirm you want to drop <strong>{dropPlayerInfo.name}</strong> and add <strong>{player.player_name || player.name}</strong> to your roster.
+                  Confirm you want to drop <strong>{dropPlayerInfo.name}</strong> and add{' '}
+                  <strong>{player.player_name || player.name}</strong> to your roster.
                 </p>
                 <div className="form-buttons">
                   <button type="submit" className="submit-btn">Confirm</button>

@@ -1,7 +1,32 @@
-import React from 'react';
+interface RosterRulesStepProps {
+  formData: Record<string, string>;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  setError: (msg: string) => void;
+  prefix: 'regular' | 'vampire';
+  title: string;
+  onNext: () => void;
+  onBack: () => void;
+  isLoading: boolean;
+}
 
-const RosterRulesStep = ({ formData, handleInputChange, setError, prefix, title, onNext, onBack, isLoading }) => {
-  const validateRosterRules = () => {
+interface FieldDef {
+  name: string;
+  label: string;
+  min: number;
+  step: number;
+}
+
+const RosterRulesStep = ({
+  formData,
+  handleInputChange,
+  setError,
+  prefix,
+  title,
+  onNext,
+  onBack,
+  isLoading,
+}: RosterRulesStepProps) => {
+  const validateRosterRules = (): boolean => {
     const activeCounts = [
       parseInt(formData[`${prefix}_quarterback_count`]) || 0,
       parseInt(formData[`${prefix}_running_back_count`]) || 0,
@@ -30,23 +55,40 @@ const RosterRulesStep = ({ formData, handleInputChange, setError, prefix, title,
       setError('Total active position counts and bench must not exceed max roster size');
       return false;
     }
-    if (activeCounts.some(count => count < 0) || maxCounts.some(count => count < 0) || irCount < 0 || beginningFaab < 0) {
+    if (
+      activeCounts.some(count => count < 0) ||
+      maxCounts.some(count => count < 0) ||
+      irCount < 0 ||
+      beginningFaab < 0
+    ) {
       setError('Position counts and beginning FAAB budget cannot be negative');
       return false;
     }
-    if (parseInt(formData[`${prefix}_quarterback_count`]) > parseInt(formData[`${prefix}_max_qb_count`])) {
+    if (
+      parseInt(formData[`${prefix}_quarterback_count`]) >
+      parseInt(formData[`${prefix}_max_qb_count`])
+    ) {
       setError('Quarterback count cannot exceed max QB count');
       return false;
     }
-    if (parseInt(formData[`${prefix}_running_back_count`]) > parseInt(formData[`${prefix}_max_rb_count`])) {
+    if (
+      parseInt(formData[`${prefix}_running_back_count`]) >
+      parseInt(formData[`${prefix}_max_rb_count`])
+    ) {
       setError('Running back count cannot exceed max RB count');
       return false;
     }
-    if (parseInt(formData[`${prefix}_wide_receiver_count`]) > parseInt(formData[`${prefix}_max_wr_count`])) {
+    if (
+      parseInt(formData[`${prefix}_wide_receiver_count`]) >
+      parseInt(formData[`${prefix}_max_wr_count`])
+    ) {
       setError('Wide receiver count cannot exceed max WR count');
       return false;
     }
-    if (parseInt(formData[`${prefix}_tight_end_count`]) > parseInt(formData[`${prefix}_max_te_count`])) {
+    if (
+      parseInt(formData[`${prefix}_tight_end_count`]) >
+      parseInt(formData[`${prefix}_max_te_count`])
+    ) {
       setError('Tight end count cannot exceed max TE count');
       return false;
     }
@@ -60,7 +102,7 @@ const RosterRulesStep = ({ formData, handleInputChange, setError, prefix, title,
     }
   };
 
-  const fields = [
+  const fields: FieldDef[] = [
     { name: `${prefix}_quarterback_count`, label: 'Quarterback Count (Active)', min: 0, step: 1 },
     { name: `${prefix}_max_qb_count`, label: 'Max Quarterback Count', min: 0, step: 1 },
     { name: `${prefix}_running_back_count`, label: 'Running Back Count (Active)', min: 0, step: 1 },

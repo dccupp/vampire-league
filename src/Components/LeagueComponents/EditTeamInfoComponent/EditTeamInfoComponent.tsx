@@ -1,15 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
+import { CurrentUser, CurrentLeague } from '../../../types';
 import './EditTeamInfoComponent.css';
 
-const EditTeamInfoComponent = ({ currentUser, currentLeague }) => {
-  const [teamName, setTeamName] = useState('');
-  const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState('');
-  const [isMessageFading, setIsMessageFading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+interface EditTeamInfoComponentProps {
+  currentUser: CurrentUser;
+  currentLeague: CurrentLeague;
+}
 
-  // Clear message after 3 seconds with fade-out
+const EditTeamInfoComponent = ({ currentUser, currentLeague }: EditTeamInfoComponentProps) => {
+  const [teamName, setTeamName] = useState<string>('');
+  const [message, setMessage] = useState<string>('');
+  const [messageType, setMessageType] = useState<string>('');
+  const [isMessageFading, setIsMessageFading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   useEffect(() => {
     if (message) {
       setIsMessageFading(false);
@@ -19,13 +25,12 @@ const EditTeamInfoComponent = ({ currentUser, currentLeague }) => {
           setMessage('');
           setMessageType('');
           setIsMessageFading(false);
-        }, 500); // Match animate__fadeOut duration
+        }, 500);
       }, 3000);
       return () => clearTimeout(timer);
     }
   }, [message]);
 
-  // Fetch current team name
   useEffect(() => {
     const fetchTeamName = async () => {
       if (!currentUser?.id || !currentLeague?.league_id) {
@@ -51,17 +56,20 @@ const EditTeamInfoComponent = ({ currentUser, currentLeague }) => {
           setMessageType('error');
         }
       } catch (error) {
-        setMessage(`Failed to load team information: ${error.response?.data?.message || error.message}`);
+        const msg = isAxiosError(error)
+          ? error.response?.data?.message || error.message
+          : 'Failed to load team information.';
+        setMessage('Failed to load team information: ' + msg);
         setMessageType('error');
       } finally {
         setIsLoading(false);
       }
     };
-    fetchTeamName();
-  }, [currentUser, currentLeague]);
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
+    fetchTeamName();
+  }, [currentUser?.id, currentLeague?.league_id]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const trimmedTeamName = teamName.trim();
     if (!trimmedTeamName) {
@@ -77,9 +85,10 @@ const EditTeamInfoComponent = ({ currentUser, currentLeague }) => {
 
     setIsLoading(true);
     try {
-      const response = await axiosInstance.put(`/league_members/updateTeamName/${currentLeague.league_id}/${currentUser.id}`, {
-        team_name: trimmedTeamName
-      });
+      const response = await axiosInstance.put(
+        `/league_members/updateTeamName/${currentLeague.league_id}/${currentUser.id}`,
+        { team_name: trimmedTeamName }
+      );
       if (response.data.status === 'success') {
         setMessage('Team name updated successfully!');
         setMessageType('success');
@@ -88,7 +97,10 @@ const EditTeamInfoComponent = ({ currentUser, currentLeague }) => {
         setMessageType('error');
       }
     } catch (error) {
-      setMessage(`Error updating team name: ${error.response?.data?.message || error.message}`);
+      const msg = isAxiosError(error)
+        ? error.response?.data?.message || error.message
+        : 'Error updating team name.';
+      setMessage('Error updating team name: ' + msg);
       setMessageType('error');
     } finally {
       setIsLoading(false);

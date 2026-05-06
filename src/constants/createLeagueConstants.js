@@ -2,8 +2,6 @@ import * as yup from 'yup';
 
 export const defaultFormValues = {
   leagueName: '',
-  division1Name: '',
-  division2Name: '',
   regular_quarterback_count: 1,
   regular_running_back_count: 2,
   regular_wide_receiver_count: 2,
@@ -169,21 +167,6 @@ export const leagueFormSchema = yup.object({
     .string()
     .required('League name is required')
     .trim(),
-  division1Name: yup
-    .string()
-    .required('Division 1 name is required')
-    .trim(),
-  division2Name: yup
-    .string()
-    .required('Division 2 name is required')
-    .trim()
-    .test(
-      'unique-division',
-      'Division names must be unique',
-      function (value) {
-        return value !== this.parent.division1Name;
-      }
-    ),
   ...rosterRulesSchema('regular'),
   ...rosterRulesSchema('vampire'),
   passing_yards: yup

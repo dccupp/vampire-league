@@ -1,44 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Container, Card, Table } from 'react-bootstrap';
-import axiosInstance from '../../api'; // Use centralized axiosInstance
+import { isAxiosError } from 'axios';
+import axiosInstance from '../../api';
+import { CurrentUser, CurrentLeague, LeagueMember, RosteredPlayer } from '../../types';
 import './Dashboard.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Dashboard = ({ currentUser, currentLeague }) => {
-  const [teamData, setTeamData] = useState({
+interface DashboardProps {
+  currentUser: CurrentUser;
+  currentLeague: CurrentLeague;
+}
+
+interface TeamData {
+  team_name: string;
+  remaining_faab_budget: number | string;
+}
+
+const Dashboard = ({ currentUser, currentLeague }: DashboardProps) => {
+  const [teamData, setTeamData] = useState<TeamData>({
     team_name: 'Team Name Here',
-    remaining_faab_budget: '0'
+    remaining_faab_budget: '0',
   });
-  const [rosteredPlayers, setRosteredPlayers] = useState([]);
-  const [error, setError] = useState('');
+  const [rosteredPlayers, setRosteredPlayers] = useState<RosteredPlayer[]>([]);
+  const [error, setError] = useState<string>('');
   const isLeagueActive = currentLeague?.is_active;
 
-  // Fetch team data and rostered players
   useEffect(() => {
     const fetchTeamData = async () => {
       if (!currentUser?.id || !currentLeague?.league_id) {
         setError('Missing user or league information.');
         return;
       }
-      
       try {
-        const memberResponse = await axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`);
-        const member = memberResponse.data.find(m => m.user_id === currentUser.id);
+        const memberResponse = await axiosInstance.get(
+          `/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`
+        );
+        const member: LeagueMember | undefined = memberResponse.data.find(
+          (m: LeagueMember) => m.user_id === currentUser.id
+        );
         if (member) {
           setTeamData({
             team_name: member.team_name || 'Team Name Here',
-            remaining_faab_budget: member.remaining_faab_budget !== null ? member.remaining_faab_budget : '0'
+            remaining_faab_budget:
+              member.remaining_faab_budget !== null ? member.remaining_faab_budget : '0',
           });
-
-          const rosterResponse = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${member.id}`);
+          const rosterResponse = await axiosInstance.get(
+            `/rostered_players/getRosteredPlayersByLeagueMemberId/${member.id}`
+          );
           setRosteredPlayers(rosterResponse.data);
         } else {
           setError('You are not a member of this league.');
         }
-      } catch (error) {
-        console.error('Error fetching team data:', error.response || error);
-        setError(`Failed to load team information: ${error.response?.data?.message || error.message}`);
+      } catch (err: unknown) {
+        const msg = isAxiosError(err)
+          ? err.response?.data?.message || err.message
+          : err instanceof Error ? err.message : 'Unknown error';
+        console.error('Error fetching team data:', err);
+        setError(`Failed to load team information: ${msg}`);
       }
     };
     fetchTeamData();
@@ -59,9 +78,13 @@ const Dashboard = ({ currentUser, currentLeague }) => {
             <div className="dashboard-team-info text-center">
               <NavLink to="/edit-team-info" className="dashboard-link me-3">Edit Team Info</NavLink>
               <span className="team-info-divider">|</span>
-              <span className="team-owner ms-3 me-3">Team Owner: {currentUser?.first_name} {currentUser?.last_name || 'Team Owner Name'}</span>
+              <span className="team-owner ms-3 me-3">
+                Team Owner: {currentUser?.first_name} {currentUser?.last_name || 'Team Owner Name'}
+              </span>
               <span className="team-info-divider">|</span>
-              <span className="dashboard-link ms-3">Free Agent Budget (${teamData.remaining_faab_budget})</span>
+              <span className="dashboard-link ms-3">
+                Free Agent Budget (${teamData.remaining_faab_budget})
+              </span>
             </div>
           </Card.Body>
         </Card>
@@ -84,12 +107,12 @@ const Dashboard = ({ currentUser, currentLeague }) => {
                         <tr key={player.player_id}>
                           <td>{player.player_name}</td>
                           <td>{player.position}</td>
-                          <td>{player.season_points || 'N/A'}</td>
+                          <td>{player.season_points ?? 'N/A'}</td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="3">No players rostered yet.</td>
+                        <td colSpan={3}>No players rostered yet.</td>
                       </tr>
                     )}
                   </tbody>
@@ -106,7 +129,8 @@ const Dashboard = ({ currentUser, currentLeague }) => {
               <Card.Body>
                 <Card.Title>League Not Active</Card.Title>
                 <Card.Text>
-                  This league is not yet active. Once it becomes active, you will have full access to all league features, including roster management, waivers, and scoring details.
+                  This league is not yet active. Once it becomes active, you will have full access
+                  to all league features, including roster management, waivers, and scoring details.
                 </Card.Text>
               </Card.Body>
             </Card>

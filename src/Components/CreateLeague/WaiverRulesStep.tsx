@@ -1,7 +1,21 @@
-import React from 'react';
+interface WaiverRulesStepProps {
+  formData: Record<string, string>;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  setError: (msg: string) => void;
+  onSubmit: () => void;
+  onBack: () => void;
+  isLoading: boolean;
+}
 
-const WaiverRulesStep = ({ formData, handleInputChange, setError, onSubmit, onBack, isLoading }) => {
-  const validateStep = () => {
+const WaiverRulesStep = ({
+  formData,
+  handleInputChange,
+  setError,
+  onSubmit,
+  onBack,
+  isLoading,
+}: WaiverRulesStepProps) => {
+  const validateStep = (): boolean => {
     const waiversLength = parseInt(formData.waivers_length);
     if (isNaN(waiversLength) || waiversLength < 0) {
       setError('Waiver length must be a non-negative number');

@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createLeague } from '../../api/leagueService';
+import { CurrentUser } from '../../types';
 import ProgressBar from './ProgressBar';
 import LeagueInfoStep from './LeagueInfoStep';
 import RosterRulesStep from './RosterRulesStep';
@@ -8,10 +9,12 @@ import ScoringRulesStep from './ScoringRulesStep';
 import WaiverRulesStep from './WaiverRulesStep';
 import './CreateLeagueFormComponent.css';
 
-const defaultFormValues = {
+interface CreateLeagueFormProps {
+  currentUser: CurrentUser;
+}
+
+const defaultFormValues: Record<string, string> = {
   leagueName: '',
-  division1Name: '',
-  division2Name: '',
   regular_quarterback_count: '1',
   regular_running_back_count: '2',
   regular_wide_receiver_count: '2',
@@ -70,36 +73,36 @@ const defaultFormValues = {
   waiver_day: 'Wednesday',
 };
 
-const CreateLeagueForm = ({ currentUser }) => {
+const CreateLeagueForm = ({ currentUser }: CreateLeagueFormProps) => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState(defaultFormValues);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const formRef = useRef(null);
+  const [step, setStep] = useState<number>(1);
+  const [formData, setFormData] = useState<Record<string, string>>(defaultFormValues);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const formRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (formRef.current) {
-      window.scrollTo({
-        top: formRef.current.offsetTop,
-        behavior: 'smooth',
-      });
+      window.scrollTo({ top: formRef.current.offsetTop, behavior: 'smooth' });
     }
   }, [step]);
 
-  const handleInputChange = useCallback((e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      setFormData(prev => ({ ...prev, [name]: value }));
+    },
+    []
+  );
 
   const handleNext = useCallback(() => {
     setError('');
-    setStep((prev) => prev + 1);
+    setStep(prev => prev + 1);
   }, []);
 
   const handleBack = useCallback(() => {
     setError('');
-    setStep((prev) => prev - 1);
+    setStep(prev => prev - 1);
   }, []);
 
   const handleSubmit = useCallback(async () => {
@@ -109,12 +112,11 @@ const CreateLeagueForm = ({ currentUser }) => {
     }
     setIsLoading(true);
     setError('');
-
     try {
       await createLeague(formData, currentUser.id);
       navigate('/landing');
-    } catch (err) {
-      setError(err.message || 'Failed to create league');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to create league');
     } finally {
       setIsLoading(false);
     }
