@@ -1,129 +1,149 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
-
-/* Redesigned PlayerCard */
 .player-card {
   width: 100%;
-  min-height: 60px;
-  background: #222222;
-  border: 1px solid #2ecc71;
-  border-radius: 4px;
-  padding: 4px 6px;
+  min-height: 72px;
+  background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 8px 10px;
   cursor: move;
-  font-family: 'Poppins', sans-serif;
-  color: #e0e0e0;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--text);
   display: flex;
   align-items: stretch;
   justify-content: center;
   margin: 0;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
   flex-direction: column;
   box-sizing: border-box;
 }
 
 .player-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 6px rgba(46, 204, 113, 0.5);
+  transform: scale(1.015);
+  box-shadow: 0 4px 16px var(--shadow-accent);
+  border-left-color: var(--accent-light);
 }
 
 .player-card-dragging {
-  opacity: 0.5;
-  transform: scale(0.98);
+  opacity: 0.45;
+  transform: scale(0.97);
 }
 
 .player-card.selected {
-  border: 2px solid #2ecc71;
-  box-shadow: 0 0 8px rgba(46, 204, 113, 0.7);
-  transform: scale(1.03);
+  border-left: 3px solid var(--gold);
+  box-shadow: 0 0 0 1px var(--gold-dim), 0 4px 18px var(--shadow-gold);
+  background: linear-gradient(135deg, #2a1d0a 0%, var(--bg-surface) 100%);
 }
 
-
-/* New layout for three rows */
 .player-info-redesign {
   display: flex;
   flex-direction: column;
   width: 100%;
-  gap: 2px;
+  gap: 3px;
 }
 
 .player-name-row {
   width: 100%;
   text-align: left;
-  margin-bottom: 2px;
 }
+
 .player-name-large {
-  font-size: 1.1em;
+  font-size: 1.3em;
   font-weight: 700;
-  color: #2ecc71;
-  letter-spacing: 0.5px;
-  line-height: 1.2;
+  color: var(--gold);
+  letter-spacing: 0.2px;
+  line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: block;
 }
 
 .player-pos-team-row {
   display: flex;
   gap: 8px;
-  font-size: 0.95em;
-  color: #b0ffb0;
+  align-items: center;
+  font-size: 1em;
   font-weight: 500;
-  margin-bottom: 2px;
 }
+
 .player-position {
-  color: #27ae60;
+  color: var(--accent-light);
   font-weight: 600;
+  letter-spacing: 0.3px;
 }
+
 .player-team {
-  color: #e0e0e0;
+  color: var(--text-secondary);
   font-weight: 400;
 }
 
 .player-schedule-row {
   display: flex;
-  gap: 8px;
-  font-size: 0.92em;
-  color: #b0b0b0;
+  gap: 6px;
+  font-size: 0.9em;
+  color: var(--text-muted);
   font-weight: 400;
   align-items: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .player-est-time {
-  color: #2ecc71;
-  font-weight: 700;
-}
-.player-day {
-  color: #27ae60;
-  font-weight: 600;
-}
-.player-date {
-  color: #e0e0e0;
-  font-weight: 400;
-}
-.player-location {
-  color: #b0b0b0;
-  font-weight: 400;
-}
-.player-no-game {
-  color: #ff4444;
+  color: var(--gold);
   font-weight: 600;
 }
 
+.player-day {
+  color: var(--accent-light);
+  font-weight: 500;
+}
+
+.player-date {
+  color: var(--text-secondary);
+}
+
+.player-location {
+  color: var(--text-muted);
+}
+
+.player-no-game {
+  color: #f87171;
+  font-weight: 500;
+}
+
 .player-info span {
-  color: #2ecc71; /* Match player-name */
-  font-weight: 400; /* Readable */
+  color: var(--text-secondary);
+  font-weight: 400;
 }
 
 @media (max-width: 768px) {
   .player-card {
     width: 100%;
-    height: 35px; /* Mobile height */
-    padding: 0px; /* No padding on mobile */
+    min-height: 38px;
+    padding: 3px 5px;
     font-size: 10px;
+    border-left-width: 2px;
+    border-radius: 5px;
   }
 
-  .player-info {
-    font-size: 10px;
+  .player-info-redesign {
+    gap: 1px;
+  }
+
+  .player-name-large {
+    font-size: 0.9em;
+  }
+
+  .player-pos-team-row {
+    font-size: 0.75em;
+    gap: 5px;
+  }
+
+  .player-schedule-row {
+    font-size: 0.7em;
+    gap: 4px;
   }
 }

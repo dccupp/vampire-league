@@ -1,6 +1,5 @@
-import React from 'react';
 import './PlayerStatsCard.css';
-import {RosteredPlayer, YearlyStat, } from '../../types';
+import { RosteredPlayer, YearlyStat } from '../../types';
 
 interface PlayerStatsCardProps {
   player: RosteredPlayer;
@@ -14,7 +13,7 @@ interface PlayerStatsCardProps {
 const PlayerStatsCard = ({ player, stats, fantasyScore, index, onClick, isSelected }: PlayerStatsCardProps) => {
   if (!player) return null;
 
-  type StatField = { key: keyof YearlyStat, label: string }
+  type StatField = { key: keyof YearlyStat; label: string };
 
   const renderStats = () => {
     const position = player.position?.toUpperCase();
@@ -24,53 +23,56 @@ const PlayerStatsCard = ({ player, stats, fantasyScore, index, onClick, isSelect
         { key: 'passing_tds', label: 'Pass TD' },
         { key: 'interceptions', label: 'INT' },
         { key: 'rushing_yards', label: 'Rush Yds' },
-        { key: 'rushing_tds', label: 'Rush TD' }
+        { key: 'rushing_tds', label: 'Rush TD' },
       ],
       WR: [
         { key: 'receptions', label: 'Rec' },
         { key: 'receiving_yards', label: 'Rec Yds' },
         { key: 'receiving_tds', label: 'Rec TD' },
         { key: 'rushing_yards', label: 'Rush Yds' },
-        { key: 'rushing_tds', label: 'Rush TD' }
+        { key: 'rushing_tds', label: 'Rush TD' },
       ],
       TE: [
         { key: 'receptions', label: 'Rec' },
         { key: 'receiving_yards', label: 'Rec Yds' },
         { key: 'receiving_tds', label: 'Rec TD' },
         { key: 'rushing_yards', label: 'Rush Yds' },
-        { key: 'rushing_tds', label: 'Rush TD' }
+        { key: 'rushing_tds', label: 'Rush TD' },
       ],
       RB: [
         { key: 'rushing_yards', label: 'Rush Yds' },
         { key: 'rushing_tds', label: 'Rush TD' },
         { key: 'receptions', label: 'Rec' },
         { key: 'receiving_yards', label: 'Rec Yds' },
-        { key: 'receiving_tds', label: 'Rec TD' }
-      ]
+        { key: 'receiving_tds', label: 'Rec TD' },
+      ],
     };
 
     const fields = statFields[position] || [];
     return fields.map((field, idx) => (
-      <span key={idx} className="stat-item">
+      <span key={idx} className="psc-stat-item">
         {field.label}: {stats && stats[field.key] ? stats[field.key] : 0}
       </span>
     ));
   };
 
   return (
-    <div className={`player-stats-card ${isSelected ? 'selected' : ''}`} onClick={() => onClick(index)}>
-      <div className="card-content">
-        <div className="player-info">
-          <div className="player-details">
-            {player.player_name} - {player.position} - {player.team}
+    <div
+      className={`psc-player-stats-card${isSelected ? ' selected' : ''}`}
+      onClick={() => onClick(index)}
+    >
+      <div className="psc-card-content">
+        <div className="psc-player-info">
+          <div className="psc-player-details">
+            {player.player_name} — {player.position} — {player.team}
           </div>
-          <div className="player-stats">
+          <div className="psc-player-stats">
             {renderStats()}
           </div>
         </div>
         {fantasyScore !== undefined && fantasyScore !== null && (
-          <div className="fantasy-score-container">
-            <span className="fantasy-score">{fantasyScore}</span>
+          <div className="psc-fantasy-score-container">
+            <span className="psc-fantasy-score">{fantasyScore}</span>
           </div>
         )}
       </div>

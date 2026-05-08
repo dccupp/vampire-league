@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createLeague } from '../../api/leagueService';
 import { CurrentUser } from '../../types';
@@ -88,7 +88,7 @@ const CreateLeagueForm = ({ currentUser }: CreateLeagueFormProps) => {
   }, [step]);
 
   const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const { name, value } = e.target;
       setFormData(prev => ({ ...prev, [name]: value }));
     },
@@ -188,11 +188,11 @@ const CreateLeagueForm = ({ currentUser }: CreateLeagueFormProps) => {
   };
 
   return (
-    <div className="create-league-container">
-      <div className="create-league-form" ref={formRef}>
+    <div className="clf-container">
+      <div className="clf-card" ref={formRef}>
         <ProgressBar step={step} totalSteps={5} />
         {error && (
-          <div className="error-message" role="alert">
+          <div className="clf-error-message" role="alert">
             {error}
           </div>
         )}

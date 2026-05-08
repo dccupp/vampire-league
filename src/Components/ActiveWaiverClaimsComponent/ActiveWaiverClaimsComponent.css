@@ -1,147 +1,145 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
-
-.active-waiver-claims-container {
-  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
-  border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+.awc-container {
   padding: 20px;
+  background: linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--border);
   max-width: 800px;
-  margin: 20px auto;
-  font-family: 'Poppins', sans-serif;
-  color: #e0e0e0;
-  --animate-duration: 0.3s;
+  width: 100%;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
 }
 
-.header-container {
+.awc-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
 }
 
-.active-waiver-claims-title {
-  font-size: 1.5rem;
+.awc-title {
+  font-size: 1.4rem;
   font-weight: 700;
-  color: #2ecc71;
+  color: var(--gold);
+  letter-spacing: 0.2px;
   margin: 0;
 }
 
-.manage-priorities-btn {
-  background: #27ae60;
-  color: #1c1c1c;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background 0.2s;
-}
-
-.manage-priorities-btn:hover {
-  background: #2ecc71;
-}
-
-.error-message {
-  color: #ff4d4d;
-  text-align: center;
-  font-size: 0.85rem;
+.awc-error-message {
+  color: #f87171;
+  background-color: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.875rem;
   margin-bottom: 1rem;
-  background: #2e2e2e;
-  padding: 8px;
-  border-radius: 4px;
+  text-align: center;
 }
 
-.table-wrapper {
-  overflow-x: auto;
+.awc-table-wrapper {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
 }
 
-.waiver-claims-table {
+.awc-table {
+  --bs-table-color: var(--text);
+  --bs-table-bg: var(--bg-surface);
+  --bs-table-border-color: var(--border);
+  --bs-table-hover-bg: var(--bg-hover);
+  --bs-table-active-bg: var(--bg-hover);
+
   width: 100%;
   border-collapse: collapse;
-  background: #2e2e2e;
-  border: 1px solid #27ae60;
-  border-radius: 6px;
+  background-color: var(--bg-surface) !important;
+  color: var(--text) !important;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
 }
 
-.waiver-claims-table th,
-.waiver-claims-table td {
-  padding: 10px;
+.awc-table th,
+.awc-table td {
+  padding: 10px 12px;
   text-align: left;
-  font-size: 0.9rem;
+  border: 1px solid var(--border) !important;
+  background-color: inherit;
 }
 
-.waiver-claims-table th {
-  background: #27ae60;
-  color: #1c1c1c;
-  font-weight: 700;
+.awc-table th {
+  background: linear-gradient(90deg, #78350f 0%, #451a03 100%) !important;
+  color: var(--gold) !important;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  border-bottom: 2px solid var(--gold-dim) !important;
 }
 
-.waiver-claims-table td {
-  color: #e0e0e0;
-  border-bottom: 1px solid #27ae60;
+.awc-table td {
+  color: var(--text);
 }
 
-.waiver-claim-row:hover {
-  background: #333333;
-}
-
-.delete-btn {
-  background: #ff4d4d;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
+.awc-row {
   cursor: pointer;
-  font-size: 0.85rem;
+  transition: background-color 0.15s;
+  background-color: var(--bg-surface) !important;
+}
+
+.awc-row:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+.awc-delete-btn {
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
   font-weight: 500;
-  transition: background 0.2s;
+  transition: background 0.15s, border-color 0.15s;
 }
 
-.delete-btn:hover {
-  background: #e63939;
+.awc-delete-btn:hover {
+  background: rgba(248, 113, 113, 0.22);
+  border-color: #f87171;
 }
 
-.empty-message {
+.awc-empty-message {
   text-align: center;
-  color: #b0b0b0;
-  padding: 20px;
+  color: var(--text-muted);
+  padding: 24px;
+  font-style: italic;
+  font-size: 0.875rem;
 }
 
 @media (max-width: 768px) {
-  .active-waiver-claims-container {
-    margin: 10px;
-    padding: 15px;
+  .awc-container {
+    padding: 12px;
+    max-width: 100%;
+    border-radius: 10px;
   }
 
-  .header-container {
+  .awc-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
 
-  .active-waiver-claims-title {
+  .awc-title {
     font-size: 1.2rem;
   }
 
-  .manage-priorities-btn {
-    padding: 6px 12px;
-    font-size: 0.8rem;
+  .awc-table th,
+  .awc-table td {
+    padding: 8px 10px;
+    font-size: 0.82rem;
   }
 
-  .error-message {
-    font-size: 0.8rem;
-    padding: 6px;
-  }
-
-  .waiver-claims-table th,
-  .waiver-claims-table td {
-    padding: 8px;
-    font-size: 0.85rem;
-  }
-
-  .delete-btn {
-    padding: 5px 10px;
-    font-size: 0.8rem;
+  .awc-delete-btn {
+    padding: 4px 10px;
+    font-size: 0.78rem;
   }
 }

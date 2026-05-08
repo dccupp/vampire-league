@@ -236,19 +236,19 @@ const ActiveWaiverClaimsComponent = ({ currentUser, currentLeague }: ActiveWaive
   }, [waiverClaims, playerNames]);
 
   if (isLoading) {
-    return <div className="active-waiver-claims-container">Loading waiver claims...</div>;
+    return <div className="awc-container">Loading waiver claims...</div>;
   }
 
   return (
-    <div className="active-waiver-claims-container animate__animated animate__fadeIn">
-      <div className="header-container">
-        <h2 className="active-waiver-claims-title">
+    <div className="awc-container animate__animated animate__fadeIn">
+      <div className="awc-header">
+        <h2 className="awc-title">
           {currentLeague?.name ? `${currentLeague.name} Active Waiver Claims` : 'Active Waiver Claims'}
         </h2>
       </div>
-      {error && <div className="error-message">{error}</div>}
-      <div className="table-wrapper">
-        <table className="waiver-claims-table">
+      {error && <div className="awc-error-message">{error}</div>}
+      <div className="awc-table-wrapper">
+        <table className="awc-table">
           <thead>
             <tr>
               <th>Player</th>
@@ -270,16 +270,15 @@ const ActiveWaiverClaimsComponent = ({ currentUser, currentLeague }: ActiveWaive
                 .map((claim, index) => (
                   <tr
                     key={claim.id || index}
-                    className="waiver-claim-row"
+                    className="awc-row"
                     onClick={() => handleEditClaim(claim)}
-                    style={{ cursor: 'pointer' }}
                   >
                     <td>{claim.player_name}</td>
                     <td>${claim.faab_claim_amount || 0}</td>
                     <td>{claim.rostered_player_to_drop_name}</td>
                     <td>
                       <button
-                        className="delete-btn"
+                        className="awc-delete-btn"
                         onClick={e => {
                           e.stopPropagation();
                           handleDeleteClaim(claim.id);
@@ -292,7 +291,7 @@ const ActiveWaiverClaimsComponent = ({ currentUser, currentLeague }: ActiveWaive
                 ))
             ) : (
               <tr>
-                <td colSpan={4} className="empty-message">
+                <td colSpan={4} className="awc-empty-message">
                   No active waiver claims available
                 </td>
               </tr>

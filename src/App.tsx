@@ -96,6 +96,7 @@ const AppContent = () => {
           setCurrentLeague={setCurrentLeague}
           isCommissioner={isCommissioner}
         />
+        <div className="page-content">
         <Routes>
           <Route path="/login" element={<Login setCurrentUser={setCurrentUser} currentUser={currentUser} />} />
           <Route path="/register" element={<Registration />} />
@@ -299,6 +300,7 @@ const AppContent = () => {
           />
           <Route path="/" element={<Navigate to="/login" />} />
         </Routes>
+        </div>
       </div>
     </ErrorBoundary>
   );

@@ -4,7 +4,6 @@ import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
 import { CurrentUser, CurrentLeague, LeagueMember, League } from '../../types';
 import './LandingComponent.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface LandingComponentProps {
   currentUser: CurrentUser;
@@ -97,7 +96,6 @@ const LandingComponent = ({
     setIsLoading(true);
     setError('');
     try {
-      // Batch 1: get league member to determine is_vamp
       const leagueMemberResponse = await axiosInstance.get(
         `/league_members/getLeagueMemberByLeagueAndUserId/${invitation.league_id}/${currentUser.id}`
       );
@@ -106,7 +104,6 @@ const LandingComponent = ({
       }
       const rosterTypeId = leagueMemberResponse.data.is_vamp ? 2 : 1;
 
-      // Batch 2: update role, team name, and fetch roster rules in parallel
       const [roleResponse, teamNameResponse, rosterRulesResponse] = await Promise.all([
         axiosInstance.put(`/league_members/updateRole/${invitation.league_id}/${currentUser.id}`, {
           role: 'player',
@@ -127,7 +124,6 @@ const LandingComponent = ({
         throw new Error(`Roster rules for roster_type_id=${rosterTypeId} not found or invalid beginning_faab.`);
       }
 
-      // Batch 3: update FAAB budget
       const faabResponse = await axiosInstance.put(
         `/league_members/updateRemainingFaabBudget/${invitation.league_id}/${currentUser.id}`,
         { remaining_faab_budget: rosterRulesResponse.data.beginning_faab }
@@ -136,7 +132,6 @@ const LandingComponent = ({
         throw new Error(faabResponse.data.message || 'Failed to set FAAB budget.');
       }
 
-      // Batch 4: refresh memberships and fetch league details in parallel
       const [updatedMemberships, leagueResponse] = await Promise.all([
         getCachedMembership(currentUser.id),
         getCachedLeague(invitation.league_id),
@@ -199,25 +194,24 @@ const LandingComponent = ({
   };
 
   return (
-    <div className="landing-container">
-      <div className="landing-content animate__animated animate__fadeIn">
-        <h2 className="text-center mb-4">Welcome to Vampire League Football</h2>
+    <div className="lc-container">
+      <div className="lc-card animate__animated animate__fadeIn">
+        <h2 className="lc-title">Welcome to Vampire League Football</h2>
         {error && (
-          <p className="error-message animate__animated animate__fadeIn">{error}</p>
+          <p className="lc-error animate__animated animate__fadeIn">{error}</p>
         )}
         {isDataLoading ? (
-          <p className="loading-message">Loading leagues...</p>
+          <p className="lc-loading">Loading leagues...</p>
         ) : (
           <>
-            <div className="section mb-4">
-              <h4>Your Leagues</h4>
+            <div className="lc-section">
+              <h4 className="lc-section-title">Your Leagues</h4>
               {leagues.length > 0 ? (
-                <ul className="league-list">
+                <ul className="lc-list">
                   {leagues.map(league => (
-                    <li key={league.league_id} className="league-item">
+                    <li key={league.league_id} className="lc-list-item">
                       <span
-                        className={`league-link ${isLoading ? 'disabled' : ''}`}
-                        style={{ cursor: isLoading ? 'not-allowed' : 'pointer' }}
+                        className={`lc-league-link${isLoading ? ' disabled' : ''}`}
                         onClick={() => !isLoading && handleSelectLeague(league)}
                       >
                         {league.name} ({league.role === 'commish' ? 'Commissioner' : 'Member'}{league.is_vamp ? ', Vampire Player' : ''})
@@ -226,28 +220,26 @@ const LandingComponent = ({
                   ))}
                 </ul>
               ) : (
-                <p className="no-data">You are not a member of any leagues yet.</p>
+                <p className="lc-no-data">You are not a member of any leagues yet.</p>
               )}
             </div>
 
-            <div className="section mb-4">
-              <h4>League Invitations</h4>
+            <div className="lc-section">
+              <h4 className="lc-section-title">League Invitations</h4>
               {invitations.length > 0 ? (
-                <ul className="league-list">
+                <ul className="lc-list">
                   {invitations.map(invitation => (
-                    <li key={invitation.league_id} className="league-item d-flex align-items-center">
-                      <span className="invitation-name me-3">{invitation.name}</span>
+                    <li key={invitation.league_id} className="lc-list-item lc-invitation-row">
+                      <span className="lc-invitation-name">{invitation.name}</span>
                       <button
-                        className={`btn btn-success me-2 ${isLoading ? 'disabled' : ''}`}
-                        style={{ cursor: isLoading ? 'not-allowed' : 'pointer' }}
+                        className="lc-btn-accept"
                         onClick={() => !isLoading && handleAcceptInvitation(invitation)}
                         disabled={isLoading}
                       >
                         Accept
                       </button>
                       <button
-                        className={`btn btn-danger ${isLoading ? 'disabled' : ''}`}
-                        style={{ cursor: isLoading ? 'not-allowed' : 'pointer' }}
+                        className="lc-btn-decline"
                         onClick={() => !isLoading && handleDenyInvitation(invitation)}
                         disabled={isLoading}
                       >
@@ -257,17 +249,17 @@ const LandingComponent = ({
                   ))}
                 </ul>
               ) : (
-                <p className="no-data">No pending invitations.</p>
+                <p className="lc-no-data">No pending invitations.</p>
               )}
             </div>
 
             {currentUser?.email_address === 'dccupp@gmail.com' && (
-              <div className="section">
-                <h4>Create a New League</h4>
+              <div className="lc-section">
+                <h4 className="lc-section-title">Create a New League</h4>
                 <Link
                   to="/create-league"
                   state={{ currentUser }}
-                  className={`btn btn-success w-100 ${isLoading ? 'disabled' : ''}`}
+                  className={`lc-btn-create${isLoading ? ' disabled' : ''}`}
                 >
                   Create League
                 </Link>

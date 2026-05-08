@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
 import { CurrentUser, CurrentLeague } from '../../../types';
 import './AddMemberToLeagueComponent.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface AddMemberToLeagueComponentProps {
   currentUser: CurrentUser;
@@ -18,7 +17,7 @@ interface FoundUser {
   last_name: string;
 }
 
-const AddMemberToLeagueComponent = ({ currentUser, currentLeague }: AddMemberToLeagueComponentProps) => {
+const AddMemberToLeagueComponent = ({ currentLeague }: AddMemberToLeagueComponentProps) => {
   const [username, setUsername] = useState<string>('');
   const [isVampire, setIsVampire] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
@@ -50,7 +49,7 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }: AddMemberToL
     return usernameRegex.test(value) && value.length >= 3 && value.length <= 50;
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage('');
     setIsLoading(true);
@@ -69,7 +68,6 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }: AddMemberToL
     }
 
     if (!foundUser) {
-      // Step 1: Look up username
       try {
         const response = await axiosInstance.get(`/users/getUserByUsername/${trimmedUsername}`);
         if (response.data?.id) {
@@ -88,7 +86,6 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }: AddMemberToL
         setIsLoading(false);
       }
     } else {
-      // Step 2: Add to league
       try {
         const response = await axiosInstance.post('/league_members/create', {
           league_id: currentLeague.league_id,
@@ -121,25 +118,24 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }: AddMemberToL
     }
   };
 
+  const isSuccess = message.includes('successful') || message.startsWith('User found');
+
   return (
-    <div className="add-member-container">
-      <div className="add-member-form animate__animated animate__fadeIn">
+    <div className="aml-container">
+      <div className="aml-card animate__animated animate__fadeIn">
+        <h3 className="aml-title">Add Member to League</h3>
+        {remainingSpots !== null && (
+          <p className={`aml-spots-text${remainingSpots === 0 ? ' full' : ''}`}>
+            {remainingSpots === 0
+              ? 'League is full (10 members)'
+              : `${remainingSpots} spot${remainingSpots === 1 ? '' : 's'} left in the league`}
+          </p>
+        )}
         <form onSubmit={handleSubmit}>
-          <h3 className="text-center mb-4">Add Member to League</h3>
-          {remainingSpots !== null && (
-            <p
-              className="text-center mb-3"
-              style={{ color: remainingSpots === 0 ? '#e74c3c' : '#2ecc71', fontFamily: 'Poppins, sans-serif', fontSize: '14px' }}
-            >
-              {remainingSpots === 0
-                ? 'League is full (10 members)'
-                : `${remainingSpots} spot${remainingSpots === 1 ? '' : 's'} left in the league`}
-            </p>
-          )}
-          <div className="form-group mb-3">
+          <div className="aml-form-group">
             <input
               type="text"
-              className="form-control"
+              className="aml-input"
               placeholder="Enter username"
               value={username}
               onChange={(e) => setUsername(e.target.value.trim())}
@@ -147,35 +143,35 @@ const AddMemberToLeagueComponent = ({ currentUser, currentLeague }: AddMemberToL
               disabled={isLoading}
             />
           </div>
-          <div className="form-group mb-3">
-            <div className="form-check">
+          <div className="aml-form-group">
+            <div className="aml-checkbox-group">
               <input
                 type="checkbox"
-                className="form-check-input"
+                className="aml-checkbox"
                 id="isVampire"
                 checked={isVampire}
                 onChange={(e) => setIsVampire(e.target.checked)}
                 disabled={isLoading || remainingSpots === 0}
               />
-              <label className="form-check-label vampire-label" htmlFor="isVampire">
+              <label className="aml-checkbox-label" htmlFor="isVampire">
                 Set As Vampire Player
               </label>
             </div>
           </div>
           <button
             type="submit"
-            className="btn btn-success w-100"
+            className="aml-submit-btn"
             disabled={isLoading || remainingSpots === 0}
           >
             {isLoading ? 'Processing...' : (foundUser ? 'Add to League' : 'Check Username')}
           </button>
           {message && (
-            <p className={`message mt-3 ${message.includes('successful') || message.startsWith('User found') ? 'success' : 'error'}`}>
+            <p className={`aml-message ${isSuccess ? 'success' : 'error'}`}>
               {message}
             </p>
           )}
-          <a href="/dashboard" className="add-member-link">Back to Dashboard</a>
         </form>
+        <a href="/dashboard" className="aml-back-link">Back to Dashboard</a>
       </div>
     </div>
   );

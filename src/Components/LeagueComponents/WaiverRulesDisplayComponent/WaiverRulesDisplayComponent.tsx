@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
 import { CurrentLeague, WaiverRule } from '../../../types';
@@ -40,41 +40,43 @@ const WaiverRulesDisplayComponent = ({ currentLeague }: WaiverRulesDisplayCompon
   }, [currentLeague?.league_id]);
 
   if (loading) {
-    return <div className="waiver-rules-container">Loading waiver rules...</div>;
+    return <div className="wrd-container">Loading waiver rules...</div>;
   }
 
-  if (error) {
-    return <div className="waiver-rules-container">{error}</div>;
-  }
-
-  if (!waiverRule) {
-    return <div className="waiver-rules-container">No waiver rules available.</div>;
+  if (error || !waiverRule) {
+    return (
+      <div className="wrd-container">
+        <div className="wrd-error-message">{error || 'No waiver rules available.'}</div>
+      </div>
+    );
   }
 
   return (
-    <div className="waiver-rules-container animate__animated animate__fadeIn">
-      <h2 className="waiver-rules-title">Waiver Rules</h2>
-      <div className="waiver-rules-categories">
-        <div className="waiver-rules-category">
-          <h3 className="waiver-rules-category-title">Waiver Settings</h3>
-          <table className="waiver-rules-table">
-            <thead>
-              <tr>
-                <th>Rule</th>
-                <th>Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="waiver-rules-row">
-                <td className="waiver-rules-info">Waivers Length (days)</td>
-                <td className="waiver-rules-info">{waiverRule.waivers_length ?? 'Not set'}</td>
-              </tr>
-              <tr className="waiver-rules-row">
-                <td className="waiver-rules-info">Waiver Processing Day</td>
-                <td className="waiver-rules-info">{waiverRule.waiver_day ?? 'Not set'}</td>
-              </tr>
-            </tbody>
-          </table>
+    <div className="wrd-container animate__animated animate__fadeIn">
+      <h2 className="wrd-title">Waiver Rules</h2>
+      <div className="wrd-categories">
+        <div className="wrd-category">
+          <h3 className="wrd-category-title">Waiver Settings</h3>
+          <div className="wrd-table-wrapper">
+            <table className="wrd-table">
+              <thead>
+                <tr>
+                  <th>Rule</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="wrd-row">
+                  <td className="wrd-label">Waivers Length (days)</td>
+                  <td className="wrd-value">{waiverRule.waivers_length ?? 'Not set'}</td>
+                </tr>
+                <tr className="wrd-row">
+                  <td className="wrd-label">Waiver Processing Day</td>
+                  <td className="wrd-value">{waiverRule.waiver_day ?? 'Not set'}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

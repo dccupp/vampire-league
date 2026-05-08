@@ -1,6 +1,8 @@
+import { ChangeEvent } from 'react';
+
 interface RosterRulesStepProps {
   formData: Record<string, string>;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   setError: (msg: string) => void;
   prefix: 'regular' | 'vampire';
   title: string;
@@ -120,21 +122,21 @@ const RosterRulesStep = ({
   ];
 
   return (
-    <div className="form-group">
-      <h3 className="text-center mb-4">{title}</h3>
-      <div className="form-group mb-3">
-        <label className="form-label">Roster Type</label>
+    <div>
+      <h3 className="clf-title">{title}</h3>
+      <div className="clf-form-group">
+        <label className="clf-label">Roster Type</label>
         <input
           type="text"
           value={prefix === 'regular' ? 'Regular' : 'Vampire'}
           readOnly
-          className="form-control"
+          className="clf-input"
           disabled
         />
       </div>
       {fields.map(({ name, label, min, step }) => (
-        <div key={name} className="form-group mb-3">
-          <label htmlFor={name} className="form-label">
+        <div key={name} className="clf-form-group">
+          <label htmlFor={name} className="clf-label">
             {label}
           </label>
           <input
@@ -145,19 +147,19 @@ const RosterRulesStep = ({
             onChange={handleInputChange}
             step={step}
             min={min}
-            className="form-control"
+            className="clf-input"
             placeholder={`Enter ${label.toLowerCase()}`}
             disabled={isLoading}
             aria-describedby={`${name}-error`}
           />
         </div>
       ))}
-      <div className="d-flex justify-content-between">
+      <div className="clf-btn-row">
         <button
           type="button"
           onClick={onBack}
           disabled={isLoading}
-          className="btn btn-secondary w-45"
+          className="clf-btn-secondary"
         >
           Back
         </button>
@@ -165,7 +167,7 @@ const RosterRulesStep = ({
           type="button"
           onClick={handleNextClick}
           disabled={isLoading}
-          className="btn btn-success w-45"
+          className="clf-btn-primary"
         >
           Next
         </button>

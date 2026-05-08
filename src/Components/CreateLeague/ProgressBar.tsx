@@ -7,9 +7,9 @@ const ProgressBar = ({ step, totalSteps }: ProgressBarProps) => {
   const progress = (step / totalSteps) * 100;
 
   return (
-    <div className="progress mb-4">
+    <div className="clf-progress">
       <div
-        className="progress-bar bg-success"
+        className="clf-progress-bar"
         role="progressbar"
         style={{ width: `${progress}%` }}
         aria-valuenow={progress}

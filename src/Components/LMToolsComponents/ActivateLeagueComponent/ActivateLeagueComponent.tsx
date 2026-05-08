@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
 import { CurrentUser, CurrentLeague } from '../../../types';
 import './ActivateLeagueComponent.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface ActivateLeagueComponentProps {
   currentUser: CurrentUser;
@@ -101,7 +100,7 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }: ActivateLeagueC
     checkLeagueConditions();
   }, [currentUser?.id, currentLeague?.league_id]);
 
-  const handleActivateLeague = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleActivateLeague = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!leagueMemberId) {
       setMessage('Cannot activate league: User is not a member.');
@@ -132,30 +131,27 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }: ActivateLeagueC
   };
 
   return (
-    <div className="activate-league-container">
-      <div className="activate-league-form animate__animated animate__fadeIn">
+    <div className="alc-container">
+      <div className="alc-card animate__animated animate__fadeIn">
+        <h3 className="alc-title">Activate League</h3>
+        {memberCount !== null && (
+          <p className={`alc-member-count ${memberCount === 10 ? 'ready' : 'not-ready'}`}>
+            {memberCount !== 10
+              ? `League has ${memberCount} valid members (player or commish). Need exactly 10.`
+              : 'League has 10 valid members and is ready to activate.'}
+          </p>
+        )}
         <form onSubmit={handleActivateLeague}>
-          <h3 className="text-center mb-4">Activate League</h3>
-          {memberCount !== null && (
-            <p
-              className="text-center mb-3"
-              style={{ color: memberCount !== 10 ? '#e74c3c' : '#2ecc71', fontFamily: 'Poppins, sans-serif', fontSize: '14px' }}
-            >
-              {memberCount !== 10
-                ? `League has ${memberCount} valid members (player or commish). Need exactly 10.`
-                : 'League has 10 valid members and is ready to activate.'}
-            </p>
-          )}
           {message && (
-            <p className={`message mt-3 ${messageType} animate__animated ${isMessageFading ? 'animate__fadeOut' : 'animate__fadeIn'}`}>
+            <p className={`alc-message ${messageType} animate__animated ${isMessageFading ? 'animate__fadeOut' : 'animate__fadeIn'}`}>
               {message}
             </p>
           )}
-          <button type="submit" className="btn btn-success w-100" disabled={isLoading || !canActivate}>
+          <button type="submit" className="alc-submit-btn" disabled={isLoading || !canActivate}>
             {isLoading ? 'Activating...' : 'Activate League'}
           </button>
-          <a href="/dashboard" className="activate-league-link">Back to Dashboard</a>
         </form>
+        <a href="/dashboard" className="alc-back-link">Back to Dashboard</a>
       </div>
     </div>
   );

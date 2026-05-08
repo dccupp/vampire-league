@@ -1,6 +1,8 @@
+import { ChangeEvent } from 'react';
+
 interface LeagueInfoStepProps {
   formData: Record<string, string>;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   setError: (msg: string) => void;
   onNext: () => void;
   isLoading: boolean;
@@ -29,10 +31,10 @@ const LeagueInfoStep = ({
   };
 
   return (
-    <div className="form-group">
-      <h3 className="text-center mb-4">Step 1: League Information</h3>
-      <div className="form-group mb-3">
-        <label htmlFor="leagueName" className="form-label">
+    <div>
+      <h3 className="clf-title">Step 1: League Information</h3>
+      <div className="clf-form-group">
+        <label htmlFor="leagueName" className="clf-label">
           League Name
         </label>
         <input
@@ -41,7 +43,7 @@ const LeagueInfoStep = ({
           name="leagueName"
           value={formData.leagueName}
           onChange={handleInputChange}
-          className="form-control"
+          className="clf-input"
           placeholder="Enter league name"
           disabled={isLoading}
           aria-describedby="leagueName-error"
@@ -51,7 +53,7 @@ const LeagueInfoStep = ({
         type="button"
         onClick={handleNextClick}
         disabled={isLoading}
-        className="btn btn-success w-100"
+        className="clf-btn-primary"
       >
         Next
       </button>

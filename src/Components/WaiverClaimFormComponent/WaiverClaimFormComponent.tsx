@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, SyntheticEvent } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
 import { Player, RosteredPlayer, LeagueMember, WaiverClaim } from '../../types';
@@ -71,7 +71,7 @@ const WaiverClaimFormComponent = ({ player, league_member, userRoster, onClose, 
     );
   };
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
@@ -125,84 +125,86 @@ const WaiverClaimFormComponent = ({ player, league_member, userRoster, onClose, 
   };
 
   if (isLoading) return (
-    <div className="modal-overlay">
-      <div className="waiver-claim-modal">
-        <div className="waiver-claim-modal-content">Loading...</div>
+    <div className="wcf-modal-overlay">
+      <div className="wcf-modal">
+        <div className="wcf-modal-content">Loading...</div>
       </div>
     </div>
   );
 
   return (
-    <div className="modal-overlay">
-      <div className="waiver-claim-modal animate__animated animate__fadeInUp">
-        <div className="waiver-claim-modal-header">
-          <h2 className="modal-title">{isEditMode ? 'Edit Waiver Claim' : 'Place Waiver Claim'}</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+    <div className="wcf-modal-overlay">
+      <div className="wcf-modal animate__animated animate__fadeInUp">
+        <div className="wcf-modal-header">
+          <h2 className="wcf-modal-title">{isEditMode ? 'Edit Waiver Claim' : 'Place Waiver Claim'}</h2>
+          <button className="wcf-close-btn" onClick={onClose}>×</button>
         </div>
-        <div className="waiver-claim-modal-content">
-          {error && <div className="error-message">{error}</div>}
-          {successMessage && <div className="success-message">{successMessage}</div>}
-          <div className="player-info-card">
-            <h3 className="player-info-title">Player Details</h3>
-            <div className="player-info-grid">
-              <div className="info-item">
-                <span className="info-label">Player:</span>
-                <span className="info-value">{player.player_name}</span>
+        <div className="wcf-modal-content">
+          {error && <div className="wcf-error-message">{error}</div>}
+          {successMessage && <div className="wcf-success-message">{successMessage}</div>}
+          <div className="wcf-player-info-card">
+            <h3 className="wcf-player-info-title">Player Details</h3>
+            <div className="wcf-player-info-grid">
+              <div className="wcf-info-item">
+                <span className="wcf-info-label">Player:</span>
+                <span className="wcf-info-value">{player.player_name}</span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Position:</span>
-                <span className="info-value">{player.position || 'Unknown'}</span>
+              <div className="wcf-info-item">
+                <span className="wcf-info-label">Position:</span>
+                <span className="wcf-info-value">{player.position || 'Unknown'}</span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Team:</span>
-                <span className="info-value">{player.team || 'Unknown'}</span>
+              <div className="wcf-info-item">
+                <span className="wcf-info-label">Team:</span>
+                <span className="wcf-info-value">{player.team || 'Unknown'}</span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Remaining FAAB:</span>
-                <span className="info-value">${league_member.remaining_faab_budget || 0}</span>
+              <div className="wcf-info-item">
+                <span className="wcf-info-label">Remaining FAAB:</span>
+                <span className="wcf-info-value">${league_member.remaining_faab_budget || 0}</span>
               </div>
             </div>
           </div>
-          <form onSubmit={handleSubmit} className="waiver-claim-form">
-            <h3 className="form-section-title">Waiver Claim</h3>
-            <label className="form-label">
-              FAAB Bid Amount ($):
-              <input
-                type="number"
-                className="form-input"
-                value={faabAmount}
-                onChange={(e) => setFaabAmount(e.target.value)}
-                min="0"
-                step="1"
-                placeholder="Enter FAAB amount"
-                required
-              />
-            </label>
-            <label className="form-label">
-              Player to Drop:
-              <select
-                className="form-select"
-                value={rosteredPlayerToDrop?.toString() ?? ''}
-                onChange={(e) => setRosteredPlayerToDrop(
-                  e.target.value && e.target.value !== 'none' ? parseInt(e.target.value, 10) : null
-                )}
-                required={isRosterFull}
-              >
-                <option value="">Select a player to drop</option>
-                {!isRosterFull && <option value="none">Do Not Drop Player</option>}
-                {userRoster.map((rosteredPlayer) => (
-                  <option key={rosteredPlayer.id} value={rosteredPlayer.id}>
-                    {rosteredPlayer.player_name} ({rosteredPlayer.position}, {rosteredPlayer.team})
-                  </option>
-                ))}
-              </select>
-            </label>
-            {isRosterFull && (
-              <p className="form-note">Your roster is full. You must select a player to drop.</p>
-            )}
-            <div className="form-buttons">
-              <button type="submit" className="submit-btn">{isEditMode ? 'Update Claim' : 'Submit Claim'}</button>
-              <button type="button" className="cancel-btn" onClick={onClose}>Cancel</button>
+          <form onSubmit={handleSubmit} className="wcf-form">
+            <div className="wcf-form-section">
+              <h3 className="wcf-form-section-title">Waiver Claim</h3>
+              <label className="wcf-form-label">
+                FAAB Bid Amount ($):
+                <input
+                  type="number"
+                  className="wcf-form-input"
+                  value={faabAmount}
+                  onChange={(e) => setFaabAmount(e.target.value)}
+                  min="0"
+                  step="1"
+                  placeholder="Enter FAAB amount"
+                  required
+                />
+              </label>
+              <label className="wcf-form-label">
+                Player to Drop:
+                <select
+                  className="wcf-form-select"
+                  value={rosteredPlayerToDrop?.toString() ?? ''}
+                  onChange={(e) => setRosteredPlayerToDrop(
+                    e.target.value && e.target.value !== 'none' ? parseInt(e.target.value, 10) : null
+                  )}
+                  required={isRosterFull}
+                >
+                  <option value="">Select a player to drop</option>
+                  {!isRosterFull && <option value="none">Do Not Drop Player</option>}
+                  {userRoster.map((rosteredPlayer) => (
+                    <option key={rosteredPlayer.id} value={rosteredPlayer.id}>
+                      {rosteredPlayer.player_name} ({rosteredPlayer.position}, {rosteredPlayer.team})
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {isRosterFull && (
+                <p className="wcf-form-note">Your roster is full. You must select a player to drop.</p>
+              )}
+            </div>
+            <div className="wcf-form-buttons">
+              <button type="submit" className="wcf-submit-btn">{isEditMode ? 'Update Claim' : 'Submit Claim'}</button>
+              <button type="button" className="wcf-cancel-btn" onClick={onClose}>Cancel</button>
             </div>
           </form>
         </div>

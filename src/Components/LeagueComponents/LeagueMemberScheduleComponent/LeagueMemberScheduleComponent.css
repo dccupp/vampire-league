@@ -1,141 +1,158 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 
-.schedule-container {
-  padding: 16px;
-  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
-  border-radius: 6px;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+.lmsc-schedule-container {
+  padding: 20px;
+  background: linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--border);
   max-width: 800px;
   width: 100%;
-  margin: 2rem auto 0 auto;
-  font-family: 'Poppins', sans-serif;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
 }
 
-.schedule-title {
-  font-size: 1.6rem;
+.lmsc-schedule-title {
+  font-size: 1.4rem;
   font-weight: 700;
-  color: #2ecc71;
-  letter-spacing: 0.5px;
+  color: var(--gold);
+  letter-spacing: 0.2px;
   text-align: center;
   margin-bottom: 1.5rem;
 }
 
-.schedule-controls {
+.lmsc-schedule-controls {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 1.5rem;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
 }
 
-.arrow-button {
+.lmsc-arrow-button {
   background: none;
   border: none;
   cursor: pointer;
   padding: 8px;
+  color: var(--accent-light);
   transition: transform 0.2s ease-in-out;
 }
 
-.arrow-button:hover {
+.lmsc-arrow-button:hover {
   transform: scale(1.2);
 }
 
-.arrow-icon {
+.lmsc-arrow-icon {
   width: 24px;
   height: 24px;
 }
 
-.member-select {
-  background: #333333;
-  color: #e0e0e0;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  padding: 8px 12px;
-  border: 1px solid #27ae60;
-  border-radius: 4px;
+.lmsc-member-select {
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 7px 12px;
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
   cursor: pointer;
   max-width: 300px;
   width: 100%;
-  transition: background 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
 }
 
-.member-select:hover {
-  background: #3a3a3a;
-  border-color: #2ecc71;
+.lmsc-member-select:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-light);
+  box-shadow: 0 0 0 3px var(--shadow-accent);
 }
 
-.member-select option {
-  background: #333333;
-  color: #e0e0e0;
+.lmsc-member-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--shadow-accent);
 }
 
-.member-select option:checked {
-  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
-  color: #1c1c1c;
-  font-weight: 600;
+.lmsc-member-select option {
+  background: var(--bg-elevated);
+  color: var(--text);
 }
 
-.schedule-table-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.lmsc-schedule-table-container {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
 }
 
-.schedule-table {
+.lmsc-schedule-table {
+  --bs-table-color: var(--text);
+  --bs-table-bg: var(--bg-surface);
+  --bs-table-border-color: var(--border);
+  --bs-table-striped-bg: var(--bg-hover);
+  --bs-table-hover-bg: var(--bg-hover);
+  --bs-table-active-bg: var(--bg-hover);
+
   width: 100%;
-  background-color: #333333;
-  color: #e0e0e0;
-  font-size: 14px;
+  background-color: var(--bg-surface) !important;
+  color: var(--text) !important;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
   table-layout: fixed;
   border-collapse: collapse;
 }
 
-.schedule-table th,
-.schedule-table td {
-  border: 0.5px solid #27ae60;
+.lmsc-schedule-table th,
+.lmsc-schedule-table td {
+  border: 1px solid var(--border) !important;
   padding: 8px;
   vertical-align: middle;
   text-align: center;
   word-wrap: break-word;
+  background-color: inherit;
 }
 
-.schedule-table th {
-  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
-  color: #1c1c1c;
-  font-weight: 700;
+.lmsc-schedule-table th {
+  background: linear-gradient(90deg, #78350f 0%, #451a03 100%) !important;
+  color: var(--gold) !important;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  border-bottom: 2px solid var(--gold-dim) !important;
 }
 
-.week-column {
+.lmsc-week-column {
   width: 20%;
 }
 
-.matchup-column {
+.lmsc-matchup-column {
   width: 80%;
 }
 
-.schedule-row:hover {
-  background-color: #3a3a3a;
-  transition: background-color 0.2s ease-in-out;
+.lmsc-schedule-row {
+  transition: background-color 0.15s;
+  background-color: var(--bg-surface) !important;
 }
 
-.schedule-row:hover .matchup-details {
-  background-color: rgba(46, 204, 113, 0.1);
-  transition: background-color 0.2s ease-in-out;
+.lmsc-schedule-row:hover {
+  background-color: var(--bg-hover) !important;
 }
 
-.schedule-info {
-  font-size: 14px;
+.lmsc-schedule-info {
+  font-size: 13px;
   font-weight: 400;
-  color: #b0b0b0;
+  color: var(--text-secondary);
 }
 
-.week-info {
+.lmsc-week-info {
   font-weight: 600;
-  color: #e0e0e0;
+  color: var(--text);
 }
 
-.matchup-info {
+.lmsc-matchup-info {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -144,119 +161,135 @@
   padding: 6px 0;
 }
 
-.team-name {
+.lmsc-matchup-details {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.lmsc-team-name {
   font-weight: 700;
-  color: #27ae60;
-  font-size: 14px;
+  color: var(--gold);
+  font-size: 13px;
   padding: 2px 4px;
   border-radius: 3px;
-  transition: color 0.2s ease-in-out;
+  transition: color 0.15s;
 }
 
-.schedule-row:hover .team-name {
-  color: #2ecc71;
+.lmsc-schedule-row:hover .lmsc-team-name {
+  color: var(--accent-light);
 }
 
-.score {
+.lmsc-score {
   display: inline-block;
-  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
-  color: #1c1c1c;
-  font-weight: 600;
+  background: var(--bg-elevated);
+  color: var(--gold);
+  font-weight: 700;
   padding: 3px 10px;
-  border-radius: 4px;
+  border-radius: 6px;
   min-width: 50px;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--gold-dim);
+  box-shadow: 0 2px 8px var(--shadow-gold);
 }
 
-.at-symbol {
-  color: #b0b0b0;
+.lmsc-at-symbol {
+  color: var(--text-muted);
   font-weight: 500;
-  font-size: 14px;
-  background: rgba(255, 255, 255, 0.1);
+  font-size: 13px;
+  background: var(--bg-elevated);
   padding: 2px 6px;
   border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+.lmsc-bye-tbd {
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  padding: 4px 12px;
+  border-radius: 6px;
+  display: inline-block;
 }
 
 @media (max-width: 768px) {
-  .schedule-container {
+  .lmsc-schedule-container {
     padding: 12px;
     max-width: 100%;
-    margin: 1.5rem auto 0 auto;
+    border-radius: 10px;
   }
 
-  .schedule-title {
-    font-size: 1.4rem;
-    margin-bottom: 1.5rem;
+  .lmsc-schedule-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
   }
 
-  .schedule-controls {
+  .lmsc-schedule-controls {
     gap: 8px;
-    flex-wrap: wrap;
   }
 
-  .member-select {
-    font-size: 13px;
+  .lmsc-member-select {
+    font-size: 0.75rem;
     padding: 6px 10px;
+    max-width: 100%;
   }
 
-  .arrow-button {
+  .lmsc-arrow-button {
     padding: 6px;
   }
 
-  .arrow-icon {
+  .lmsc-arrow-icon {
     width: 20px;
     height: 20px;
   }
 
-  .schedule-table {
-    font-size: 13px;
+  .lmsc-schedule-table {
+    font-size: 12px;
   }
 
-  .schedule-table th,
-  .schedule-table td {
+  .lmsc-schedule-table th,
+  .lmsc-schedule-table td {
     padding: 6px;
   }
 
-  .week-column {
+  .lmsc-week-column {
     width: 30%;
   }
 
-  .matchup-column {
+  .lmsc-matchup-column {
     width: 70%;
   }
 
-  .schedule-info {
-    font-size: 13px;
+  .lmsc-schedule-info {
+    font-size: 12px;
   }
 
-  .team-name {
-    font-size: 12px;
+  .lmsc-team-name {
+    font-size: 11px;
     padding: 1px 3px;
   }
 
-  .score {
-    font-size: 12px;
+  .lmsc-score {
+    font-size: 11px;
     padding: 2px 8px;
     min-width: 40px;
   }
 
-  .at-symbol {
-    font-size: 12px;
+  .lmsc-at-symbol {
+    font-size: 11px;
     padding: 1px 4px;
   }
 
-  .matchup-info {
+  .lmsc-matchup-info {
     gap: 6px;
     padding: 4px 0;
   }
 
-  .bye-tbd {
-    font-weight: 700;
-    color: #f39c12;
-    background: rgba(243, 156, 18, 0.2);
-    padding: 6px 12px;
-    border-radius: 4px;
-    display: inline-block;
+  .lmsc-bye-tbd {
+    font-size: 12px;
+    padding: 3px 10px;
   }
 }

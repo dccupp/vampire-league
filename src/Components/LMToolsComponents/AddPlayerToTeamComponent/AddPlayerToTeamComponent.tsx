@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, ChangeEvent, FormEvent } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
 import PlayerCard from '../../PlayerCard/PlayerCard';
@@ -37,7 +37,7 @@ const nflTeams = [
   'PIT', 'SEA', 'SF', 'TB', 'TEN', 'WAS',
 ];
 
-const AddPlayerToTeamComponent = ({ currentUser, currentLeague }: AddPlayerToTeamComponentProps) => {
+const AddPlayerToTeamComponent = ({ currentLeague }: AddPlayerToTeamComponentProps) => {
   const [nameFilter, setNameFilter] = useState<string>('');
   const [teamFilter, setTeamFilter] = useState<string>('All');
   const [positionFilter, setPositionFilter] = useState<string>('All');
@@ -153,24 +153,11 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }: AddPlayerToTea
       const irSlots = slots.filter(s => s.position === 'IR');
       const nonIrSlots = slots.filter(s => s.position !== 'IR');
 
-      assignedPlayers.forEach(player => {
-        const playerDetails = players.find(plyr => plyr.player_id === player.player_id);
-        nonIrSlots.push({
-          position: 'BENCH',
-          sPosition: `BENCH${nonIrSlots.filter(s => s.position === 'BENCH').length + 1}`,
-          player: {
-            ...player,
-            name: playerDetails?.name || 'Unknown',
-            playingPosition: playerDetails?.playingPosition || 'N/A',
-            team: playerDetails?.team || 'N/A',
-          },
-        });
-      });
-
       const benchCount: number = rosterRulesRes.data.bench_count || 0;
       const nonBenchNonIr = nonIrSlots.filter(s => s.position !== 'BENCH');
       const filledBench   = nonIrSlots.filter(s => s.position === 'BENCH' && s.player);
-      const emptyBench    = nonIrSlots.filter(s => s.position === 'BENCH' && !s.player).slice(0, benchCount);
+      const emptyBench    = nonIrSlots.filter(s => s.position === 'BENCH' && !s.player)
+        .slice(0, Math.max(0, benchCount - filledBench.length));
       const finalSlots    = [...nonBenchNonIr, ...filledBench, ...emptyBench, ...irSlots];
 
       setRosterSlots(finalSlots);
@@ -227,32 +214,18 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }: AddPlayerToTea
     )?.sPosition ?? null;
   }, [rosterRules, rosterSlots, rosteredPlayers]);
 
-  const populatedSlots = useMemo((): AptRosterSlot[] => {
-    if (!rosterSlots.length) return [];
-    const benchPlayers = rosteredPlayers.filter(p => p.roster_position === 'BENCH');
-    let benchIndex = 0;
-
-    return rosterSlots.map(slot => {
-      if (slot.position === 'BENCH') {
-        return { ...slot, player: benchPlayers[benchIndex++] ?? null };
-      }
-      return {
-        ...slot,
-        player: rosteredPlayers.find(p => p.roster_position === slot.sPosition) ?? null,
-      };
-    });
-  }, [rosterSlots, rosteredPlayers]);
+  const populatedSlots = useMemo((): AptRosterSlot[] => rosterSlots, [rosterSlots]);
 
   const handlePlayerSelect = (player: TransformedPlayer) => {
     setSelectedPlayer(player);
   };
 
-  const handleMemberSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleMemberSelect = (e: ChangeEvent<HTMLSelectElement>) => {
     setSelectedMember(e.target.value);
     setSelectedPlayer(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedPlayer || !selectedMember) {
       showMessage('Please select a player and a league member.', 'error');
@@ -276,23 +249,8 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }: AddPlayerToTea
       if (response.data.status === 'success') {
         showMessage(`Successfully added ${selectedPlayer.name} to roster.`, 'success');
         setSelectedPlayer(null);
-
-        const rosteredPlayersRes = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${selectedMember}`);
-        const enriched: any[] = Array.isArray(rosteredPlayersRes.data)
-          ? rosteredPlayersRes.data
-              .filter((rp: any) => rp.roster_position !== 'IR')
-              .map((rp: any) => {
-                const playerDetails = players.find(p => p.player_id === rp.player_id);
-                return {
-                  ...rp,
-                  name: playerDetails?.name || 'Unknown',
-                  playingPosition: playerDetails?.playingPosition || 'N/A',
-                  team: playerDetails?.team || 'N/A',
-                };
-              })
-          : [];
-        setRosteredPlayers(enriched);
         setLeagueRosteredPlayerIds(prev => [...prev, selectedPlayer.player_id]);
+        await fetchMemberData();
       } else {
         showMessage(response.data.message || 'Failed to add player.', 'error');
       }
@@ -380,33 +338,35 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }: AddPlayerToTea
               Add Player
             </button>
           </form>
-          <table className="apt-player-table">
-            <thead>
-              <tr>
-                <th>Player</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentPlayers.length > 0 ? (
-                currentPlayers.map((player, index) => (
-                  <tr key={player.player_id} className="apt-player-row">
-                    <td className="apt-player-cell">
-                      <PlayerCard
-                        player={player}
-                        index={index}
-                        onClick={() => handlePlayerSelect(player)}
-                        isSelected={selectedPlayer?.player_id === player.player_id}
-                      />
-                    </td>
-                  </tr>
-                ))
-              ) : (
+          <div className="apt-table-wrapper">
+            <table className="apt-player-table">
+              <thead>
                 <tr>
-                  <td className="apt-empty-message">No players available</td>
+                  <th>Player</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {currentPlayers.length > 0 ? (
+                  currentPlayers.map((player, index) => (
+                    <tr key={player.player_id} className="apt-player-row">
+                      <td className="apt-player-cell">
+                        <PlayerCard
+                          player={player}
+                          index={index}
+                          onClick={() => handlePlayerSelect(player)}
+                          isSelected={selectedPlayer?.player_id === player.player_id}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td><div className="apt-empty-message">No players available</div></td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
           {totalPages > 1 && (
             <div className="apt-pagination">
               <button
@@ -438,7 +398,7 @@ const AddPlayerToTeamComponent = ({ currentUser, currentLeague }: AddPlayerToTea
           {isLoadingRoster ? (
             <div className="apt-loading-message">Loading roster...</div>
           ) : rosterRules ? (
-            <div className="apt-table-responsive">
+            <div className="apt-table-wrapper">
               <table className="apt-roster-table">
                 <thead>
                   <tr>

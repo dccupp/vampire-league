@@ -1,7 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 
-.modal-overlay {
+.wcf-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -14,281 +13,289 @@
   z-index: 1000;
 }
 
-.waiver-claim-modal {
-  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
-  border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+.wcf-modal {
+  background: linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--border);
   max-width: 450px;
   width: 90%;
-  font-family: 'Poppins', sans-serif;
-  color: #e0e0e0;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
   overflow: hidden;
   --animate-duration: 0.3s;
 }
 
-.waiver-claim-modal-header {
+.wcf-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 15px;
-  background: #2ecc71;
-  color: #1c1c1c;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, #78350f 0%, #451a03 100%);
+  border-bottom: 2px solid var(--gold-dim);
 }
 
-.modal-title {
-  font-size: 1.2rem;
+.wcf-modal-title {
+  font-size: 1.1rem;
   font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.2px;
   margin: 0;
 }
 
-.close-btn {
+.wcf-close-btn {
   background: none;
   border: none;
-  color: #1c1c1c;
+  color: var(--text-muted);
   font-size: 1.5rem;
   font-weight: 700;
   cursor: pointer;
-  padding: 5px 15px;
+  padding: 2px 10px;
+  line-height: 1;
+  transition: color 0.15s;
 }
 
-.close-btn:hover {
-  color: #ffffff;
+.wcf-close-btn:hover {
+  color: var(--text);
 }
 
-.waiver-claim-modal-content {
-  padding: 15px;
+.wcf-modal-content {
+  padding: 16px;
   width: 100%;
   box-sizing: border-box;
 }
 
-.error-message {
-  color: #ff4d4d;
-  text-align: center;
+.wcf-error-message {
+  color: #f87171;
+  background-color: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
   font-size: 0.85rem;
   margin-bottom: 1rem;
-  background: #2e2e2e;
-  padding: 8px;
-  border-radius: 4px;
+  text-align: center;
 }
 
-.success-message {
-  color: #2ecc71;
-  text-align: center;
+.wcf-success-message {
+  color: var(--accent-light);
+  background-color: var(--shadow-accent);
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  padding: 10px 14px;
   font-size: 0.85rem;
   margin-bottom: 1rem;
-  background: #2e2e2e;
-  padding: 8px;
-  border-radius: 4px;
+  text-align: center;
 }
 
-.player-info-card {
-  background: #2e2e2e;
-  border: 1px solid #27ae60;
-  border-radius: 6px;
-  padding: 15px;
-  margin-bottom: 1.5rem;
+.wcf-player-info-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 1.25rem;
 }
 
-.player-info-title {
-  font-size: 1.1rem;
+.wcf-player-info-title {
+  font-size: 0.95rem;
   font-weight: 700;
-  color: #2ecc71;
+  color: var(--gold);
+  letter-spacing: 0.2px;
   margin-bottom: 0.75rem;
   text-align: center;
 }
 
-.player-info-grid {
+.wcf-player-info-grid {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 0.5rem 1rem;
 }
 
-.info-item {
+.wcf-info-item {
   display: contents;
 }
 
-.info-label {
+.wcf-info-label {
   font-weight: 600;
-  color: #2ecc71;
+  font-size: 0.85rem;
+  color: var(--accent-light);
 }
 
-.info-value {
+.wcf-info-value {
   font-weight: 400;
-  color: #e0e0e0;
+  font-size: 0.85rem;
+  color: var(--text);
 }
 
-.waiver-claim-form {
+.wcf-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.main-form-section,
-.drop-player-form-section {
-  background: #2e2e2e;
-  border: 1px solid #27ae60;
-  border-radius: 6px;
-  padding: 15px;
+.wcf-form-section {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
 }
 
-.form-section-title {
-  font-size: 1rem;
+.wcf-form-section-title {
+  font-size: 0.95rem;
   font-weight: 700;
-  color: #2ecc71;
+  color: var(--gold);
+  letter-spacing: 0.2px;
   margin-bottom: 0.75rem;
   text-align: center;
 }
 
-.form-note {
-  font-size: 0.85rem;
-  color: #b0b0b0;
+.wcf-form-note {
+  font-size: 0.82rem;
+  color: var(--text-muted);
   margin-bottom: 0.75rem;
   text-align: center;
+  font-style: italic;
 }
 
-.form-label {
+.wcf-form-label {
   display: flex;
   flex-direction: column;
-  font-size: 0.9rem;
-  color: #e0e0e0;
+  gap: 4px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
 }
 
-.form-input,
-.form-select {
-  background-color: #2e2e2e;
-  border: 1px solid #27ae60;
-  color: #e0e0e0;
-  padding: 10px;
-  border-radius: 4px;
-  font-size: 0.9rem;
+.wcf-form-input,
+.wcf-form-select {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-accent);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
   width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
-.form-select {
+.wcf-form-select {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="%2327ae60" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-  background-repeat: no-repeat;
-  background-position: right 8px center;
 }
 
-.form-input:focus,
-.form-select:focus {
+.wcf-form-input:focus,
+.wcf-form-select:focus {
   outline: none;
-  border-color: #2ecc71;
-  box-shadow: 0 0 4px rgba(46, 204, 113, 0.3);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--shadow-accent);
 }
 
-.form-buttons {
+.wcf-form-input:hover,
+.wcf-form-select:hover {
+  border-color: var(--accent-light);
+}
+
+.wcf-form-buttons {
   display: flex;
   justify-content: center;
-  gap: 15px;
-  margin-top: 1rem;
+  gap: 12px;
+  margin-top: 0.5rem;
 }
 
-.submit-btn,
-.cancel-btn {
-  background: #2ecc71;
-  color: #1c1c1c;
+.wcf-submit-btn,
+.wcf-cancel-btn {
   border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 0.9rem;
-  font-weight: 700;
+  border-radius: 8px;
+  padding: 9px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
-.submit-btn:hover {
-  background: #27ae60;
+.wcf-submit-btn {
+  background: var(--accent);
+  color: #fff;
 }
 
-.cancel-btn {
-  background: #666666;
+.wcf-submit-btn:hover {
+  background: var(--accent-light);
+  box-shadow: 0 0 0 3px var(--shadow-accent);
 }
 
-.cancel-btn:hover {
-  background: #555555;
+.wcf-cancel-btn {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.wcf-cancel-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+  border-color: var(--border-accent);
 }
 
 @media (max-width: 768px) {
-  .waiver-claim-modal {
+  .wcf-modal {
     width: 95%;
+    border-radius: 10px;
   }
 
-  .waiver-claim-modal-header {
-    padding: 8px 12px;
+  .wcf-modal-header {
+    padding: 10px 12px;
   }
 
-  .modal-title {
-    font-size: 1.1rem;
-  }
-
-  .close-btn {
-    font-size: 1.3rem;
-    padding: 5px 12px;
-  }
-
-  .waiver-claim-modal-content {
-    padding: 12px;
-  }
-
-  .error-message,
-  .success-message {
-    font-size: 0.8rem;
-    padding: 6px;
-  }
-
-  .player-info-card {
-    padding: 12px;
-  }
-
-  .player-info-title {
+  .wcf-modal-title {
     font-size: 1rem;
   }
 
-  .player-info-grid {
-    grid-template-columns: 1fr;
+  .wcf-close-btn {
+    font-size: 1.3rem;
+    padding: 2px 8px;
   }
 
-  .info-label {
-    font-size: 0.85rem;
-  }
-
-  .info-value {
-    font-size: 0.85rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .main-form-section,
-  .drop-player-form-section {
+  .wcf-modal-content {
     padding: 12px;
   }
 
-  .form-section-title {
-    font-size: 0.9rem;
-  }
-
-  .form-note {
+  .wcf-error-message,
+  .wcf-success-message {
     font-size: 0.8rem;
+    padding: 8px 10px;
   }
 
-  .form-label {
-    font-size: 0.85rem;
+  .wcf-player-info-card,
+  .wcf-form-section {
+    padding: 12px;
   }
 
-  .form-input,
-  .form-select {
-    padding: 8px;
-    font-size: 0.85rem;
+  .wcf-player-info-grid {
+    grid-template-columns: 1fr;
   }
 
-  .submit-btn,
-  .cancel-btn {
-    padding: 8px 15px;
-    font-size: 0.85rem;
+  .wcf-info-label,
+  .wcf-info-value {
+    font-size: 0.82rem;
+  }
+
+  .wcf-info-value {
+    margin-bottom: 0.4rem;
+  }
+
+  .wcf-form-input,
+  .wcf-form-select {
+    padding: 7px 10px;
+    font-size: 0.82rem;
+  }
+
+  .wcf-submit-btn,
+  .wcf-cancel-btn {
+    padding: 8px 16px;
+    font-size: 0.82rem;
   }
 }

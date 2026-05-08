@@ -57,64 +57,66 @@ const RosterRulesDisplayComponent = ({ currentLeague }: RosterRulesDisplayCompon
 
   const renderRosterSection = (rules: RosterRules, title: string) => {
     const rosterFields = [
-      { label: 'Quarterbacks',         value: rules.quarterback_count },
-      { label: 'Running Backs',        value: rules.running_back_count },
-      { label: 'Wide Receivers',       value: rules.wide_receiver_count },
-      { label: 'Tight Ends',           value: rules.tight_end_count },
-      { label: 'WR/TE Count',          value: rules.wide_receiver_tight_end_count },
-      { label: 'Flex',                 value: rules.flex_count },
-      { label: 'Bench',                value: rules.bench_count },
-      { label: 'Injured Reserve',      value: rules.ir_count },
-      { label: 'Max Roster Size',      value: rules.max_roster_size },
-      { label: 'Max Quarterbacks',     value: rules.max_qb_count },
-      { label: 'Max Running Backs',    value: rules.max_rb_count },
-      { label: 'Max Wide Receivers',   value: rules.max_wr_count },
-      { label: 'Max Tight Ends',       value: rules.max_te_count },
+      { label: 'Quarterbacks',          value: rules.quarterback_count },
+      { label: 'Running Backs',         value: rules.running_back_count },
+      { label: 'Wide Receivers',        value: rules.wide_receiver_count },
+      { label: 'Tight Ends',            value: rules.tight_end_count },
+      { label: 'WR/TE Count',           value: rules.wide_receiver_tight_end_count },
+      { label: 'Flex',                  value: rules.flex_count },
+      { label: 'Bench',                 value: rules.bench_count },
+      { label: 'Injured Reserve',       value: rules.ir_count },
+      { label: 'Max Roster Size',       value: rules.max_roster_size },
+      { label: 'Max Quarterbacks',      value: rules.max_qb_count },
+      { label: 'Max Running Backs',     value: rules.max_rb_count },
+      { label: 'Max Wide Receivers',    value: rules.max_wr_count },
+      { label: 'Max Tight Ends',        value: rules.max_te_count },
       { label: 'Beginning FAAB Budget', value: rules.beginning_faab },
     ];
 
     return (
-      <div className="roster-rules-category">
-        <h3 className="roster-rules-category-title">{title}</h3>
-        <table className="roster-rules-table">
-          <thead>
-            <tr>
-              <th>Position</th>
-              <th>Count</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rosterFields.map((field) => (
-              <tr key={field.label} className="roster-rules-row">
-                <td className="roster-rules-info">{field.label}</td>
-                <td className="roster-rules-info">{field.value ?? '—'}</td>
+      <div className="rrd-category">
+        <h3 className="rrd-category-title">{title}</h3>
+        <div className="rrd-table-wrapper">
+          <table className="rrd-table">
+            <thead>
+              <tr>
+                <th>Position</th>
+                <th>Count</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rosterFields.map((field) => (
+                <tr key={field.label} className="rrd-row">
+                  <td className="rrd-label">{field.label}</td>
+                  <td className="rrd-value">{field.value ?? '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   };
 
   if (loading) {
-    return <div className="roster-rules-container">Loading roster rules...</div>;
+    return <div className="rrd-container">Loading roster rules...</div>;
   }
 
-  if (error) {
-    return <div className="roster-rules-container error-message">{error}</div>;
-  }
-
-  if (rosterRules.length === 0) {
-    return <div className="roster-rules-container error-message">No roster rules available.</div>;
+  if (error || rosterRules.length === 0) {
+    return (
+      <div className="rrd-container">
+        <div className="rrd-error-message">{error || 'No roster rules available.'}</div>
+      </div>
+    );
   }
 
   const regularRules = rosterRules.find(rule => rule.roster_type_id === 1);
   const vampireRules = rosterRules.find(rule => rule.roster_type_id === 2);
 
   return (
-    <div className="roster-rules-container animate__animated animate__fadeIn">
-      <h2 className="roster-rules-title">Roster Rules</h2>
-      <div className="roster-rules-categories">
+    <div className="rrd-container animate__animated animate__fadeIn">
+      <h2 className="rrd-title">Roster Rules</h2>
+      <div className="rrd-categories">
         {regularRules && renderRosterSection(regularRules, 'Regular Player Roster Rules')}
         {vampireRules && renderRosterSection(vampireRules, 'Vampire Player Roster Rules')}
       </div>

@@ -1,129 +1,140 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
-@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
-
-.register-container {
+.reg-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(180deg, #1c1c1c 0%, #111111 100%);
-}
-
-.register-form {
+  background: linear-gradient(160deg, var(--bg-base) 0%, #0d0d0d 100%);
   padding: 20px;
-  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
-  border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-  max-width: 360px;
+  box-sizing: border-box;
+}
+
+.reg-card {
+  padding: 28px 24px;
+  background: linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--border);
+  max-width: 380px;
   width: 100%;
-  margin: 20px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
 }
 
-.register-form form {
-  padding: 0;
-}
-
-.register-form h3 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.5rem;
+.reg-title {
+  font-size: 1.4rem;
   font-weight: 700;
-  color: #2ecc71;
-  letter-spacing: 0.5px;
+  color: var(--gold);
+  letter-spacing: 0.2px;
   text-align: center;
-  margin-bottom: 20px;
+  margin: 0 0 1.5rem 0;
 }
 
-.register-form .form-group {
-  margin-bottom: 15px;
+.reg-form-group {
+  margin-bottom: 1rem;
 }
 
-.register-form input.form-control {
-  padding: 10px;
-  border: 1px solid #27ae60;
-  border-radius: 5px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  background-color: #333333;
-  color: #e0e0e0;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.register-form input.form-control:focus {
-  border-color: #2ecc71;
-  box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
-  outline: none;
-}
-
-.register-form input.form-control::placeholder {
-  color: #b0b0b0;
-  font-size: 14px;
-}
-
-.register-form input.form-control:disabled {
-  background-color: #2a2a2a;
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.register-form .btn-success {
-  padding: 10px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 5px;
-  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
-  border: none;
-  transition: transform 0.3s, box-shadow 0.3s;
+.reg-input {
   width: 100%;
+  padding: 9px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
-.register-form .btn-success:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(46, 204, 113, 0.7);
+.reg-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--shadow-accent);
 }
 
-.register-form .btn-success:disabled {
-  background: linear-gradient(90deg, #1e874b 0%, #1a6e42 100%);
-  opacity: 0.7;
+.reg-input:hover {
+  border-color: var(--accent-light);
+}
+
+.reg-input::placeholder {
+  color: var(--text-muted);
+}
+
+.reg-input:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.register-form .register-link {
+.reg-submit-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.reg-submit-btn:hover:not(:disabled) {
+  background: var(--accent-light);
+  box-shadow: 0 0 0 3px var(--shadow-accent);
+  transform: scale(1.02);
+}
+
+.reg-submit-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.reg-message {
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 1rem;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+.reg-message.error {
+  color: #f87171;
+  background-color: rgba(248, 113, 113, 0.08);
+  border-color: rgba(248, 113, 113, 0.2);
+}
+
+.reg-message.success {
+  color: var(--accent-light);
+  background-color: var(--shadow-accent);
+  border-color: var(--border-accent);
+}
+
+.reg-link {
   display: block;
   text-align: center;
-  color: #2ecc71;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
   text-decoration: none;
-  margin-top: 15px;
-  transition: color 0.3s, transform 0.3s;
+  margin-top: 1.25rem;
+  transition: color 0.15s;
 }
 
-.register-form .register-link:hover {
-  color: #27ae60;
-  transform: scale(1.03);
+.reg-link:hover {
+  color: var(--accent-light);
 }
 
-.register-form .message {
-  color:#27ae60;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  text-align: center;
-  margin-top: 15px;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid;
-}
+@media (max-width: 480px) {
+  .reg-card {
+    padding: 20px 16px;
+    border-radius: 10px;
+  }
 
-.register-form .message.error {
-  color: #e74c3c;
-  background-color: rgba(231, 76, 60, 0.2);
-  border-color: rgba(231, 76, 60, 0.4);
-}
-
-.register-form .message.success {
-  color: #2ecc71;
-  background-color: rgba(46, 204, 113, 0.2);
-  border-color: rgba(46, 204, 113, 0.4);
+  .reg-title {
+    font-size: 1.2rem;
+  }
 }

@@ -1,6 +1,8 @@
+import { ChangeEvent } from 'react';
+
 interface ScoringRulesStepProps {
   formData: Record<string, string>;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   setError: (msg: string) => void;
   onNext: () => void;
   onBack: () => void;
@@ -78,11 +80,11 @@ const ScoringRulesStep = ({
   ];
 
   return (
-    <div className="form-group">
-      <h3 className="text-center mb-4">Step 4: Scoring Rules</h3>
+    <div>
+      <h3 className="clf-title">Step 4: Scoring Rules</h3>
       {fields.map(({ name, label, step }) => (
-        <div key={name} className="form-group mb-3">
-          <label htmlFor={name} className="form-label">
+        <div key={name} className="clf-form-group">
+          <label htmlFor={name} className="clf-label">
             {label}
           </label>
           <input
@@ -92,19 +94,19 @@ const ScoringRulesStep = ({
             value={formData[name]}
             onChange={handleInputChange}
             step={step}
-            className="form-control"
+            className="clf-input"
             placeholder={`Enter ${label.toLowerCase()}`}
             disabled={isLoading}
             aria-describedby={`${name}-error`}
           />
         </div>
       ))}
-      <div className="d-flex justify-content-between">
+      <div className="clf-btn-row">
         <button
           type="button"
           onClick={onBack}
           disabled={isLoading}
-          className="btn btn-secondary w-45"
+          className="clf-btn-secondary"
         >
           Back
         </button>
@@ -112,7 +114,7 @@ const ScoringRulesStep = ({
           type="button"
           onClick={handleNextClick}
           disabled={isLoading}
-          className="btn btn-success w-45"
+          className="clf-btn-primary"
         >
           Next
         </button>

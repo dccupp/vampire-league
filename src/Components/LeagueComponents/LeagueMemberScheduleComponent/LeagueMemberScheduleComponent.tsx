@@ -126,24 +126,24 @@ const LeagueMemberScheduleComponent = ({ currentUser, currentLeague }: LeagueMem
   };
 
   if (loading) {
-    return <div className="schedule-container">Loading schedule...</div>;
+    return <div className="lmsc-schedule-container">Loading schedule...</div>;
   }
 
   if (error) {
-    return <div className="schedule-container">{error}</div>;
+    return <div className="lmsc-schedule-container">{error}</div>;
   }
 
   return (
-    <div className="schedule-container animate__animated animate__fadeIn">
-      <h2 className="schedule-title">League Schedule</h2>
-      <div className="schedule-controls">
-        <button className="arrow-button" onClick={handlePrevMember} title="Previous Member">
-          <svg className="arrow-icon" viewBox="0 0 24 24">
-            <path d="M15 18l-6-6 6-6" fill="none" stroke="#2ecc71" strokeWidth="2"/>
+    <div className="lmsc-schedule-container animate__animated animate__fadeIn">
+      <h2 className="lmsc-schedule-title">League Schedule</h2>
+      <div className="lmsc-schedule-controls">
+        <button className="lmsc-arrow-button" onClick={handlePrevMember} title="Previous Member">
+          <svg className="lmsc-arrow-icon" viewBox="0 0 24 24">
+            <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" strokeWidth="2"/>
           </svg>
         </button>
         <select
-          className="member-select"
+          className="lmsc-member-select"
           value={selectedMemberId || ''}
           onChange={handleMemberChange}
         >
@@ -153,34 +153,34 @@ const LeagueMemberScheduleComponent = ({ currentUser, currentLeague }: LeagueMem
             </option>
           ))}
         </select>
-        <button className="arrow-button" onClick={handleNextMember} title="Next Member">
-          <svg className="arrow-icon" viewBox="0 0 24 24">
-            <path d="M9 18l6-6-6-6" fill="none" stroke="#2ecc71" strokeWidth="2"/>
+        <button className="lmsc-arrow-button" onClick={handleNextMember} title="Next Member">
+          <svg className="lmsc-arrow-icon" viewBox="0 0 24 24">
+            <path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" strokeWidth="2"/>
           </svg>
         </button>
       </div>
-      <div className="schedule-table-container">
-        <table className="schedule-table">
+      <div className="lmsc-schedule-table-container">
+        <table className="lmsc-schedule-table">
           <thead>
             <tr>
-              <th className="week-column">Week</th>
-              <th className="matchup-column">Matchup</th>
+              <th className="lmsc-week-column">Week</th>
+              <th className="lmsc-matchup-column">Matchup</th>
             </tr>
           </thead>
           <tbody>
             {schedule.map(entry => (
-              <tr key={entry.week} className="schedule-row">
-                <td className="schedule-info week-info">Week {entry.week}</td>
-                <td className="schedule-info matchup-info">
+              <tr key={entry.week} className="lmsc-schedule-row">
+                <td className="lmsc-schedule-info lmsc-week-info">Week {entry.week}</td>
+                <td className="lmsc-schedule-info lmsc-matchup-info">
                   {entry.match ? (
-                    <span className="bye-tbd">{entry.match}</span>
+                    <span className="lmsc-bye-tbd">{entry.match}</span>
                   ) : (
-                    <div className="matchup-details">
-                      <span className="score">{entry.awayScore}</span>
-                      <span className="team-name">{entry.awayTeam}</span>
-                      <span className="at-symbol">@</span>
-                      <span className="team-name">{entry.homeTeam}</span>
-                      <span className="score">{entry.homeScore}</span>
+                    <div className="lmsc-matchup-details">
+                      <span className="lmsc-score">{entry.awayScore}</span>
+                      <span className="lmsc-team-name">{entry.awayTeam}</span>
+                      <span className="lmsc-at-symbol">@</span>
+                      <span className="lmsc-team-name">{entry.homeTeam}</span>
+                      <span className="lmsc-score">{entry.homeScore}</span>
                     </div>
                   )}
                 </td>

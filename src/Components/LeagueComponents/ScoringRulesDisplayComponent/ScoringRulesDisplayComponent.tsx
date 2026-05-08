@@ -92,36 +92,38 @@ const ScoringRulesDisplayComponent = ({ currentLeague }: ScoringRulesDisplayComp
   }, [scoringRules]);
 
   if (loading) {
-    return <div className="scoring-rules-container">Loading scoring rules...</div>;
+    return <div className="srd-container">Loading scoring rules...</div>;
   }
 
   if (error || !scoringRules) {
-    return <div className="scoring-rules-container">{error || 'No scoring rules available.'}</div>;
+    return <div className="srd-container">{error || 'No scoring rules available.'}</div>;
   }
 
   return (
-    <div className="scoring-rules-container animate__animated animate__fadeIn">
-      <h2 className="scoring-rules-title">Scoring Rules</h2>
-      <div className="scoring-rules-categories">
+    <div className="srd-container animate__animated animate__fadeIn">
+      <h2 className="srd-title">Scoring Rules</h2>
+      <div className="srd-categories">
         {ruleCategories.map((category) => (
-          <div key={category.title} className="scoring-rules-category">
-            <h3 className="scoring-rules-category-title">{category.title}</h3>
-            <table className="scoring-rules-table">
-              <thead>
-                <tr>
-                  <th>Rule</th>
-                  <th>Points</th>
-                </tr>
-              </thead>
-              <tbody>
-                {category.rules.map((rule) => (
-                  <tr key={rule.label} className="scoring-rules-row">
-                    <td className="scoring-rules-info">{rule.label}</td>
-                    <td className="scoring-rules-info">{rule.value}</td>
+          <div key={category.title} className="srd-category">
+            <h3 className="srd-category-title">{category.title}</h3>
+            <div className="srd-table-wrapper">
+              <table className="srd-table">
+                <thead>
+                  <tr>
+                    <th>Rule</th>
+                    <th>Points</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {category.rules.map((rule) => (
+                    <tr key={rule.label} className="srd-row">
+                      <td className="srd-label">{rule.label}</td>
+                      <td className="srd-value">{rule.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ))}
       </div>

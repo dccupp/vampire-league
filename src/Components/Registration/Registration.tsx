@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
 import './Registration.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Registration = () => {
   const [username, setUsername] = useState<string>('');
@@ -50,7 +49,7 @@ const Registration = () => {
     return null;
   };
 
-  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage('');
     setIsLoading(true);
@@ -95,14 +94,14 @@ const Registration = () => {
   };
 
   return (
-    <div className="register-container">
-      <div className="register-form animate__animated animate__fadeIn">
+    <div className="reg-container">
+      <div className="reg-card animate__animated animate__fadeIn">
+        <h3 className="reg-title">Register</h3>
         <form onSubmit={handleRegister}>
-          <h3 className="text-center mb-4">Fantasy Football Register</h3>
-          <div className="form-group mb-3">
+          <div className="reg-form-group">
             <input
               type="text"
-              className="form-control"
+              className="reg-input"
               placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value.trim())}
@@ -110,10 +109,10 @@ const Registration = () => {
               disabled={isLoading}
             />
           </div>
-          <div className="form-group mb-3">
+          <div className="reg-form-group">
             <input
               type="email"
-              className="form-control"
+              className="reg-input"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value.trim())}
@@ -121,10 +120,10 @@ const Registration = () => {
               disabled={isLoading}
             />
           </div>
-          <div className="form-group mb-3">
+          <div className="reg-form-group">
             <input
               type="text"
-              className="form-control"
+              className="reg-input"
               placeholder="First Name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value.trim())}
@@ -132,10 +131,10 @@ const Registration = () => {
               disabled={isLoading}
             />
           </div>
-          <div className="form-group mb-3">
+          <div className="reg-form-group">
             <input
               type="text"
-              className="form-control"
+              className="reg-input"
               placeholder="Last Name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value.trim())}
@@ -143,10 +142,10 @@ const Registration = () => {
               disabled={isLoading}
             />
           </div>
-          <div className="form-group mb-3">
+          <div className="reg-form-group">
             <input
               type="password"
-              className="form-control"
+              className="reg-input"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -154,10 +153,10 @@ const Registration = () => {
               disabled={isLoading}
             />
           </div>
-          <div className="form-group mb-3">
+          <div className="reg-form-group">
             <input
               type="password"
-              className="form-control"
+              className="reg-input"
               placeholder="Confirm Password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -165,16 +164,16 @@ const Registration = () => {
               disabled={isLoading}
             />
           </div>
-          <button type="submit" className="btn btn-success w-100" disabled={isLoading}>
+          <button type="submit" className="reg-submit-btn" disabled={isLoading}>
             {isLoading ? 'Registering...' : 'Register'}
           </button>
           {message && (
-            <p className={`message mt-3 ${message.includes('successful') ? 'success' : 'error'}`}>
+            <p className={`reg-message ${message.includes('successful') ? 'success' : 'error'}`}>
               {message}
             </p>
           )}
-          <a href="/" className="register-link">Already have an account? Login</a>
         </form>
+        <a href="/" className="reg-link">Already have an account? Login</a>
       </div>
     </div>
   );

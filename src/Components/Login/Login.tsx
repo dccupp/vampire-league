@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
 import { CurrentUser } from '../../types';
 import './Login.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface LoginProps {
   setCurrentUser: (user: CurrentUser) => void;
@@ -18,7 +17,7 @@ const Login = ({ setCurrentUser, currentUser }: LoginProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage('');
     setIsLoading(true);
@@ -83,28 +82,15 @@ const Login = ({ setCurrentUser, currentUser }: LoginProps) => {
     return <Navigate to="/landing" />;
   }
 
-  const name: string = "";
-  const isAdmin: boolean = true;
-  const notifications: number = 0;
-
-  const nameDisplay = name || "Guest";
-  console.log(nameDisplay);
-
-  const adminDisplay = isAdmin && "Admin Access Granted";
-  console.log(adminDisplay);
-
-  const notificationDisplay = notifications || "No Notifications";
-  console.log(notificationDisplay);
-
   return (
-    <div className="login-container">
-      <div className="login-form animate__animated animate__fadeIn">
+    <div className="lgn-container">
+      <div className="lgn-card animate__animated animate__fadeIn">
+        <h3 className="lgn-title">Vampire League Football</h3>
         <form onSubmit={handleLogin}>
-          <h3 className="text-center mb-4">Vampire League Football</h3>
-          <div className="form-group mb-3">
+          <div className="lgn-form-group">
             <input
               type="text"
-              className="form-control"
+              className="lgn-input"
               placeholder="Enter username"
               value={username}
               onChange={(e) => setUsername(e.target.value.trim())}
@@ -112,10 +98,10 @@ const Login = ({ setCurrentUser, currentUser }: LoginProps) => {
               disabled={isLoading}
             />
           </div>
-          <div className="form-group mb-3">
+          <div className="lgn-form-group">
             <input
               type="password"
-              className="form-control"
+              className="lgn-input"
               placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -123,16 +109,16 @@ const Login = ({ setCurrentUser, currentUser }: LoginProps) => {
               disabled={isLoading}
             />
           </div>
-          <button type="submit" className="btn btn-success w-100" disabled={isLoading}>
+          <button type="submit" className="lgn-submit-btn" disabled={isLoading}>
             {isLoading ? 'Logging in...' : 'Login'}
           </button>
           {message && (
-            <p className={`message mt-3 ${message.includes('successful') ? 'success' : 'error'}`}>
+            <p className={`lgn-message ${message.includes('successful') ? 'success' : 'error'}`}>
               {message}
             </p>
           )}
-          <a href="/register" className="register-link">Don't have an account? Register</a>
         </form>
+        <a href="/register" className="lgn-link">Don't have an account? Register</a>
       </div>
     </div>
   );

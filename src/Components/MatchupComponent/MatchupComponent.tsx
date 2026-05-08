@@ -149,10 +149,14 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
     fetchData();
   }, [currentLeague.league_id]);
 
-  // Auto-select first matchup whenever the derived matchups list changes
+  // Auto-select the current user's matchup; fall back to the first matchup
   useEffect(() => {
     if (matchups.length > 0) {
-      setSelectedMatchup(String(matchups[0].id));
+      const currentMember = leagueMembers.find(m => m.user_id === currentUser.id);
+      const userMatchup = currentMember
+        ? matchups.find(m => m.home_league_member === currentMember.id || m.away_league_member === currentMember.id)
+        : null;
+      setSelectedMatchup(String((userMatchup ?? matchups[0]).id));
     } else {
       setSelectedMatchup('');
       setHomeRosterSlots([]);
@@ -162,7 +166,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
         setMessageType('info');
       }
     }
-  }, [matchups, selectedWeek]);
+  }, [matchups, selectedWeek, leagueMembers, currentUser]);
 
   // Fetch rosters and scores for the selected matchup in a single backend call
   useEffect(() => {
@@ -172,7 +176,8 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
       const matchup = matchups.find(m => m.id === parseInt(selectedMatchup, 10));
       if (!matchup) return;
 
-      const { week, year } = currentFantasyWeek;
+      const week = parseInt(selectedWeek, 10);
+      const year = currentFantasyWeek.year;
 
       try {
         const res = await axiosInstance.get(
@@ -336,7 +341,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
                           )}
                         </td>
                         <td className="score-cell">
-                          {rosterEntry.player?.fantasyScore != null ? rosterEntry.player.fantasyScore : '--'}
+                          {rosterEntry.player?.fantasyScore != null ? rosterEntry.player.fantasyScore.toFixed(2) : '--'}
                         </td>
                       </tr>
                     ))}
@@ -365,7 +370,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
                           )}
                         </td>
                         <td className="score-cell">
-                          {rosterEntry.player?.fantasyScore != null ? rosterEntry.player.fantasyScore : '--'}
+                          {rosterEntry.player?.fantasyScore != null ? rosterEntry.player.fantasyScore.toFixed(2) : '--'}
                         </td>
                       </tr>
                     ))}
@@ -390,7 +395,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
                     .map((rosterEntry, index) => (
                       <tr key={rosterEntry.sPosition} className="roster-row" data-position={rosterEntry.sPosition}>
                         <td className="score-cell">
-                          {rosterEntry.player?.fantasyScore != null ? rosterEntry.player.fantasyScore : '--'}
+                          {rosterEntry.player?.fantasyScore != null ? rosterEntry.player.fantasyScore.toFixed(2) : '--'}
                         </td>
                         <td className="player-cell">
                           {rosterEntry.player ? (
@@ -419,7 +424,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
                     .map((rosterEntry, index) => (
                       <tr key={rosterEntry.sPosition} className="roster-row">
                         <td className="score-cell">
-                          {rosterEntry.player?.fantasyScore != null ? rosterEntry.player.fantasyScore : '--'}
+                          {rosterEntry.player?.fantasyScore != null ? rosterEntry.player.fantasyScore.toFixed(2) : '--'}
                         </td>
                         <td className="player-cell">
                           {rosterEntry.player ? (

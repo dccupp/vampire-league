@@ -1,350 +1,339 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 
-/* Container for the entire matchup component */
 .matchup-container {
-  padding: 8px; /* Reduced padding for mobile */
-  background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  padding: 20px;
+  background: linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--border);
   max-width: 1000px;
   width: 100%;
   margin: 0 auto;
-  font-family: 'Poppins', sans-serif;
-  color: #e0e0e0;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
 }
 
-/* Title for the matchup component */
 .matchup-title {
-  font-size: 1.3rem; /* Slightly smaller for mobile */
+  font-size: 1.25rem;
   font-weight: 700;
-  color: #2ecc71;
+  color: var(--gold);
   text-align: center;
-  margin-bottom: 1rem;
-  letter-spacing: 0.5px;
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.2px;
 }
 
-/* Controls for week and matchup selection */
 .matchup-controls {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px; /* Reduced gap */
-  margin-bottom: 1rem;
+  gap: 12px;
+  margin-bottom: 1.25rem;
   flex-wrap: wrap;
 }
 
-/* Styles for select dropdowns */
 .week-select,
 .matchup-select {
-  background: #2a2a2a;
-  color: #e0e0e0;
-  font-family: 'Poppins', sans-serif;
-  font-size: 12px; /* Smaller font */
-  padding: 6px 8px; /* Reduced padding */
-  border: 1px solid #27ae60;
-  border-radius: 4px;
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 7px 12px;
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
   cursor: pointer;
-  max-width: 200px; /* Smaller dropdowns */
+  max-width: 210px;
   width: 100%;
-  transition: background 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
 }
 
 .week-select:hover,
 .matchup-select:hover {
-  background: #333333;
-  border-color: #2ecc71;
+  background: var(--bg-hover);
+  border-color: var(--accent-light);
+  box-shadow: 0 0 0 3px var(--shadow-accent);
+}
+
+.week-select:focus,
+.matchup-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--shadow-accent);
 }
 
 .week-select option,
 .matchup-select option {
-  background: #2a2a2a;
-  color: #e0e0e0;
+  background: var(--bg-elevated);
+  color: var(--text);
 }
 
-.week-select option:checked,
-.matchup-select option:checked {
-  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
-  color: #121212;
-  font-weight: 600;
-}
-
-/* Container for the two roster tables */
 .rosters-container {
   display: flex;
   justify-content: space-between;
-  gap: 6px; /* Tighter gap */
-  flex-wrap: nowrap; /* Force side-by-side */
+  gap: 12px;
+  flex-wrap: nowrap;
 }
 
-/* Individual roster section */
 .roster-section {
   flex: 1;
-  min-width: 150px; /* Minimum width for very small screens */
-  max-width: 49%; /* Ensure two sections fit */
+  min-width: 150px;
+  max-width: 49%;
 }
 
-/* Team title above each table */
 .team-title {
-  font-size: 1rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  color: #2ecc71;
+  color: var(--gold);
   text-align: center;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.2px;
 }
 
-/* Bench title above bench tables */
 .bench-title {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: #2ecc71;
+  color: var(--accent-light);
   text-align: center;
-  margin-top: 0.8rem;
+  margin-top: 1rem;
   margin-bottom: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* Team score box */
 .team-score {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #181f13;
-  color: #2ecc71;
+  background: var(--bg-elevated);
+  color: var(--gold);
   font-weight: 700;
-  font-size: 1.6rem; /* Smaller score box */
-  padding: 6px 10px;
-  border-radius: 6px;
-  min-width: 40px;
-  max-width: 80px;
+  font-size: 1.5rem;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--gold-dim);
+  min-width: 44px;
+  max-width: 90px;
   width: fit-content;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(46, 204, 113, 0.18);
-  margin: 0 auto 0.8rem auto;
+  box-shadow: 0 2px 12px var(--shadow-gold);
+  margin: 0 auto 0.85rem auto;
   letter-spacing: 0.5px;
 }
 
-/* Table styling */
+/* Table wrapper — rounded corners via overflow clip */
+.table-responsive {
+  max-width: 100%;
+  margin: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
 .roster-table {
+  /* Reset Bootstrap's table CSS variables */
+  --bs-table-color: var(--text);
+  --bs-table-bg: var(--bg-surface);
+  --bs-table-border-color: var(--border);
+  --bs-table-striped-bg: var(--bg-hover);
+  --bs-table-hover-bg: var(--bg-hover);
+  --bs-table-active-bg: var(--bg-hover);
+
   width: 100%;
   table-layout: fixed;
-  background-color: #2a2a2a;
-  color: #e0e0e0;
-  font-family: 'Poppins', sans-serif;
-  font-size: 10px; /* Smaller font for tables */
+  background-color: var(--bg-surface) !important;
+  color: var(--text) !important;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
   border-collapse: collapse;
 }
 
-/* Table headers and cells */
 .roster-table th,
 .roster-table td {
-  border: 1px solid #27ae60;
-  padding: 3px; /* Tighter padding */
+  border: 1px solid var(--border) !important;
+  padding: 4px;
   vertical-align: middle;
-  white-space: nowrap; /* Prevent text wrapping */
+  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* Truncate long text */
+  text-overflow: ellipsis;
+  background-color: inherit;
 }
 
-/* Table headers */
 .roster-table th {
-  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
-  color: #121212;
-  font-weight: 700;
+  background: linear-gradient(90deg, #78350f 0%, #451a03 100%) !important;
+  color: var(--gold) !important;
+  font-weight: 600;
   text-align: center;
   font-size: 10px;
+  letter-spacing: 0.3px;
+  padding: 6px 4px;
+  border-bottom: 2px solid var(--gold-dim) !important;
 }
 
-/* Column widths for all tables */
 .roster-table th.score-header,
 .roster-table .score-cell {
-  width: 30%; /* Increased to ensure score fits */
+  width: 30%;
 }
 
 .roster-table th.player-header,
 .roster-table .player-cell {
-  width: 70%; /* Reduced player column width */
+  width: 70%;
 }
 
-/* Player cell alignment */
 .roster-table .player-cell {
   text-align: left;
 }
 
-/* Score cell styling */
 .roster-table .score-cell {
   text-align: center;
-  background: #1a1a1a;
-  color: #2ecc71;
+  background: var(--bg-elevated) !important;
+  color: var(--gold) !important;
   font-weight: 700;
-  font-size: 1rem; /* Smaller score text */
+  font-size: 0.95rem;
   letter-spacing: 0.3px;
 }
 
-/* Row styling */
 .roster-row {
-  height: 50px; /* Shorter rows */
+  height: 52px;
+  transition: background-color 0.15s;
+  background-color: var(--bg-surface) !important;
 }
 
 .roster-row:hover {
-  background-color: #333333;
-  transition: background-color 0.2s ease-in-out;
+  background-color: var(--bg-hover) !important;
 }
 
-/* Empty slot styling */
 .empty-slot {
   font-size: 10px;
-  color: #b0b0b0;
+  color: var(--text-muted);
   text-align: center;
-  min-height: 50px;
+  min-height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-style: italic;
 }
 
-/* PlayerCard overrides to ensure it fits */
-.player-cell .PlayerCard {
-  font-size: 10px !important; /* Override PlayerCard font size */
-  padding: 2px !important; /* Reduce padding */
-  margin: 0 !important; /* Remove margins */
-  max-width: 100%; /* Ensure it fits container */
+/* PlayerCard overrides for tight table context — scoped so these don't bleed into other components */
+.matchup-container .player-cell .PlayerCard,
+.matchup-container .player-cell .player-card {
+  font-size: 11px !important;
+  padding: 2px !important;
+  margin: 0 !important;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+  border-radius: 4px !important;
+  border-top: none !important;
 }
 
-/* Message styling */
 .message {
   text-align: center;
-  padding: 8px;
-  font-size: 0.9rem;
-  color: #e0e0e0;
+  padding: 12px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
 }
 
 .message.error {
-  color: #ff4444;
+  color: #f87171;
 }
 
 .message.info {
-  color: #b0b0b0;
+  color: var(--text-muted);
 }
 
-/* Responsive table container */
-.table-responsive {
-  max-width: 100%;
-  margin: 0;
-  border-radius: 4px;
-  overflow-x: auto; /* Enable horizontal scrolling */
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-}
-
-/* Responsive adjustments for mobile */
 @media (max-width: 768px) {
   .matchup-container {
-    padding: 6px;
+    padding: 12px;
     max-width: 100%;
+    border-radius: 10px;
   }
 
   .matchup-title {
-    font-size: 1.1rem;
-    margin-bottom: 0.8rem;
+    font-size: 1.05rem;
+    margin-bottom: 0.9rem;
   }
 
   .matchup-controls {
-    gap: 6px;
+    gap: 8px;
     flex-direction: column;
     align-items: center;
   }
 
   .week-select,
   .matchup-select {
-    font-size: 11px;
-    padding: 4px 6px;
+    font-size: 0.75rem;
+    padding: 6px 10px;
     max-width: 100%;
   }
 
   .rosters-container {
     flex-direction: row;
     flex-wrap: nowrap;
-    gap: 4px; /* Minimal gap */
+    gap: 6px;
     justify-content: space-between;
     width: 100%;
   }
 
   .roster-section {
-    min-width: 140px; /* Allow very small width */
-    max-width: 49.5%; /* Ensure two sections fit */
+    min-width: 140px;
+    max-width: 49.5%;
     flex: 1;
   }
 
   .team-title {
-    font-size: 0.9rem;
+    font-size: 1.15rem;
     margin-bottom: 0.5rem;
   }
 
   .bench-title {
-    font-size: 0.8rem;
-    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    margin-top: 0.7rem;
     margin-bottom: 0.4rem;
   }
 
   .team-score {
-    font-size: 1.4rem;
-    padding: 4px 8px;
-    min-width: 30px;
-    max-width: 60px;
+    font-size: 1.3rem;
+    padding: 4px 10px;
+    min-width: 34px;
+    max-width: 70px;
   }
 
   .roster-table {
-    font-size: 9px; /* Very small font */
+    font-size: 9px;
   }
 
   .roster-table th,
   .roster-table td {
-    padding: 2px; /* Minimal padding */
-  }
-
-  .roster-table th.score-header,
-  .roster-table .score-cell {
-    width: 30%;
-  }
-
-  .roster-table th.player-header,
-  .roster-table .player-cell {
-    width: 70%;
+    padding: 2px;
   }
 
   .roster-table .score-cell {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 
   .roster-row {
-    height: 40px; /* Very compact rows */
+    height: 42px;
   }
 
   .empty-slot {
     font-size: 9px;
-    min-height: 40px;
+    min-height: 42px;
   }
 
   .message {
     font-size: 0.8rem;
-    padding: 6px;
+    padding: 8px;
   }
 
-  .table-responsive {
-    max-width: 100%;
-    overflow-x: auto;
-  }
-
-  /* Ensure PlayerCard is compact */
-  .player-cell .PlayerCard {
-    font-size: 9px !important;
+  .matchup-container .player-cell .PlayerCard,
+  .matchup-container .player-cell .player-card {
+    font-size: 10px !important;
     padding: 1px !important;
-    margin: 0 !important;
-    max-width: 100%;
   }
 }
 
-/* Extra small screens (e.g., <360px) */
 @media (max-width: 360px) {
   .roster-section {
     min-width: 120px;
@@ -360,19 +349,20 @@
   }
 
   .roster-table .score-cell {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 
   .roster-row {
-    height: 35px;
+    height: 36px;
   }
 
   .empty-slot {
     font-size: 8px;
-    min-height: 35px;
+    min-height: 36px;
   }
 
-  .player-cell .PlayerCard {
-    font-size: 8px !important;
+  .matchup-container .player-cell .PlayerCard,
+  .matchup-container .player-cell .player-card {
+    font-size: 9px !important;
   }
 }

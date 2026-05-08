@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
 import { CurrentUser, CurrentLeague, LeagueMember, Player } from '../../types';
@@ -116,29 +116,29 @@ const WaiversComponent = ({ currentUser, currentLeague }: WaiversComponentProps)
     return pages;
   }, [currentPage, totalPages]);
 
-  if (isLoading) return <div className="waivers-container">Loading...</div>;
+  if (isLoading) return <div className="wc-waivers-container">Loading...</div>;
 
   return (
-    <div className="waivers-container">
-      <h2 className="waivers-title">Add Players from Waivers</h2>
-      {error && <div className="error-message">{error}</div>}
-      <div className="waivers-tables-container">
-        <div className="table-wrapper free-agents-table-wrapper">
-          <h3 className="table-title">Free Agents</h3>
-          <div className="filters-container">
-            <label className="filter-label">
+    <div className="wc-waivers-container">
+      <h2 className="wc-waivers-title">Add Players from Waivers</h2>
+      {error && <div className="wc-error-message">{error}</div>}
+      <div className="wc-waivers-tables-container">
+        <div className="wc-table-wrapper">
+          <h3 className="wc-table-title">Free Agents</h3>
+          <div className="wc-filters-container">
+            <label className="wc-filter-label">
               Name:
               <input
                 type="text"
-                className="filter-input"
+                className="wc-filter-input"
                 value={nameFilter}
                 onChange={(e) => setNameFilter(e.target.value)}
               />
             </label>
-            <label className="filter-label">
+            <label className="wc-filter-label">
               Team:
               <select
-                className="filter-select"
+                className="wc-filter-select"
                 value={teamFilter}
                 onChange={(e) => setTeamFilter(e.target.value)}
               >
@@ -147,10 +147,10 @@ const WaiversComponent = ({ currentUser, currentLeague }: WaiversComponentProps)
                 ))}
               </select>
             </label>
-            <label className="filter-label">
+            <label className="wc-filter-label">
               Position:
               <select
-                className="filter-select"
+                className="wc-filter-select"
                 value={positionFilter}
                 onChange={(e) => setPositionFilter(e.target.value)}
               >
@@ -164,49 +164,51 @@ const WaiversComponent = ({ currentUser, currentLeague }: WaiversComponentProps)
               </select>
             </label>
           </div>
-          <table className="waivers-table">
-            <thead>
-              <tr>
-                <th>Player</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentFreeAgents.length > 0 ? (
-                currentFreeAgents.map((player, index) => (
-                  <tr key={player.id} className="waivers-row">
-                    <td className="player-cell">
-                      <PlayerStatsCard
-                        player={player}
-                        stats={player.stats}
-                        fantasyScore={player.fantasyScore}
-                        index={index}
-                        onClick={() => {
-                          setSelectedPlayer(player);
-                          setSelectedLeagueMember(userRoster.length ? userRoster[0].league_member : null);
-                        }}
-                        isSelected={selectedPlayer?.id === player.id}
-                      />
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr key="no-free-agents">
-                  <td className="empty-message">No free agents available</td>
+          <div className="wc-table-responsive">
+            <table className="wc-waivers-table">
+              <thead>
+                <tr>
+                  <th>Player</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {currentFreeAgents.length > 0 ? (
+                  currentFreeAgents.map((player, index) => (
+                    <tr key={player.id} className="wc-waivers-row">
+                      <td className="wc-player-cell">
+                        <PlayerStatsCard
+                          player={player}
+                          stats={player.stats}
+                          fantasyScore={player.fantasyScore}
+                          index={index}
+                          onClick={() => {
+                            setSelectedPlayer(player);
+                            setSelectedLeagueMember(userRoster.length ? userRoster[0].league_member : null);
+                          }}
+                          isSelected={selectedPlayer?.id === player.id}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr key="no-free-agents">
+                    <td><div className="wc-empty-message">No free agents available</div></td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
           {totalPages > 1 && (
-            <div className="pagination-container">
+            <div className="wc-pagination-container">
               <button
-                className="pagination-btn"
+                className="wc-pagination-btn"
                 onClick={() => setCurrentPage(1)}
                 disabled={currentPage === 1}
               >
                 First
               </button>
               <button
-                className="pagination-btn"
+                className="wc-pagination-btn"
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
               >
@@ -215,7 +217,7 @@ const WaiversComponent = ({ currentUser, currentLeague }: WaiversComponentProps)
               {pageNumbers.map((page, idx) => (
                 <button
                   key={idx}
-                  className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                  className={`wc-pagination-btn ${currentPage === page ? 'active' : ''}`}
                   onClick={() => typeof page === 'number' && setCurrentPage(page)}
                   disabled={typeof page !== 'number'}
                 >
@@ -223,14 +225,14 @@ const WaiversComponent = ({ currentUser, currentLeague }: WaiversComponentProps)
                 </button>
               ))}
               <button
-                className="pagination-btn"
+                className="wc-pagination-btn"
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
               >
                 Next
               </button>
               <button
-                className="pagination-btn"
+                className="wc-pagination-btn"
                 onClick={() => setCurrentPage(totalPages)}
                 disabled={currentPage === totalPages}
               >

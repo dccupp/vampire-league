@@ -303,15 +303,15 @@ const ViewLeagueMemberRosterComponent = ({ currentUser, currentLeague }: ViewLea
 
   return (
     <div className="roster-view-container animate__animated animate__fadeIn">
-      <h2 className="roster-title">{currentLeague?.name ? `${currentLeague.name} Roster` : 'Team Roster'}</h2>
-      <div className="roster-controls">
-        <button className="arrow-button" onClick={handlePrevMember} title="Previous Member">
-          <svg className="arrow-icon" viewBox="0 0 24 24">
-            <path d="M15 18l-6-6 6-6" fill="none" stroke="#2ecc71" strokeWidth="2"/>
+      <h2 className="vlmr-roster-title">{currentLeague?.name ? `${currentLeague.name} Roster` : 'Team Roster'}</h2>
+      <div className="vlmr-roster-controls">
+        <button className="vlmr-arrow-button" onClick={handlePrevMember} title="Previous Member">
+          <svg className="vlmr-arrow-icon" viewBox="0 0 24 24">
+            <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" strokeWidth="2"/>
           </svg>
         </button>
         <select
-          className="member-select"
+          className="vlmr-member-select"
           value={selectedMemberId || ''}
           onChange={handleMemberChange}
         >
@@ -325,19 +325,19 @@ const ViewLeagueMemberRosterComponent = ({ currentUser, currentLeague }: ViewLea
             <option value="">No members available</option>
           )}
         </select>
-        <button className="arrow-button" onClick={handleNextMember} title="Next Member">
-          <svg className="arrow-icon" viewBox="0 0 24 24">
-            <path d="M9 18l6-6-6-6" fill="none" stroke="#2ecc71" strokeWidth="2"/>
+        <button className="vlmr-arrow-button" onClick={handleNextMember} title="Next Member">
+          <svg className="vlmr-arrow-icon" viewBox="0 0 24 24">
+            <path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" strokeWidth="2"/>
           </svg>
         </button>
       </div>
       {message && (
-        <div className={`message ${messageType} animate__animated ${isMessageFading ? 'animate__fadeOut' : 'animate__fadeIn'}`}>
+        <div className={`vlmr-message ${messageType} animate__animated ${isMessageFading ? 'animate__fadeOut' : 'animate__fadeIn'}`}>
           {message}
         </div>
       )}
-      <div className="table-responsive">
-        <table className="roster-table">
+      <div className="vlmr-table-responsive">
+        <table className="vlmr-roster-table">
           <thead>
             <tr>
               <th>Slot</th>
@@ -348,11 +348,11 @@ const ViewLeagueMemberRosterComponent = ({ currentUser, currentLeague }: ViewLea
             {rosterSlots.map((rosterEntry, index) => (
               <tr
                 key={rosterEntry.sPosition}
-                className="roster-row"
+                className="vlmr-roster-row"
                 {...(rosterEntry.position !== 'BENCH' ? { 'data-position': rosterEntry.sPosition } : {})}
               >
-                <td className="slot-cell">{rosterEntry.position}</td>
-                <td className="player-cell">
+                <td className="vlmr-slot-cell">{rosterEntry.position}</td>
+                <td className="vlmr-player-cell">
                   {rosterEntry.player ? (
                     <PlayerCard
                       player={rosterEntry.player}
@@ -361,7 +361,7 @@ const ViewLeagueMemberRosterComponent = ({ currentUser, currentLeague }: ViewLea
                       isSelected={false}
                     />
                   ) : (
-                    <div className="empty-slot">
+                    <div className="vlmr-empty-slot">
                       Empty
                     </div>
                   )}

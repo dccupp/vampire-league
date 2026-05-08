@@ -1,6 +1,8 @@
+import { ChangeEvent } from 'react';
+
 interface WaiverRulesStepProps {
   formData: Record<string, string>;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   setError: (msg: string) => void;
   onSubmit: () => void;
   onBack: () => void;
@@ -36,10 +38,10 @@ const WaiverRulesStep = ({
   };
 
   return (
-    <div className="form-group">
-      <h3 className="text-center mb-4">Step 5: Waiver Rules</h3>
-      <div className="form-group mb-3">
-        <label htmlFor="waivers_length" className="form-label">
+    <div>
+      <h3 className="clf-title">Step 5: Waiver Rules</h3>
+      <div className="clf-form-group">
+        <label htmlFor="waivers_length" className="clf-label">
           Waiver Length (days)
         </label>
         <input
@@ -50,14 +52,14 @@ const WaiverRulesStep = ({
           onChange={handleInputChange}
           step="1"
           min="0"
-          className="form-control"
+          className="clf-input"
           placeholder="Enter waiver length"
           disabled={isLoading}
           aria-describedby="waivers_length-error"
         />
       </div>
-      <div className="form-group mb-3">
-        <label htmlFor="waiver_day" className="form-label">
+      <div className="clf-form-group">
+        <label htmlFor="waiver_day" className="clf-label">
           Waiver Day
         </label>
         <select
@@ -65,7 +67,7 @@ const WaiverRulesStep = ({
           name="waiver_day"
           value={formData.waiver_day}
           onChange={handleInputChange}
-          className="form-control"
+          className="clf-input"
           disabled={isLoading}
           aria-describedby="waiver_day-error"
         >
@@ -74,12 +76,12 @@ const WaiverRulesStep = ({
           <option value="Thursday">Thursday</option>
         </select>
       </div>
-      <div className="d-flex justify-content-between">
+      <div className="clf-btn-row">
         <button
           type="button"
           onClick={onBack}
           disabled={isLoading}
-          className="btn btn-secondary w-45"
+          className="clf-btn-secondary"
         >
           Back
         </button>
@@ -87,7 +89,7 @@ const WaiverRulesStep = ({
           type="button"
           onClick={handleSubmitClick}
           disabled={isLoading}
-          className="btn btn-success w-45"
+          className="clf-btn-primary"
         >
           {isLoading ? 'Creating...' : 'Create League'}
         </button>

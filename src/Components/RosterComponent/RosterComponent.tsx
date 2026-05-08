@@ -19,6 +19,7 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
   const [error, setError] = useState<string | null>(null);
   const [leagueMemberId, setLeagueMemberId] = useState<number | null>(null);
   const [selectedPlayerIndex, setSelectedPlayerIndex] = useState<number | null>(null);
+  const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
   const [isMessageFading, setIsMessageFading] = useState(false);
@@ -260,11 +261,9 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
       return;
     }
 
-    // if the selected player index has the same value of selected slot index, set the
-    // selected player index to null (the same slot was selected twice in a row)
+    // Same card clicked twice — open the action modal
     if (selectedPlayerIndex === numIndex) {
-      console.log("selected player index equals index");
-      setSelectedPlayerIndex(null);
+      setIsActionModalOpen(true);
       setMessage('');
       setMessageType('');
       return;
@@ -274,6 +273,75 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
     handleMovePlayer(selectedPlayerIndex, numIndex);
   };
 
+
+  const closeModal = () => {
+    setIsActionModalOpen(false);
+    setSelectedPlayerIndex(null);
+  };
+
+  const handleDropPlayer = async () => {
+    if (selectedPlayerIndex === null || !leagueMemberId) return;
+    const player = rosterSlots[selectedPlayerIndex]?.player;
+    const rosteredPlayer = rosteredPlayers.find(p => p.player_id === player?.player_id);
+    if (!player || !rosteredPlayer) return;
+
+    try {
+      await axiosInstance.put(`/rostered_players/update/${rosteredPlayer.id}`, {
+        league_member_id: leagueMemberId,
+        player_id: rosteredPlayer.player_id,
+        roster_position: rosteredPlayer.roster_position,
+        is_rostered: 0,
+      });
+      const rosterResponse = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${leagueMemberId}`);
+      const fresh: RosteredPlayer[] = Array.isArray(rosterResponse.data) ? rosterResponse.data : [];
+      setRosteredPlayers(fresh.map(p => ({
+        ...p,
+        roster_position: p.roster_position ? p.roster_position.toUpperCase() : 'BENCH1',
+        schedule: rosteredPlayers.find(existing => existing.player_id === p.player_id)?.schedule || null,
+      })));
+
+      setMessage(`${player.player_name} has been dropped.`);
+      setMessageType('success');
+    } catch (err) {
+      setMessage(axios.isAxiosError(err) ? err.response?.data?.message || 'Failed to drop player.' : 'Failed to drop player.');
+      setMessageType('error');
+    } finally {
+      closeModal();
+    }
+  };
+
+  const handleMoveToBench = async () => {
+    if (selectedPlayerIndex === null || !leagueMemberId) return;
+    const player = rosterSlots[selectedPlayerIndex]?.player;
+    const rosteredPlayer = rosteredPlayers.find(p => p.player_id === player?.player_id);
+    if (!player || !rosteredPlayer) return;
+
+    const openBench = rosterSlots.find(s => s.position === 'BENCH' && !s.player);
+    const benchPosition = openBench ? openBench.sPosition : 'BENCH';
+
+    try {
+      await axiosInstance.put(`/rostered_players/update/${rosteredPlayer.id}`, {
+        league_member_id: leagueMemberId,
+        player_id: rosteredPlayer.player_id,
+        roster_position: benchPosition,
+        is_rostered: 1,
+      });
+      const rosterResponse = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${leagueMemberId}`);
+      const fresh: RosteredPlayer[] = Array.isArray(rosterResponse.data) ? rosterResponse.data : [];
+      setRosteredPlayers(fresh.map(p => ({
+        ...p,
+        roster_position: p.roster_position ? p.roster_position.toUpperCase() : 'BENCH1',
+        schedule: rosteredPlayers.find(existing => existing.player_id === p.player_id)?.schedule || null,
+      })));
+      setMessage(`${player.player_name} moved to bench.`);
+      setMessageType('success');
+    } catch (err) {
+      setMessage(axios.isAxiosError(err) ? err.response?.data?.message || 'Failed to move player.' : 'Failed to move player.');
+      setMessageType('error');
+    } finally {
+      closeModal();
+    }
+  };
 
   const isValidMove = (player: RosteredPlayer | null, targetPosition: string): boolean => {
     if (!player) return false;
@@ -437,6 +505,30 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
           </tbody>
         </table>
       </div>
+      {isActionModalOpen && selectedPlayerIndex !== null && rosterSlots[selectedPlayerIndex]?.player && (
+        <div className="modal-overlay">
+          <div className="roster-action-modal animate__animated animate__fadeInUp">
+            <div className="roster-action-modal-header">
+              <h2 className="roster-action-modal-title">
+                {rosterSlots[selectedPlayerIndex].player!.player_name}
+              </h2>
+              <button className="roster-action-close-btn" onClick={closeModal}>×</button>
+            </div>
+            <div className="roster-action-modal-content">
+              <p className="roster-action-modal-subtitle">
+                {rosterSlots[selectedPlayerIndex].player!.position} · {rosterSlots[selectedPlayerIndex].player!.team}
+              </p>
+              <div className="roster-action-buttons">
+                <button className="drop-player-btn" onClick={handleDropPlayer}>Drop Player</button>
+                {rosterSlots[selectedPlayerIndex].position !== 'BENCH' && (
+                  <button className="move-bench-btn" onClick={handleMoveToBench}>Move to Bench</button>
+                )}
+                <button className="close-modal-btn" onClick={closeModal}>Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

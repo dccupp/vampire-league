@@ -1,112 +1,127 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
-
-.player-stats-card {
+.psc-player-stats-card {
   width: 100%;
-  height: auto;
   min-height: 60px;
-  background: #222222;
-  border: 1px solid #2ecc71;
-  border-radius: 4px;
-  padding: 4px;
-  cursor: move;
-  font-family: 'Poppins', sans-serif;
-  color: #e0e0e0;
+  background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   margin: 0;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  box-sizing: border-box;
 }
 
-.player-stats-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 6px rgba(46, 204, 113, 0.5);
+.psc-player-stats-card:hover {
+  transform: scale(1.015);
+  box-shadow: 0 4px 16px var(--shadow-accent);
+  border-left-color: var(--accent-light);
 }
 
-.player-stats-card-dragging {
-  opacity: 0.5;
-  transform: scale(0.98);
+.psc-player-stats-card-dragging {
+  opacity: 0.45;
+  transform: scale(0.97);
 }
 
-.player-stats-card.selected {
-  border: 2px solid #2ecc71;
-  box-shadow: 0 0 8px rgba(46, 204, 113, 0.7);
-  transform: scale(1.03);
+.psc-player-stats-card.selected {
+  border-left: 3px solid var(--gold);
+  box-shadow: 0 0 0 1px var(--gold-dim), 0 4px 18px var(--shadow-gold);
+  background: linear-gradient(135deg, #2a1d0a 0%, var(--bg-surface) 100%);
 }
 
-.player-stats-card.error {
-  color: #ff4d4d;
+.psc-player-stats-card.error {
+  color: #f87171;
   font-size: 12px;
   text-align: center;
 }
 
-.card-content {
+.psc-card-content {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 
-.player-info {
+.psc-player-info {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
 }
 
-.player-details {
-  font-size: 16px;
+.psc-player-details {
+  font-size: 1em;
   font-weight: 700;
-  color: #e0e0e0;
+  color: var(--gold);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 4px;
+  letter-spacing: 0.2px;
 }
 
-.player-stats {
+.psc-player-stats {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
-  gap: 8px;
+  gap: 6px;
 }
 
-.stat-item {
-  font-size: 12px;
+.psc-stat-item {
+  font-size: 0.8em;
   font-weight: 400;
-  color: #e0e0e0;
+  color: var(--text-secondary);
 }
 
-.fantasy-score-container {
+.psc-fantasy-score-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 8px;
+  flex-shrink: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--gold-dim);
+  border-radius: 8px;
+  padding: 4px 10px;
+  box-shadow: 0 2px 8px var(--shadow-gold);
 }
 
-.fantasy-score {
-  font-size: 24px;
+.psc-fantasy-score {
+  font-size: 1.3em;
   font-weight: 700;
-  color: #e0e0e0;
+  color: var(--gold);
+  letter-spacing: 0.3px;
 }
 
 @media (max-width: 768px) {
-  .player-stats-card {
+  .psc-player-stats-card {
     min-height: 50px;
-    padding: 2px;
+    padding: 4px 6px;
+    border-left-width: 2px;
+    border-radius: 5px;
   }
 
-  .player-details {
-    font-size: 14px;
+  .psc-player-details {
+    font-size: 0.9em;
   }
 
-  .stat-item {
-    font-size: 11px;
+  .psc-stat-item {
+    font-size: 0.72em;
   }
 
-  .fantasy-score {
-    font-size: 20px;
+  .psc-fantasy-score {
+    font-size: 1.1em;
+  }
+
+  .psc-fantasy-score-container {
+    padding: 3px 8px;
   }
 }

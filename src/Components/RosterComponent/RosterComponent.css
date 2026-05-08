@@ -1,46 +1,65 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
-
 .roster-container {
-  padding: 12px;
-  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
-  border-radius: 6px;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  background: linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--border);
   max-width: 700px;
   width: 100%;
   margin: 0 auto;
+  font-family: 'Inter', sans-serif;
 }
 
 .roster-title {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #2ecc71;
-  letter-spacing: 0.5px;
-  font-family: 'Poppins', sans-serif;
+  color: var(--gold);
+  letter-spacing: 0.2px;
   text-align: center;
   margin-bottom: 1.5rem;
 }
 
+/* Table wrapper */
+.table-responsive {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
 .roster-table {
-  background-color: #333333;
-  color: #e0e0e0;
-  font-family: 'Poppins', sans-serif;
+  /* Reset Bootstrap table variables */
+  --bs-table-color: var(--text);
+  --bs-table-bg: var(--bg-surface);
+  --bs-table-border-color: var(--border);
+  --bs-table-striped-bg: var(--bg-hover);
+  --bs-table-hover-bg: var(--bg-hover);
+  --bs-table-active-bg: var(--bg-hover);
+
+  background-color: var(--bg-surface) !important;
+  color: var(--text) !important;
+  font-family: 'Inter', sans-serif;
   font-size: 13px;
   width: 100%;
   table-layout: fixed;
+  border-collapse: collapse;
 }
 
 .roster-table th,
 .roster-table td {
-  border: 0.5px solid #27ae60;
+  border: 1px solid var(--border) !important;
   padding: 8px;
   vertical-align: middle;
+  background-color: inherit;
 }
 
 .roster-table th {
-  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
-  color: #1c1c1c;
-  font-weight: 700;
+  background: linear-gradient(90deg, #78350f 0%, #451a03 100%) !important;
+  color: var(--gold) !important;
+  font-weight: 600;
   text-align: left;
+  letter-spacing: 0.2px;
+  border-bottom: 2px solid var(--gold-dim) !important;
 }
 
 .roster-table th:first-child {
@@ -48,25 +67,31 @@
 }
 
 .roster-row {
-  height: 80px;
-  transition: background-color 0.2s, box-shadow 0.2s;
+  height: 86px;
+  transition: background-color 0.15s;
+  background-color: var(--bg-surface) !important;
 }
 
 .roster-row:hover {
-  background-color: #3a3a3a;
-  transition: background-color 0.2s ease-in-out;
+  background-color: var(--bg-hover) !important;
+}
+
+.roster-row.selected-player {
+  background-color: rgba(124, 58, 237, 0.18) !important;
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .slot-cell {
   width: 80px;
   height: 80px;
-  background: #1c1c1c;
-  border: 0.5px solid #27ae60;
-  color: #2ecc71;
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--accent-light);
   font-weight: 700;
   font-size: 12px;
   text-align: center;
   vertical-align: middle;
+  letter-spacing: 0.3px;
 }
 
 .player-cell {
@@ -74,67 +99,39 @@
 }
 
 .player-cell.valid-target {
-  background-color: rgba(46, 204, 113, 0.15);
-  border: 1px solid #2ecc71;
-  box-shadow: inset 0 0 6px rgba(46, 204, 113, 0.3);
+  background-color: rgba(124, 58, 237, 0.12) !important;
+  border: 1px solid var(--accent) !important;
+  box-shadow: inset 0 0 8px rgba(124, 58, 237, 0.2);
   cursor: pointer;
-}
-
-.player-card {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 6px 8px;
-  background: #2a2a2a;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.player-card:hover {
-  background: #333;
-}
-
-.player-name {
-  font-weight: 700;
-  color: #e0e0e0;
-  font-size: 13px;
-}
-
-.player-meta {
-  font-size: 11px;
-  color: #2ecc71;
-}
-
-.player-schedule {
-  font-size: 11px;
-  color: #b0b0b0;
-}
-
-.player-schedule.no-game {
-  color: #666;
-  font-style: italic;
 }
 
 .empty-slot {
-  color: #b0b0b0;
+  color: var(--text-muted);
   font-size: 12px;
   text-align: center;
   padding: 8px;
-  background: #2e2e2e;
-  border-radius: 4px;
+  background: var(--bg-elevated);
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 60px;
+  font-style: italic;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.empty-slot:hover {
+  background: var(--bg-hover);
 }
 
 .message {
   text-align: center;
-  padding: 8px 12px;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
-  font-family: 'Poppins', sans-serif;
-  border-radius: 4px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif;
+  border-radius: 8px;
   opacity: 1;
   transition: opacity 0.5s ease-out;
 }
@@ -144,25 +141,33 @@
 }
 
 .message.error {
-  color: #ff4444;
+  color: #f87171;
+  background-color: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.2);
 }
 
 .message.success {
-  color: #2ecc71;
+  color: var(--gold);
+  background-color: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
 .message.question {
-  color: #dbbe6f;
+  color: var(--accent-light);
+  background-color: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 @media (max-width: 768px) {
   .roster-container {
-    padding: 10px;
+    padding: 12px;
     max-width: 100%;
+    border-radius: 10px;
   }
 
   .roster-title {
     font-size: 1.2rem;
+    margin-bottom: 1rem;
   }
 
   .roster-table {
@@ -176,7 +181,7 @@
 
   .slot-cell {
     width: 70px;
-    height: 70px;
+    height: 74px;
     font-size: 11px;
   }
 
@@ -185,11 +190,121 @@
   }
 
   .roster-row {
-    height: 70px;
+    height: 74px;
   }
 
   .empty-slot {
     font-size: 11px;
     min-height: 50px;
   }
+}
+
+/* ─── Player Action Modal ─────────────────────────────────────────────────── */
+
+.roster-action-modal {
+  background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px var(--shadow);
+  max-width: 360px;
+  width: 90%;
+  overflow: hidden;
+  --animate-duration: 0.25s;
+}
+
+.roster-action-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--gold);
+  color: #1c1c1c;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.roster-action-modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.roster-action-close-btn {
+  background: none;
+  border: none;
+  color: #1c1c1c;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 8px;
+  line-height: 1;
+}
+
+.roster-action-close-btn:hover {
+  color: #555;
+}
+
+.roster-action-modal-content {
+  padding: 20px 16px;
+  text-align: center;
+}
+
+.roster-action-modal-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted, #aaa);
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.3px;
+}
+
+.roster-action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.drop-player-btn {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.drop-player-btn:hover {
+  background: #a93226;
+}
+
+.move-bench-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.move-bench-btn:hover {
+  opacity: 0.85;
+}
+
+.close-modal-btn {
+  background: #555;
+  color: #e0e0e0;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.close-modal-btn:hover {
+  background: #444;
 }
