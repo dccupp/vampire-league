@@ -222,6 +222,17 @@ export interface WeeklyStat {
   special_teams_tds: number;
 }
 
+// ─── League Activity Log ──────────────────────────────────────────────────────
+
+export interface LeagueLog {
+  id: number;
+  league_member_id: number;
+  team_name: string;
+  type: 'add_player' | 'drop_player' | 'vampire_transaction';
+  message: string;
+  created_at: string;
+}
+
 // Yearly Stats
 
 export interface YearlyStat {

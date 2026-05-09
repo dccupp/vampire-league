@@ -21,6 +21,7 @@ import AddMemberToLeagueComponent from './Components/LMToolsComponents/AddMember
 import AddPlayerToTeamComponent from './Components/LMToolsComponents/AddPlayerToTeamComponent/AddPlayerToTeamComponent';
 import ViewLeagueMemberRosterComponent from './Components/LeagueComponents/ViewLeagueMemberRosterComponent/ViewLeagueMemberRosterComponent';
 import ActivateLeagueComponent from './Components/LMToolsComponents/ActivateLeagueComponent/ActivateLeagueComponent';
+import ActivityFeedPage from './Components/ActivityFeedPage/ActivityFeedPage';
 import axiosInstance from './api';
 import { CurrentUser, CurrentLeague, LeagueMember, League } from './types';
 
@@ -292,6 +293,18 @@ const AppContent = () => {
               <PrivateRoute>
                 {currentUser && currentLeague ? (
                   <ActivateLeagueComponent currentUser={currentUser} currentLeague={currentLeague} />
+                ) : (
+                  <Navigate to="/login" />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/activity"
+            element={
+              <PrivateRoute>
+                {currentUser && currentLeague ? (
+                  <ActivityFeedPage currentUser={currentUser} currentLeague={currentLeague} />
                 ) : (
                   <Navigate to="/login" />
                 )}

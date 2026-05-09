@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 import { CurrentUser, CurrentLeague } from '../../types';
@@ -68,6 +67,10 @@ const NavBar = ({ currentUser, setCurrentUser, currentLeague, setCurrentLeague, 
                       </NavDropdown.Item>
                     </NavDropdown>
                     <NavDropdown title="League Info" id="league-info-dropdown" className="nav-link-custom">
+                      <NavDropdown.Item as={NavLink} to="/activity" className={dropdownItemClass as any}>
+                        Recent Activity
+                      </NavDropdown.Item>
+                      <NavDropdown.Divider />
                       <NavDropdown.Item as={NavLink} to="/league-member-roster" className={dropdownItemClass as any}>
                         View League Rosters
                       </NavDropdown.Item>

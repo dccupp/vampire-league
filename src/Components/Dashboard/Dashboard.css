@@ -1,95 +1,280 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 
-.dashboard-container {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #1c1c1c 0%, #111111 100%);
-  padding: 20px 0;
+/* ── Page wrapper ──────────────────────────────────────────────────────────── */
+
+.db-container {
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.dashboard-title {
-  font-family: 'Poppins', sans-serif;
-  font-size: 2rem;
+.db-loading {
+  text-align: center;
+  padding: 60px 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.db-error {
+  padding: 12px 16px;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 10px;
+  color: #f87171;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* ── Header card ───────────────────────────────────────────────────────────── */
+
+.db-header-card {
+  padding: 20px 24px;
+  background: linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--gold);
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--border);
+}
+
+.db-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.db-header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.db-team-name {
+  font-size: 1.6rem;
   font-weight: 700;
-  color: #2ecc71;
+  color: var(--gold);
+  margin: 0;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+}
+
+.db-record {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
   letter-spacing: 0.5px;
 }
 
-.dashboard-subtitle {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 400;
-  color: #e0e0e0;
+.db-header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
-.team-info-card {
-  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
-  border: none;
-  border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-}
-
-.dashboard-team-info {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1rem;
-  color: #e0e0e0;
-}
-
-.dashboard-link {
-  color: #2ecc71;
-  text-decoration: none;
-  transition: color 0.3s, transform 0.3s;
-}
-
-.dashboard-link:hover {
-  color: #27ae60;
-  transform: scale(1.05);
-}
-
-.team-info-divider {
-  color: #b0b0b0;
-  margin: 0 10px;
-}
-
-.team-owner {
-  color: #e0e0e0;
-}
-
-.dashboard-content .card {
-  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
-  border: none;
-  border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-}
-
-.dashboard-content .card-title {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.5rem;
+.db-faab {
+  font-size: 0.9rem;
   font-weight: 700;
-  color: #2ecc71;
+  color: var(--gold);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid var(--gold-dim);
+  border-radius: 8px;
+  padding: 5px 12px;
+  white-space: nowrap;
 }
 
-.dashboard-content .card-text {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1rem;
-  color: #e0e0e0;
+.db-faab-label {
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.table {
-  background-color: #333333;
-  color: #e0e0e0;
+.db-edit-link {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--accent-light);
+  text-decoration: none;
+  padding: 5px 12px;
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  white-space: nowrap;
 }
 
-.table th, .table td {
-  border-color: #27ae60;
+.db-edit-link:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  color: var(--accent-light);
 }
 
-.table thead th {
-  background-color: #2ecc71;
-  color: #1c1c1c;
+.db-header-owner {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 400;
 }
 
-.table tbody tr:hover {
-  background-color: #27ae60;
-  color: #fff;
+/* ── Active league grid ────────────────────────────────────────────────────── */
+
+.db-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ── Shared card shell ─────────────────────────────────────────────────────── */
+
+.db-matchup-card,
+.db-inactive-card {
+  padding: 20px;
+  background: linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--border);
+}
+
+.db-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin: 0 0 16px 0;
+  letter-spacing: 0.2px;
+}
+
+/* ── Matchup card body ─────────────────────────────────────────────────────── */
+
+.db-matchup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.db-matchup-team-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.db-matchup-team-name--opp {
+  color: var(--text-secondary);
+}
+
+.db-matchup-score {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  min-width: 52px;
+  text-align: right;
+  letter-spacing: 0.3px;
+}
+
+.db-matchup-score--mine {
+  color: var(--gold);
+}
+
+.db-matchup-vs {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin: 2px 0;
+}
+
+.db-matchup-link {
+  display: block;
+  margin-top: 16px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--accent-light);
+  text-decoration: none;
+  text-align: right;
+  transition: color 0.2s;
+}
+
+.db-matchup-link:hover {
+  color: var(--accent);
+}
+
+.db-no-matchup {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── Inactive card ─────────────────────────────────────────────────────────── */
+
+.db-inactive-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .db-container {
+    gap: 14px;
+    padding: 0 12px;
+  }
+
+  .db-header-card {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .db-team-name {
+    font-size: 1.3rem;
+  }
+
+  .db-record {
+    font-size: 0.9rem;
+  }
+
+  .db-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .db-matchup-card,
+  .db-inactive-card {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .db-section-title {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+
+  .db-matchup-score {
+    font-size: 1.1rem;
+    min-width: 44px;
+  }
 }

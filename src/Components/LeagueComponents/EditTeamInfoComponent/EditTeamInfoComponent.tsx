@@ -108,36 +108,39 @@ const EditTeamInfoComponent = ({ currentUser, currentLeague }: EditTeamInfoCompo
   };
 
   return (
-    <div className="edit-team-container">
-      <div className="edit-team-form animate__animated animate__fadeIn">
-        <h3>Edit Team Information</h3>
+    <div className="eti-container">
+      <div className="eti-card animate__animated animate__fadeIn">
+        <h2 className="eti-title">Edit Team Info</h2>
+
         {isLoading ? (
-          <p>Loading...</p>
+          <div className="eti-loading">Loading...</div>
         ) : (
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="vampire-label">Team Name</label>
+          <form onSubmit={handleSubmit} className="eti-form">
+            <div className="eti-field">
+              <label className="eti-label">Team Name</label>
               <input
                 type="text"
-                className="form-control"
+                className="eti-input"
                 placeholder="Enter team name"
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
                 disabled={isLoading}
                 maxLength={50}
               />
+              <span className="eti-char-count">{teamName.length} / 50</span>
             </div>
             <button
               type="submit"
-              className="btn-success"
+              className="eti-submit"
               disabled={!teamName.trim() || teamName.length > 50 || isLoading}
             >
               Update Team Name
             </button>
           </form>
         )}
+
         {message && (
-          <div className={`message ${messageType} animate__animated ${isMessageFading ? 'animate__fadeOut' : 'animate__fadeIn'}`}>
+          <div className={`eti-message eti-message--${messageType} animate__animated ${isMessageFading ? 'animate__fadeOut' : 'animate__fadeIn'}`}>
             {message}
           </div>
         )}

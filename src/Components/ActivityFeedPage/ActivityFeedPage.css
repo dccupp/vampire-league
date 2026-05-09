@@ -1,0 +1,209 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+.afp-container {
+  padding: 20px;
+  background: linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--border);
+  max-width: 780px;
+  width: 100%;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+}
+
+/* ── Header ────────────────────────────────────────────────────────────────── */
+
+.afp-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-align: center;
+  margin: 0 0 1.25rem 0;
+  letter-spacing: 0.2px;
+}
+
+/* ── Filter controls ───────────────────────────────────────────────────────── */
+
+.afp-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.afp-select {
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 7px 12px;
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  min-width: 130px;
+}
+
+.afp-select:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-light);
+  box-shadow: 0 0 0 3px var(--shadow-accent);
+}
+
+.afp-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--shadow-accent);
+}
+
+.afp-select option {
+  background: var(--bg-elevated);
+  color: var(--text);
+}
+
+/* ── Log list ──────────────────────────────────────────────────────────────── */
+
+.afp-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.afp-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.afp-item:last-child {
+  border-bottom: none;
+}
+
+/* ── Type badges ───────────────────────────────────────────────────────────── */
+
+.afp-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  flex-shrink: 0;
+}
+
+.afp-badge--add_player {
+  background: rgba(74, 222, 128, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.35);
+}
+
+.afp-badge--drop_player {
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+}
+
+.afp-badge--vampire_transaction {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+}
+
+/* ── Row content ───────────────────────────────────────────────────────────── */
+
+.afp-team {
+  font-weight: 600;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.afp-team::after {
+  content: ':';
+  color: var(--text-muted);
+}
+
+.afp-message {
+  flex: 1;
+  color: var(--text-secondary);
+  min-width: 0;
+}
+
+.afp-time {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* ── Footer count ──────────────────────────────────────────────────────────── */
+
+.afp-count {
+  margin: 14px 0 0 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+/* ── State messages ────────────────────────────────────────────────────────── */
+
+.afp-state {
+  text-align: center;
+  padding: 24px 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.afp-state--error {
+  color: #f87171;
+  font-style: normal;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .afp-container {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .afp-title {
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+  }
+
+  .afp-controls {
+    gap: 8px;
+  }
+
+  .afp-select {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .afp-item {
+    font-size: 0.8rem;
+    padding: 9px 0;
+    gap: 7px;
+  }
+
+  .afp-badge {
+    font-size: 0.6rem;
+  }
+}

@@ -1,0 +1,182 @@
+.rac-container {
+  padding: 20px;
+  background: linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--border);
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+}
+
+.rac-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.rac-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+
+.rac-view-all {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent-light);
+  text-decoration: none;
+  padding: 3px 9px;
+  border: 1px solid var(--border-accent);
+  border-radius: 6px;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.rac-view-all:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.rac-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rac-list--scroll {
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-accent) transparent;
+  padding-right: 4px;
+}
+
+.rac-list--scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.rac-list--scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rac-list--scroll::-webkit-scrollbar-thumb {
+  background: var(--border-accent);
+  border-radius: 4px;
+}
+
+.rac-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.8rem;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.rac-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.rac-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  flex-shrink: 0;
+}
+
+.rac-badge--add_player {
+  background: rgba(46, 204, 113, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.35);
+}
+
+.rac-badge--drop_player {
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+}
+
+.rac-badge--vampire_transaction {
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+}
+
+.rac-team {
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.rac-team::after {
+  content: ':';
+  color: var(--text-muted);
+}
+
+.rac-message {
+  flex: 1;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  min-width: 0;
+}
+
+.rac-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.rac-empty,
+.rac-state {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 4px 0;
+  margin: 0;
+}
+
+.rac-error {
+  color: #f87171;
+  font-style: normal;
+}
+
+@media (max-width: 768px) {
+  .rac-container {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .rac-title {
+    font-size: 1.05rem;
+  }
+
+  .rac-item {
+    font-size: 0.75rem;
+    padding: 8px 0;
+    gap: 6px;
+  }
+
+  .rac-badge {
+    font-size: 0.6rem;
+    padding: 2px 6px;
+  }
+
+  .rac-time {
+    font-size: 0.65rem;
+  }
+}

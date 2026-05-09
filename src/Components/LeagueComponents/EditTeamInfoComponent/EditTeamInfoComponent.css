@@ -1,120 +1,159 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 
-.edit-team-container {
+.eti-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(180deg, #1c1c1c 0%, #111111 100%);
+  align-items: flex-start;
+  padding: 0 16px;
+  font-family: 'Inter', sans-serif;
 }
 
-.edit-team-form {
-  padding: 20px;
-  background: linear-gradient(180deg, #222222 0%, #1c1c1c 100%);
-  border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-  max-width: 360px;
+.eti-card {
   width: 100%;
-  margin: 20px;
+  max-width: 420px;
+  padding: 28px;
+  background: linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--border);
 }
 
-.edit-team-form form {
-  padding: 0;
-}
-
-.edit-team-form h3 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.5rem;
+.eti-title {
+  font-size: 1.25rem;
   font-weight: 700;
-  color: #2ecc71;
-  letter-spacing: 0.5px;
+  color: var(--gold);
+  margin: 0 0 24px 0;
   text-align: center;
-  margin-bottom: 20px;
+  letter-spacing: 0.2px;
 }
 
-.edit-team-form .form-group {
-  margin-bottom: 15px;
+.eti-loading {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 16px 0;
 }
 
-.edit-team-form input.form-control {
-  padding: 10px;
-  border: 1px solid #27ae60;
-  border-radius: 5px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  background-color: #333333;
-  color: #e0e0e0;
-  transition: border-color 0.3s, box-shadow 0.3s;
+/* ── Form ──────────────────────────────────────────────────────────────────── */
+
+.eti-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.edit-team-form input.form-control:focus {
-  border-color: #2ecc71;
-  box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
-  outline: none;
+.eti-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.edit-team-form input.form-control::placeholder {
-  color: #b0b0b0;
-  font-size: 14px;
-}
-
-.edit-team-form input.form-control:disabled {
-  background-color: #2a2a2a;
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.edit-team-form .btn-success {
-  padding: 10px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+.eti-label {
+  font-size: 0.78rem;
   font-weight: 600;
-  border-radius: 5px;
-  background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
-  border: none;
-  transition: transform 0.3s, box-shadow 0.3s;
+  color: var(--accent-light);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.eti-input {
   width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
-.edit-team-form .btn-success:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(46, 204, 113, 0.7);
+.eti-input::placeholder {
+  color: var(--text-muted);
 }
 
-.edit-team-form .btn-success:disabled {
-  background: linear-gradient(90deg, #1e874b 0%, #1a6e42 100%);
-  opacity: 0.7;
+.eti-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--shadow-accent);
+}
+
+.eti-input:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.edit-team-form .vampire-label {
-  color: #2ecc71;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  font-weight: 400;
+.eti-char-count {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: right;
 }
 
-.message {
-  color: #27ae60;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+/* ── Submit button ─────────────────────────────────────────────────────────── */
+
+.eti-submit {
+  width: 100%;
+  padding: 11px;
+  background: var(--accent);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
   font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+  letter-spacing: 0.2px;
+}
+
+.eti-submit:hover:not(:disabled) {
+  background: var(--accent-hover);
+  box-shadow: 0 0 0 3px var(--shadow-accent);
+  transform: translateY(-1px);
+}
+
+.eti-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Feedback message ──────────────────────────────────────────────────────── */
+
+.eti-message {
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 500;
   text-align: center;
-  margin-top: 15px;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid;
+  border: 1px solid transparent;
 }
 
-.message.error {
-  color: #e74c3c;
-  background-color: rgba(231, 76, 60, 0.2);
-  border-color: rgba(231, 76, 60, 0.4);
+.eti-message--success {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+  border-color: rgba(74, 222, 128, 0.3);
 }
 
-.message.success {
-  color: #2ecc71;
-  background-color: rgba(46, 204, 113, 0.2);
-  border-color: rgba(46, 204, 113, 0.4);
+.eti-message--error {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .eti-card {
+    padding: 20px 16px;
+    border-radius: 10px;
+  }
+
+  .eti-title {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+  }
 }
