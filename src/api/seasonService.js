@@ -1,17 +1,26 @@
 import axiosInstance from '../api';
 
-export const getCurrentFantasyWeek = async () => {
+/** @param {number | undefined} [nowMs] */
+export const getCurrentFantasyWeek = async (nowMs = undefined) => {
   try {
-    // Get current date and time in EST
-    const now = new Date();
-    const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    let year, formattedDate;
 
-    // determine if test mode is active
-    const testMode = process.env.REACT_APP_TEST_MODE === 'true';
-    const year = testMode ? parseInt(process.env.REACT_APP_TEST_YEAR) : estDate.getFullYear();
-    
-    // Format date to match database format (YYYY-MM-DD HH:MM:SS)
-    const formattedDate = testMode ? '2025-12-12 00:00:00' :  estDate.toISOString().slice(0, 19).replace('T', ' ');
+    if (nowMs != null) {
+      const d = new Date(nowMs);
+      year = d.getFullYear();
+      formattedDate = d.toISOString().slice(0, 19).replace('T', ' ');
+    } else {
+      // Get current date and time in EST
+      const now = new Date();
+      const estDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+
+      // determine if test mode is active
+      const testMode = process.env.REACT_APP_TEST_MODE === 'true';
+      year = testMode ? parseInt(process.env.REACT_APP_TEST_YEAR) : estDate.getFullYear();
+
+      // Format date to match database format (YYYY-MM-DD HH:MM:SS)
+      formattedDate = testMode ? '2025-12-12 00:00:00' : estDate.toISOString().slice(0, 19).replace('T', ' ');
+    }
 
     // Fetch all fantasy weeks for the current year
     const response = await axiosInstance.get(`/fantasy_weeks/getFantasyWeeksByYear/${year}`);

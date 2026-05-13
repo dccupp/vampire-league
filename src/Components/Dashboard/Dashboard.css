@@ -178,6 +178,13 @@
   color: var(--text-secondary);
 }
 
+.db-matchup-record {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-left: 6px;
+}
+
 .db-matchup-score {
   font-size: 1.3rem;
   font-weight: 700;

@@ -1,0 +1,164 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+/* ── Trigger button (fixed, bottom-right corner) ───────────────────────────── */
+
+.dim-trigger {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 900;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  border: 1px solid var(--border-accent);
+  background: var(--bg-elevated);
+  color: var(--accent);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px var(--shadow);
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.dim-trigger:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-light);
+  box-shadow: 0 0 0 4px var(--shadow-accent), 0 4px 16px var(--shadow);
+  transform: scale(1.08);
+}
+
+.dim-trigger:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--shadow-accent);
+}
+
+/* ── Overlay ────────────────────────────────────────────────────────────────── */
+
+.dim-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* ── Modal card ─────────────────────────────────────────────────────────────── */
+
+.dim-modal {
+  background: linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--border);
+  width: 100%;
+  max-width: 480px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  animation-duration: 0.25s;
+}
+
+/* ── Header row ─────────────────────────────────────────────────────────────── */
+
+.dim-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.dim-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.2px;
+}
+
+.dim-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+}
+
+.dim-close:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+/* ── Body text ──────────────────────────────────────────────────────────────── */
+
+.dim-body {
+  padding: 1rem 1.25rem;
+}
+
+.dim-body p {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  margin: 0 0 0.75rem 0;
+}
+
+.dim-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────────── */
+
+.dim-footer {
+  padding: 0.6rem 1.25rem 0.9rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dim-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .dim-trigger {
+    bottom: 1rem;
+    right: 1rem;
+    width: 2.1rem;
+    height: 2.1rem;
+    font-size: 1rem;
+  }
+
+  .dim-modal {
+    border-radius: 10px;
+  }
+
+  .dim-header {
+    padding: 0.85rem 1rem 0.65rem;
+  }
+
+  .dim-body {
+    padding: 0.85rem 1rem;
+  }
+
+  .dim-body p {
+    font-size: 0.825rem;
+  }
+}

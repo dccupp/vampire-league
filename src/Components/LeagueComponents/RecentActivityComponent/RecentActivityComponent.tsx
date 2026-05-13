@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
 import { LeagueLog } from '../../../types';
+import { useNow } from '../../../context/NowContext';
 import './RecentActivityComponent.css';
 
 interface RecentActivityProps {
@@ -18,8 +19,8 @@ const TYPE_LABELS: Record<LeagueLog['type'], string> = {
   vampire_transaction: 'Vampire',
 };
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
+function timeAgo(dateStr: string, nowMs: number): string {
+  const diff = nowMs - new Date(dateStr).getTime();
   const minutes = Math.floor(diff / 60_000);
   if (minutes < 1) return 'just now';
   if (minutes < 60) return `${minutes}m ago`;
@@ -30,6 +31,7 @@ function timeAgo(dateStr: string): string {
 }
 
 const RecentActivityComponent = ({ leagueId, compact = false }: RecentActivityProps) => {
+  const nowMs = useNow();
   const [logs, setLogs] = useState<LeagueLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,7 @@ const RecentActivityComponent = ({ leagueId, compact = false }: RecentActivityPr
     const fetchLogs = async () => {
       try {
         const response = await axiosInstance.get(`/logs/getLogsByLeagueId/${leagueId}`);
-        const cutoff = Date.now() - DAYS_WINDOW * 24 * 60 * 60 * 1000;
+        const cutoff = nowMs - DAYS_WINDOW * 24 * 60 * 60 * 1000;
         const recent: LeagueLog[] = response.data.filter(
           (log: LeagueLog) => new Date(log.created_at).getTime() >= cutoff
         );
@@ -54,7 +56,7 @@ const RecentActivityComponent = ({ leagueId, compact = false }: RecentActivityPr
     };
 
     fetchLogs();
-  }, [leagueId]);
+  }, [leagueId, nowMs]);
 
   if (loading) {
     return <div className="rac-container rac-state">Loading activity...</div>;
@@ -84,7 +86,7 @@ const RecentActivityComponent = ({ leagueId, compact = false }: RecentActivityPr
               </span>
               <span className="rac-team">{log.team_name}</span>
               <span className="rac-message">{log.message}</span>
-              <span className="rac-time">{timeAgo(log.created_at)}</span>
+              <span className="rac-time">{timeAgo(log.created_at, nowMs)}</span>
             </li>
           ))}
         </ul>

@@ -5,6 +5,7 @@ import axiosInstance from '../../api';
 import { getCurrentFantasyWeek } from '../../api/seasonService';
 import { CurrentUser, CurrentLeague, LeagueMember, Schedule } from '../../types';
 import RecentActivityComponent from '../LeagueComponents/RecentActivityComponent/RecentActivityComponent';
+import { useNow } from '../../context/NowContext';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -20,11 +21,13 @@ interface TeamData {
 interface CurrentMatchup {
   week: number;
   opponentName: string;
+  opponentRecord: { wins: number; losses: number };
   myScore: number | null;
   opponentScore: number | null;
 }
 
 const Dashboard = ({ currentUser, currentLeague }: DashboardProps) => {
+  const nowMs = useNow();
   const [teamData, setTeamData] = useState<TeamData>({ team_name: '', remaining_faab_budget: '0' });
   const [record, setRecord] = useState({ wins: 0, losses: 0 });
   const [currentMatchup, setCurrentMatchup] = useState<CurrentMatchup | null>(null);
@@ -43,7 +46,7 @@ const Dashboard = ({ currentUser, currentLeague }: DashboardProps) => {
         const [membersRes, schedulesRes, weekResult] = await Promise.all([
           axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`),
           axiosInstance.get(`/schedules/getSchedulesByLeagueId/${currentLeague.league_id}`),
-          getCurrentFantasyWeek().catch(() => null),
+          getCurrentFantasyWeek(nowMs).catch(() => null),
         ]);
 
         const members: LeagueMember[] = membersRes.data;
@@ -79,9 +82,16 @@ const Dashboard = ({ currentUser, currentLeague }: DashboardProps) => {
             const isHome = weekMatchup.home_league_member === member.id;
             const opponentId = isHome ? weekMatchup.away_league_member : weekMatchup.home_league_member;
             const opponent = members.find((m: LeagueMember) => m.id === opponentId);
+            const opponentMatches = schedules.filter(
+              s => s.winner !== null && (s.home_league_member === opponentId || s.away_league_member === opponentId)
+            );
             setCurrentMatchup({
               week: currentWeekNum,
               opponentName: opponent?.team_name || 'Unknown',
+              opponentRecord: {
+                wins: opponentMatches.filter(s => s.winner === opponentId).length,
+                losses: opponentMatches.filter(s => s.winner !== opponentId).length,
+              },
               myScore: isHome ? weekMatchup.home_score : weekMatchup.away_score,
               opponentScore: isHome ? weekMatchup.away_score : weekMatchup.home_score,
             });
@@ -97,7 +107,7 @@ const Dashboard = ({ currentUser, currentLeague }: DashboardProps) => {
       }
     };
     fetchData();
-  }, [currentUser?.id, currentLeague?.league_id]);
+  }, [currentUser?.id, currentLeague?.league_id, nowMs]);
 
   if (loading) {
     return (
@@ -136,14 +146,20 @@ const Dashboard = ({ currentUser, currentLeague }: DashboardProps) => {
             {currentMatchup ? (
               <>
                 <div className="db-matchup-row">
-                  <span className="db-matchup-team-name">{teamData.team_name}</span>
+                  <span className="db-matchup-team-name">
+                    {teamData.team_name}
+                    <span className="db-matchup-record">{record.wins}–{record.losses}</span>
+                  </span>
                   <span className="db-matchup-score db-matchup-score--mine">
                     {currentMatchup.myScore != null ? currentMatchup.myScore.toFixed(2) : '—'}
                   </span>
                 </div>
                 <div className="db-matchup-vs">vs</div>
                 <div className="db-matchup-row">
-                  <span className="db-matchup-team-name db-matchup-team-name--opp">{currentMatchup.opponentName}</span>
+                  <span className="db-matchup-team-name db-matchup-team-name--opp">
+                    {currentMatchup.opponentName}
+                    <span className="db-matchup-record">{currentMatchup.opponentRecord.wins}–{currentMatchup.opponentRecord.losses}</span>
+                  </span>
                   <span className="db-matchup-score">
                     {currentMatchup.opponentScore != null ? currentMatchup.opponentScore.toFixed(2) : '—'}
                   </span>

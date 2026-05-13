@@ -22,6 +22,7 @@ import AddPlayerToTeamComponent from './Components/LMToolsComponents/AddPlayerTo
 import ViewLeagueMemberRosterComponent from './Components/LeagueComponents/ViewLeagueMemberRosterComponent/ViewLeagueMemberRosterComponent';
 import ActivateLeagueComponent from './Components/LMToolsComponents/ActivateLeagueComponent/ActivateLeagueComponent';
 import ActivityFeedPage from './Components/ActivityFeedPage/ActivityFeedPage';
+import { NowProvider } from './context/NowContext';
 import axiosInstance from './api';
 import { CurrentUser, CurrentLeague, LeagueMember, League } from './types';
 
@@ -88,6 +89,7 @@ const AppContent = () => {
   }, [currentUser?.id, currentLeague?.league_id]);
 
   return (
+    <NowProvider currentLeague={currentLeague}>
     <ErrorBoundary>
       <div className="app-content">
         <Navbar
@@ -316,6 +318,7 @@ const AppContent = () => {
         </div>
       </div>
     </ErrorBoundary>
+    </NowProvider>
   );
 };
 

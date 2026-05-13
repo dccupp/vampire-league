@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
 import { CurrentUser, CurrentLeague, LeagueMember, LeagueLog } from '../../types';
+import { useNow } from '../../context/NowContext';
 import './ActivityFeedPage.css';
 
 interface ActivityFeedPageProps {
@@ -23,8 +24,9 @@ const TIME_RANGE_MS: Record<Exclude<TimeRange, 'season'>, number> = {
   '30days': 30 * 24 * 60 * 60 * 1000,
 };
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
+
+function timeAgo(dateStr: string, nowMs: number): string {
+  const diff = nowMs - new Date(dateStr).getTime();
   const minutes = Math.floor(diff / 60_000);
   if (minutes < 1) return 'just now';
   if (minutes < 60) return `${minutes}m ago`;
@@ -39,6 +41,8 @@ const ActivityFeedPage = ({ currentLeague }: ActivityFeedPageProps) => {
   const [members, setMembers] = useState<LeagueMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const nowMs = useNow();
 
   const [timeRange, setTimeRange] = useState<TimeRange>('7days');
   const [selectedMember, setSelectedMember] = useState<string>('all');
@@ -67,7 +71,7 @@ const ActivityFeedPage = ({ currentLeague }: ActivityFeedPageProps) => {
 
   const filtered = useMemo(() => {
     const cutoff = timeRange !== 'season'
-      ? Date.now() - TIME_RANGE_MS[timeRange]
+      ? nowMs - TIME_RANGE_MS[timeRange]
       : null;
 
     return logs.filter(log => {
@@ -76,7 +80,7 @@ const ActivityFeedPage = ({ currentLeague }: ActivityFeedPageProps) => {
       if (selectedType !== 'all' && log.type !== selectedType) return false;
       return true;
     });
-  }, [logs, timeRange, selectedMember, selectedType]);
+  }, [logs, timeRange, selectedMember, selectedType, nowMs]);
 
   return (
     <div className="afp-container animate__animated animate__fadeIn">
@@ -131,7 +135,7 @@ const ActivityFeedPage = ({ currentLeague }: ActivityFeedPageProps) => {
                 </span>
                 <span className="afp-team">{log.team_name}</span>
                 <span className="afp-message">{log.message}</span>
-                <span className="afp-time">{timeAgo(log.created_at)}</span>
+                <span className="afp-time">{timeAgo(log.created_at, nowMs)}</span>
               </li>
             ))}
           </ul>

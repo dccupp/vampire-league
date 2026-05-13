@@ -171,14 +171,20 @@
   border-bottom: 2px solid var(--gold-dim) !important;
 }
 
+.roster-table th.slot-header,
+.roster-table .slot-cell {
+  width: 15%;
+  text-align: center;
+}
+
 .roster-table th.score-header,
 .roster-table .score-cell {
-  width: 30%;
+  width: 25%;
 }
 
 .roster-table th.player-header,
 .roster-table .player-cell {
-  width: 70%;
+  width: 60%;
 }
 
 .roster-table .player-cell {

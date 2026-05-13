@@ -4,6 +4,7 @@ import axiosInstance from '../../api';
 import { getCurrentFantasyWeek } from '../../api/seasonService';
 import { CurrentUser, CurrentLeague, RosterSlot, Schedule, LeagueMember, RosterRules } from '../../types';
 import PlayerCard from '../PlayerCard/PlayerCard';
+import { useNow } from '../../context/NowContext';
 import './MatchupComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -13,6 +14,7 @@ interface MatchupComponentProps {
 }
 
 const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps) => {
+  const nowMs = useNow();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [leagueMembers, setLeagueMembers] = useState<LeagueMember[]>([]);
   const [rosterRules, setRosterRules] = useState<Record<number, RosterRules> | null>(null);
@@ -30,14 +32,22 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
   // Derived from roster slots — no separate state needed
   const homeTeamScore = useMemo(() =>
     homeRosterSlots
-      .filter(slot => slot.position !== 'BENCH' && slot.position !== 'IR' && slot.player?.fantasyScore != null)
+      .filter(slot =>
+        slot.player?.fantasyScore != null &&
+        !slot.sPosition.startsWith('BENCH') &&
+        !slot.sPosition.startsWith('IR')
+      )
       .reduce((sum, slot) => sum + (slot.player!.fantasyScore as number), 0),
     [homeRosterSlots]
   );
 
   const awayTeamScore = useMemo(() =>
     awayRosterSlots
-      .filter(slot => slot.position !== 'BENCH' && slot.position !== 'IR' && slot.player?.fantasyScore != null)
+      .filter(slot =>
+        slot.player?.fantasyScore != null &&
+        !slot.sPosition.startsWith('BENCH') &&
+        !slot.sPosition.startsWith('IR')
+      )
       .reduce((sum, slot) => sum + (slot.player!.fantasyScore as number), 0),
     [awayRosterSlots]
   );
@@ -100,7 +110,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
           axiosInstance.get(`/schedules/getSchedulesByLeagueId/${currentLeague.league_id}`),
           (async () => {
             try {
-              const weekRes = await getCurrentFantasyWeek();
+              const weekRes = await getCurrentFantasyWeek(nowMs);
               return weekRes.data ?? null;
             } catch {
               return null;
@@ -133,9 +143,14 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
         const uniqueWeeks = [...new Set(schedulesRes.data.map(s => s.week))].sort((a, b) => a - b);
         setWeeks(uniqueWeeks);
         if (uniqueWeeks.length > 0) {
-          setSelectedWeek(uniqueWeeks[0]);
+          const currentWeek = currentWeekResult?.week;
+          const defaultWeek = currentWeek && uniqueWeeks.includes(currentWeek)
+            ? currentWeek
+            : uniqueWeeks[0];
+          setSelectedWeek(defaultWeek);
         }
 
+        console.log('[MatchupComponent] currentFantasyWeek:', currentWeekResult);
         setCurrentFantasyWeek(currentWeekResult);
 
       } catch (error) {
@@ -147,7 +162,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
       }
     };
     fetchData();
-  }, [currentLeague.league_id]);
+  }, [currentLeague.league_id, nowMs]);
 
   // Auto-select the current user's matchup; fall back to the first matchup
   useEffect(() => {
@@ -178,19 +193,28 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
 
       const week = parseInt(selectedWeek, 10);
       const year = currentFantasyWeek.year;
+      const isHistorical = week < currentFantasyWeek.week;
 
       try {
         const res = await axiosInstance.get(
           `/matchups/getMatchupPageData/${currentLeague.league_id}/${selectedMatchup}`,
-          { params: { week, year } }
+          { params: { week, year, ...(isHistorical ? { historical: true } : {}) } }
         );
 
         const { home_roster, away_roster } = res.data;
 
-        const homeRules = rosterRules[matchup.home_league_member];
-        const awayRules = rosterRules[matchup.away_league_member];
-        setHomeRosterSlots(constructRosterSlots(homeRules, home_roster || []));
-        setAwayRosterSlots(constructRosterSlots(awayRules, away_roster || []));
+        if (isHistorical) {
+          // Past week: players and scores come from rostered_player_weekly_scores.
+          // Build slots directly from stored roster_position — avoids rosterRules
+          // mismatch (e.g. vampire team TE slots) that would wrongly bench starters.
+setHomeRosterSlots(buildHistoricalSlots(home_roster || []));
+          setAwayRosterSlots(buildHistoricalSlots(away_roster || []));
+        } else {
+          const homeRules = rosterRules[matchup.home_league_member];
+          const awayRules = rosterRules[matchup.away_league_member];
+          setHomeRosterSlots(constructRosterSlots(homeRules, home_roster || []));
+          setAwayRosterSlots(constructRosterSlots(awayRules, away_roster || []));
+        }
 
         if (!home_roster?.length && !away_roster?.length) {
           setMessage('No players rostered for either team.');
@@ -212,7 +236,23 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
       }
     };
     fetchRosters();
-  }, [selectedMatchup, rosterRules, currentFantasyWeek, matchups, currentLeague.league_id]);
+  }, [selectedMatchup, rosterRules, currentFantasyWeek, matchups, currentLeague.league_id, nowMs]);
+
+  const POSITION_ORDER = ['QB', 'RB', 'WR', 'TE', 'WRT', 'FLEX', 'BENCH', 'IR'];
+
+  const buildHistoricalSlots = (players: any[]): RosterSlot[] =>
+    players
+      .map(p => ({
+        position: (p.roster_position as string).replace(/\d+$/, ''),
+        sPosition: p.roster_position as string,
+        player: p,
+      }))
+      .sort((a, b) => {
+        const ai = POSITION_ORDER.indexOf(a.position);
+        const bi = POSITION_ORDER.indexOf(b.position);
+        if (ai !== bi) return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+        return parseInt(a.sPosition.replace(/\D/g, ''), 10) - parseInt(b.sPosition.replace(/\D/g, ''), 10);
+      });
 
   const constructRosterSlots = (rosterRules: RosterRules, rosteredPlayers: any[]): RosterSlot[] => {
     if (!rosterRules || rosteredPlayers.length === 0) return [];
@@ -324,6 +364,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
               <table className="roster-table" id="home-roster-table">
                 <thead>
                   <tr>
+                    <th className="slot-header">Slot</th>
                     <th className="player-header">Player</th>
                     <th className="score-header">Score</th>
                   </tr>
@@ -333,6 +374,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
                     .filter(rosterEntry => rosterEntry.position !== 'BENCH' && rosterEntry.position !== 'IR' && rosterEntry.sPosition)
                     .map((rosterEntry, index) => (
                       <tr key={rosterEntry.sPosition} className="roster-row" data-position={rosterEntry.sPosition}>
+                        <td className="slot-cell">{rosterEntry.position}</td>
                         <td className="player-cell">
                           {rosterEntry.player ? (
                             <PlayerCard player={rosterEntry.player} index={index} onClick={() => {}} isSelected={false} />
@@ -353,6 +395,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
               <table className="roster-table" id="home-bench-table">
                 <thead>
                   <tr>
+                    <th className="slot-header">Slot</th>
                     <th className="player-header">Player</th>
                     <th className="score-header">Score</th>
                   </tr>
@@ -362,6 +405,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
                     .filter(rosterEntry => rosterEntry.position === 'BENCH')
                     .map((rosterEntry, index) => (
                       <tr key={rosterEntry.sPosition} className="roster-row">
+                        <td className="slot-cell">{rosterEntry.position}</td>
                         <td className="player-cell">
                           {rosterEntry.player ? (
                             <PlayerCard player={rosterEntry.player} index={index} onClick={() => {}} isSelected={false} />
@@ -387,6 +431,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
                   <tr>
                     <th className="score-header">Score</th>
                     <th className="player-header">Player</th>
+                    <th className="slot-header">Slot</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -404,6 +449,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
                             <div className="empty-slot">Empty</div>
                           )}
                         </td>
+                        <td className="slot-cell">{rosterEntry.position}</td>
                       </tr>
                     ))}
                 </tbody>
@@ -416,6 +462,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
                   <tr>
                     <th className="score-header">Score</th>
                     <th className="player-header">Player</th>
+                    <th className="slot-header">Slot</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -433,6 +480,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
                             <div className="empty-slot">Empty</div>
                           )}
                         </td>
+                        <td className="slot-cell">{rosterEntry.position}</td>
                       </tr>
                     ))}
                 </tbody>
