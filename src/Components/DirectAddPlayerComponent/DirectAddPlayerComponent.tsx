@@ -97,7 +97,6 @@ const DirectAddPlayerComponent = ({
           roster_position: 'BENCH',
           league_member_id: league_member.id,
         };
-        console.log('Drop player update body:', dropBody);
         await axiosInstance.put(`/rostered_players/update/${playerToDrop}`, dropBody);
       }
 
@@ -110,7 +109,7 @@ const DirectAddPlayerComponent = ({
           existingId = checkResponse.data.id;
         }
       } catch {
-        console.log('Rostered player not found, will create new record.');
+        // console.log('Rostered player not found, will create new record.');
       }
 
       if (existingId) {

@@ -150,7 +150,6 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
           setSelectedWeek(defaultWeek);
         }
 
-        console.log('[MatchupComponent] currentFantasyWeek:', currentWeekResult);
         setCurrentFantasyWeek(currentWeekResult);
 
       } catch (error) {

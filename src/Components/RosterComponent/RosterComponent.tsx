@@ -40,35 +40,6 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
     }
   }, [message, messageType]);
 
-  /*
-   * fetchRosterData — the single useEffect responsible for all API calls this component needs.
-   *
-   * Dependency array: [currentUser?.id, currentLeague?.league_id]
-   *   Runs once on mount. Only re-runs if the logged-in user or active league changes,
-   *   which would mean we need a completely fresh set of data anyway.
-   *
-   * Why one useEffect instead of many?
-   *   Chaining multiple useEffects (each setting state that triggers the next) causes
-   *   extra render cycles and makes the data flow hard to follow. One effect that owns
-   *   all fetching keeps the sequence explicit and predictable.
-   *
-   * Fetch sequence:
-   *   Step 1 — await league member
-   *     Must go first. We need is_vamp (determines roster rule type) and
-   *     member.id (needed to fetch rostered players) before we can proceed.
-   *
-   *   Step 2 — Promise.all([roster rules, rostered players, fantasy week])
-   *     These three calls don't depend on each other, so we fire them simultaneously.
-   *     Promise.all waits for all three to finish before moving on.
-   *
-   *   Step 3 — await NFL schedule
-   *     Must be sequential here — we need year and week from the fantasy week
-   *     response in Step 2 before we can build the schedule request URL.
-   *
-   *   Step 4 — map schedule onto players (pure JS, no API call)
-   *     Matches each rostered player to their team's game using Array.find,
-   *     then attaches the game info as a schedule property on the player object.
-   */
   useEffect(() => {
     const fetchRosterData = async () => {
       if (!currentUser?.id || !currentLeague?.league_id) {
@@ -119,11 +90,6 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
         });
 
         setRosteredPlayers(playersWithSchedule);
-
-        console.log('=== RosterComponent: Data Loaded ===');
-        console.log('League Member:', member);
-        console.log('Roster Rules:', rulesResponse.data);
-        console.log('Rostered Players with Schedule:', playersWithSchedule);
       } catch (err) {
         if (axios.isAxiosError(err)) {
           setError(err.response?.data?.message || err.message || 'Failed to load roster data.');
@@ -141,15 +107,10 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
   }, [currentUser?.id, currentLeague?.league_id]);
 
 
-  // Derive roster slots from rosterRules and assign rosteredPlayers to their matching slots
   const rosterSlots = useMemo(() => {
 
-    // We need rosterRules to be set in order to do anything in this hook... so if rosterRules is empty, return an empty array
     if (!rosterRules) return [];
 
-    // create a positionCounts array that will be used for determining how the roster table should be structured.
-    // The properties utilized from the rosterRules information determine how many slots for each position should 
-    // be represented on the roster table
     const positionCounts = [
       { position: 'QB',    count: rosterRules.quarterback_count             || 0 },
       { position: 'RB',    count: rosterRules.running_back_count            || 0 },
@@ -160,47 +121,23 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
       { position: 'BENCH', count: rosterRules.bench_count                   || 0 },
       { position: 'IR',    count: rosterRules.ir_count                      || 0 },
     ];
-
-    // Define the slots array, which will be used to define the roster slots on the table themselves
     const slots: RosterSlot[] = [];
 
-    // For each item in the positionCount array... if i is less than the count property of that item... 
-    // create a roster slot item in the slots array
-
-    // Define position as the position value of the positionCounts item, 
-    // sPosition as the position value and the current value for i + 1,
-    // player should be null as the slot is currently empty
     positionCounts.forEach(({ position, count }) => {
       for (let i = 0; i < count; i++) {
         slots.push({ position, sPosition: `${position}${i + 1}`, player: null });
       }
     });
-
-    console.log("Slots:", slots);
-
     // if rosteredPlayers is empty... return slots in it's current form
     if (rosteredPlayers.length === 0) return slots;
 
-    // Normalize roster_position to uppercase so matching is case-insensitive
-    // Utilizing a spread operator for the current rosteredPlayers item...
-    // except to make sure that the roster_position value is set to uppercase
     const normalized = rosteredPlayers.map(p => ({
       ...p,
       roster_position: p.roster_position ? p.roster_position.toUpperCase() : 'BENCH',
     }));
 
-    console.log("Normalized Rostered Players:", normalized);
-
-    // Assign each player to the slot whose sPosition matches their roster_position.
-    // BENCH players (roster_position === 'BENCH') fill the next available BENCH slot.
-
-    // create unassigned array that contains all of the normalized rostered player data
     const unassigned = [...normalized];
 
-    // for each item in the slot array, find a record with the same roster_position values
-    // from the unassigned array and assign it to idx
-    // if the record was found, assign the found records value to the slot.player property
-    // once this process has taken place, the unassigned record is removed from the array
     slots.forEach(slot => {
       const idx = unassigned.findIndex(p => p.roster_position === slot.sPosition);
       if (idx !== -1) {
@@ -210,14 +147,9 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
       }
     });
 
-    // Any players left over (overflow beyond bench_count) get extra BENCH rows 
-    // sort the slots records into IR and NON IR lists
     const irSlots = slots.filter(s => s.position === 'IR');
     const nonIrSlots = slots.filter(s => s.position !== 'IR');
 
-    // for each remaining record in the unassigned array that wasn't matched to a slot record
-    // earlier... (these remaining records should be extra bench players)... and put them in the
-    // nonIrSlots array
     unassigned.forEach(p => {
       nonIrSlots.push({
         position: 'BENCH',
@@ -226,7 +158,6 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
       });
     });
 
-    // Show enough empty BENCH rows to reach bench_count minimum, but never fewer filled rows
     const benchCount = rosterRules.bench_count || 0;
     const nonBenchNonIr = nonIrSlots.filter(s => s.position !== 'BENCH');
     const filledBench   = nonIrSlots.filter(s => s.position === 'BENCH' && s.player);
@@ -240,19 +171,8 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
   const handlePlayerClick = (index: number | string) => {
     const numIndex = typeof index === 'string' ? parseInt(index, 10) : index;
     const slot = rosterSlots[numIndex];
-    console.log("Selected Slot:", slot);
-    console.log("Selected Player Index:", selectedPlayerIndex);
 
-    // if the selected player index is null, sets the selected player index to the 
-    // index of the selected slot
     if (selectedPlayerIndex === null) {
-      console.log("Selected Player Index is null");
-      if (slot.player) {
-        console.log("Slot Player:", slot.player); 
-        console.log("Index:", index)
-      } else {
-        console.log("No Slot Player");
-      }
       if (slot.player) {
         setSelectedPlayerIndex(numIndex);
         setMessage(`Move ${slot.player.player_name} where?`);
@@ -261,7 +181,6 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
       return;
     }
 
-    // Same card clicked twice — open the action modal
     if (selectedPlayerIndex === numIndex) {
       setIsActionModalOpen(true);
       setMessage('');
@@ -364,11 +283,6 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
     const sourcePlayer = sourceSlot.player;
     const targetPlayer = targetSlot.player;
 
-    console.log("Source Slot:", sourceSlot);
-    console.log("Source Player:", sourcePlayer);
-    console.log("Target Slot:", targetSlot);
-    console.log("Target Player:", targetPlayer);
-
     const sourceRosteredPlayer = rosteredPlayers.find(p => p.player_id === sourcePlayer?.player_id);
     const targetRosteredPlayer = targetPlayer
       ? rosteredPlayers.find(p => p.player_id === targetPlayer.player_id)
@@ -380,9 +294,6 @@ const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) =
       setSelectedPlayerIndex(null);
       return;
     }
-
-    console.log("Can Source Player Valid Move?:", isValidMove(sourcePlayer, targetSlot.position));
-    console.log("Can Target Player Valid Move?:", isValidMove(targetPlayer, sourceSlot.position));
 
     if (!isValidMove(sourcePlayer, targetSlot.position)) {
       setMessage(`${sourcePlayer.player_name} cannot play ${targetSlot.position}.`);

@@ -135,14 +135,14 @@ const MatchupComponent = ({ currentUser, currentLeague }) => {
           const homeResponse = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${matchup.home_league_member}`);
           const homePlayers = Array.isArray(homeResponse.data) ? homeResponse.data : [];
           const homeSlots = constructRosterSlots(rosterRules, homePlayers);
-          console.log("homePlayers:", homePlayers);
+
           setHomeRosterSlots(homeSlots);
 
           // Fetch away roster
           const awayResponse = await axiosInstance.get(`/rostered_players/getRosteredPlayersByLeagueMemberId/${matchup.away_league_member}`);
           const awayPlayers = Array.isArray(awayResponse.data) ? awayResponse.data : [];
           const awaySlots = constructRosterSlots(rosterRules, awayPlayers);
-          console.log("awayPlayers:", awayPlayers);
+
           setAwayRosterSlots(awaySlots);
 
           if (homePlayers.length === 0 && awayPlayers.length === 0) {
