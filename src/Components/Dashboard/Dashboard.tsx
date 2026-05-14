@@ -164,7 +164,7 @@ const Dashboard = ({ currentUser, currentLeague }: DashboardProps) => {
                     {currentMatchup.opponentScore != null ? currentMatchup.opponentScore.toFixed(2) : '—'}
                   </span>
                 </div>
-                <NavLink to="/matchup" className="db-matchup-link">View Full Matchup →</NavLink>
+                <NavLink to="/matchups" className="db-matchup-link">View Full Matchup →</NavLink>
               </>
             ) : (
               <p className="db-no-matchup">No matchup scheduled this week.</p>

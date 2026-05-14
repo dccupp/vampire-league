@@ -49,6 +49,29 @@
   padding: 1rem;
 }
 
+/* ── Inline link trigger ────────────────────────────────────────────────────── */
+
+.dim-trigger-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 1.25rem;
+}
+
+.dim-trigger-link:hover {
+  color: var(--accent-light);
+}
+
 /* ── Modal card ─────────────────────────────────────────────────────────────── */
 
 .dim-modal {
@@ -58,10 +81,13 @@
   border-radius: 14px;
   box-shadow: 0 8px 32px var(--shadow), 0 0 0 1px var(--border);
   width: 100%;
-  max-width: 480px;
+  max-width: 560px;
   font-family: 'Inter', sans-serif;
   color: var(--text);
   animation-duration: 0.25s;
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
 }
 
 /* ── Header row ─────────────────────────────────────────────────────────────── */
@@ -102,6 +128,23 @@
 
 .dim-body {
   padding: 1rem 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-accent) transparent;
+}
+
+.dim-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.dim-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dim-body::-webkit-scrollbar-thumb {
+  background: var(--border-accent);
+  border-radius: 3px;
 }
 
 .dim-body p {
@@ -113,6 +156,21 @@
 
 .dim-body p:last-child {
   margin-bottom: 0;
+}
+
+.dim-section-heading {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gold);
+  margin: 1.1rem 0 0.4rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.dim-section-heading:first-child {
+  margin-top: 0;
 }
 
 /* ── Footer ─────────────────────────────────────────────────────────────────── */
@@ -148,6 +206,7 @@
 
   .dim-modal {
     border-radius: 10px;
+    max-height: 90vh;
   }
 
   .dim-header {

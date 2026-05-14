@@ -1,5 +1,6 @@
 .lgn-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
@@ -9,7 +10,7 @@
 }
 
 .lgn-card {
-  padding: 28px 24px;
+  padding: 36px 24px;
   background: linear-gradient(160deg, var(--bg-surface) 0%, var(--bg-base) 100%);
   border-radius: 14px;
   border: 1px solid var(--border);
@@ -125,6 +126,31 @@
 }
 
 .lgn-link:hover {
+  color: var(--accent-light);
+}
+
+.lgn-disclaimer {
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-top: 1.25rem;
+  padding: 0 4px;
+  opacity: 0.75;
+}
+
+.lgn-disclaimer-link {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+
+.lgn-disclaimer-link:hover {
   color: var(--accent-light);
 }
 

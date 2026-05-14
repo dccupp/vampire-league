@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
 import { CurrentUser } from '../../types';
+import DemoInfoModal from '../DemoInfoModal/DemoInfoModal';
 import './Login.css';
 
 interface LoginProps {
@@ -119,7 +120,20 @@ const Login = ({ setCurrentUser, currentUser }: LoginProps) => {
           )}
         </form>
         <a href="/register" className="lgn-link">Don't have an account? Register</a>
+        <DemoInfoModal context="Login" variant="link" />
       </div>
+      <p className="lgn-disclaimer">
+        This is a private, non-commercial site. Access is by invitation only.{' '}
+        If you would like a demonstration, you can reach me at {' '}
+        <a
+          href="https://www.linkedin.com/in/dennis-cupp-46129231"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="lgn-disclaimer-link"
+        >
+          my LinkedIn.
+        </a>
+      </p>
     </div>
   );
 };

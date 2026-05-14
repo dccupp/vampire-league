@@ -1,71 +1,100 @@
-# Getting Started with Create React App
+# Vampire League — Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React frontend for Vampire League Fantasy Football, a private league 
+management app built around a custom ruleset where one manager 
+(the Vampire) has special powers to steal players from opponents.
+
+🌐 **Live Demo:** [vampireleaguefootball.com](http://vampireleaguefootball.com)
+
+> **Backend API:** [vamp_api_laravel](https://github.com/dccupp/vamp_api_laravel) 
+> — Built with Laravel, deployed on DigitalOcean
+
+## Tech Stack
+
+- **React 18** with TypeScript
+- **React Router 6** for client-side routing
+- **Axios** for API communication
+- **React Hook Form + Yup** for form validation
+- **React DnD** for drag-and-drop roster management
+- **React Bootstrap / Bootstrap 5** for UI components
+- **Sentry** for error tracking
+- **Create React App** (Webpack-based build)
+
+## Prerequisites
+
+- Node.js 16+
+- The [vamp_api_laravel](https://github.com/dccupp/vamp_api_laravel) 
+  backend running locally on port 8080
+
+## Getting Started
+
+```bash
+npm install
+npm start
+```
+
+The dev server proxies `/api` requests to `http://localhost:8080`.
+
+## Environment Variables
+
+| Variable | Development | Production |
+|---|---|---|
+| `REACT_APP_API_URL` | `/api/` | `https://api.vampireleaguefootball.com/api/` |
+| `REACT_APP_TEST_MODE` | `true` | `true` |
+| `REACT_APP_TEST_YEAR` | `2025` | `2025` |
+
+## Project Structure
+
+src/
+├── api/                          # Service layer
+│   ├── leagueService.ts          # League creation (multi-step)
+│   ├── seasonService.js          # NFL schedule & fantasy week logic
+│   └── calculateFantasyScores.ts # Score computation
+├── Components/
+│   ├── Login/                    # Authentication
+│   ├── Registration/
+│   ├── PrivateRoute/             # Route guard HOC
+│   ├── Dashboard/                # Main league view
+│   ├── RosterComponent/          # Player roster management
+│   ├── MatchupComponent/         # Weekly matchup view
+│   ├── WaiversComponent/         # Waiver wire
+│   ├── ActivityFeedPage/         # League transaction history
+│   ├── LandingComponent/         # League selector
+│   ├── CreateLeague/             # Multi-step league creation wizard
+│   ├── LMToolsComponents/        # Commissioner-only tools
+│   ├── LeagueComponents/         # Scoring/roster/waiver rule displays
+│   ├── DemoInfoModal/            # Contextual info modal for demo league
+│   └── Navbar/
+├── constants/
+│   └── demoConstants.ts          # Demo league name and time overrides
+├── context/
+│   └── NowContext.tsx            # Timestamp provider (supports frozen demo time)
+├── types.ts                      # Shared TypeScript interfaces
+└── api.js                        # Axios instance
+
+## Key Features
+
+- **Multi-step league creation** — wizard flow covering roster rules, 
+  scoring rules, and waiver settings
+- **Vampire roster type** — separate lineup configuration and elevated 
+  FAAB budget for the Vampire manager
+- **Waiver system** — FAAB bidding, claim processing, and active claim 
+  tracking
+- **Commissioner tools** — league activation, member management, and 
+  direct player assignment
+- **Demo mode** — fixed timestamps and a demo league for showcasing 
+  the app without live data
+- **Activity feed** — audit trail of all league transactions
 
 ## Available Scripts
 
-In the project directory, you can run:
+```bash
+npm start        # Start dev server
+npm run build    # Production build
+npm test         # Run test suite
+```
 
-### `npm start`
+## Notes
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# vampire-league
+- Several components (`OfferTradeComponent`, `WaiverClaimPriorityFormComponent`) 
+  exist in the repo but are not currently wired into the app
