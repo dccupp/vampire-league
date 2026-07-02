@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
-import { CurrentLeague, RosterRules } from '../../../types';
+import { RosterRules } from '../../../types';
+
+import { useLeague } from '../../../context/LeagueContext';
+
 import './RosterRulesDisplayComponent.css';
 
-interface RosterRulesDisplayComponentProps {
-  currentLeague: CurrentLeague;
-}
-
-const RosterRulesDisplayComponent = ({ currentLeague }: RosterRulesDisplayComponentProps) => {
+const RosterRulesDisplayComponent = () => {
+  const { currentLeague } = useLeague();
   const [rosterRules, setRosterRules] = useState<RosterRules[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

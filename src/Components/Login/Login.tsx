@@ -2,16 +2,13 @@ import { useState, FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
+import { useUser } from '../../context/UserContext';
 import { CurrentUser } from '../../types';
 import DemoInfoModal from '../DemoInfoModal/DemoInfoModal';
 import './Login.css';
 
-interface LoginProps {
-  setCurrentUser: (user: CurrentUser) => void;
-  currentUser: CurrentUser | null;
-}
-
-const Login = ({ setCurrentUser, currentUser }: LoginProps) => {
+const Login = () => {
+  const { currentUser, setCurrentUser } = useUser();
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [message, setMessage] = useState<string>('');

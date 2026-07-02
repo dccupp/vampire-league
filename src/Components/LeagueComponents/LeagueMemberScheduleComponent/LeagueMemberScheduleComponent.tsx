@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
-import { CurrentUser, CurrentLeague, LeagueMember, Schedule } from '../../../types';
+import { LeagueMember, Schedule } from '../../../types';
+
+import { useUser } from '../../../context/UserContext';
+import { useLeague } from '../../../context/LeagueContext';
+
 import './LeagueMemberScheduleComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
-interface LeagueMemberScheduleComponentProps {
-  currentUser: CurrentUser;
-  currentLeague: CurrentLeague;
-}
 
 interface ScheduleEntry {
   week: number;
@@ -50,7 +49,9 @@ const buildSchedule = (
   return result;
 };
 
-const LeagueMemberScheduleComponent = ({ currentUser, currentLeague }: LeagueMemberScheduleComponentProps) => {
+const LeagueMemberScheduleComponent = () => {
+  const { currentUser } = useUser();
+  const { currentLeague } = useLeague();
   const [schedule, setSchedule] = useState<ScheduleEntry[]>([]);
   const [members, setMembers] = useState<LeagueMember[]>([]);
   const [rawSchedules, setRawSchedules] = useState<Schedule[]>([]);

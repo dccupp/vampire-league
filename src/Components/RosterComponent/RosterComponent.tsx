@@ -3,15 +3,14 @@ import axios from 'axios';
 import axiosInstance from '../../api';
 import { getCurrentFantasyWeek, getGamesByWeekAndYear } from '../../api/seasonService';
 import { CurrentUser, CurrentLeague, LeagueMember, RosterRules, RosteredPlayer, RosterSlot, NFLGame } from '../../types';
+import { useUser } from '../../context/UserContext';
+import { useLeague } from '../../context/LeagueContext';
 import './RosterComponent.css';
 import PlayerCard from '../PlayerCard/PlayerCard';
 
-interface RosterComponentProps {
-  currentUser: CurrentUser;
-  currentLeague: CurrentLeague;
-}
-
-const RosterComponent = ({ currentUser, currentLeague }: RosterComponentProps) => {
+const RosterComponent = () => {
+  const { currentUser } = useUser();
+  const { currentLeague } = useLeague();
   const [leagueMember, setLeagueMember] = useState<LeagueMember | null>(null);
   const [rosterRules, setRosterRules] = useState<RosterRules | null>(null);
   const [rosteredPlayers, setRosteredPlayers] = useState<RosteredPlayer[]>([]);

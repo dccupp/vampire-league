@@ -1,15 +1,15 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
-import { CurrentUser, CurrentLeague } from '../../../types';
+
+import { useUser } from '../../../context/UserContext';
+import { useLeague } from '../../../context/LeagueContext';
+
 import './ActivateLeagueComponent.css';
 
-interface ActivateLeagueComponentProps {
-  currentUser: CurrentUser;
-  currentLeague: CurrentLeague;
-}
-
-const ActivateLeagueComponent = ({ currentUser, currentLeague }: ActivateLeagueComponentProps) => {
+const ActivateLeagueComponent = () => {
+  const { currentUser } = useUser();
+  const { currentLeague } = useLeague();
   const [message, setMessage] = useState<string>('');
   const [messageType, setMessageType] = useState<string>('');
   const [isMessageFading, setIsMessageFading] = useState<boolean>(false);
@@ -111,7 +111,7 @@ const ActivateLeagueComponent = ({ currentUser, currentLeague }: ActivateLeagueC
     setIsLoading(true);
 
     try {
-      const response = await axiosInstance.post(`/leagues/activate/${currentLeague.league_id}/${leagueMemberId}`, {});
+      const response = await axiosInstance.post(`/leagues/activate/${currentLeague?.league_id}/${leagueMemberId}`, {});
       if (response.data.status !== 'success') {
         throw new Error(response.data.message || 'Failed to activate league');
       }

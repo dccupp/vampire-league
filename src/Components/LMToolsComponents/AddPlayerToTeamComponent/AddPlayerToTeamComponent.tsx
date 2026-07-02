@@ -2,13 +2,11 @@ import { useState, useEffect, useMemo, useCallback, ChangeEvent, FormEvent } fro
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
 import PlayerCard from '../../PlayerCard/PlayerCard';
-import { CurrentUser, CurrentLeague, RosterRules, LeagueMember } from '../../../types';
-import './AddPlayerToTeamComponent.css';
+import { RosterRules, LeagueMember } from '../../../types';
 
-interface AddPlayerToTeamComponentProps {
-  currentUser: CurrentUser;
-  currentLeague: CurrentLeague;
-}
+import { useLeague } from '../../../context/LeagueContext';
+
+import './AddPlayerToTeamComponent.css';
 
 interface TransformedPlayer {
   player_id: number;
@@ -37,7 +35,8 @@ const nflTeams = [
   'PIT', 'SEA', 'SF', 'TB', 'TEN', 'WAS',
 ];
 
-const AddPlayerToTeamComponent = ({ currentLeague }: AddPlayerToTeamComponentProps) => {
+const AddPlayerToTeamComponent = () => {
+  const { currentLeague } = useLeague();
   const [nameFilter, setNameFilter] = useState<string>('');
   const [teamFilter, setTeamFilter] = useState<string>('All');
   const [positionFilter, setPositionFilter] = useState<string>('All');

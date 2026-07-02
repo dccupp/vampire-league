@@ -1,15 +1,11 @@
 import { createContext, useContext, ReactNode } from 'react';
-import { CurrentLeague } from '../types';
+import { useLeague } from './LeagueContext'; 
 import { DEMO_LEAGUE_NAME, DEMO_NOW_MS } from '../constants/demoConstants';
 
 const NowContext = createContext<number>(Date.now());
 
-interface NowProviderProps {
-  currentLeague: CurrentLeague | null;
-  children: ReactNode;
-}
-
-export function NowProvider({ currentLeague, children }: NowProviderProps) {
+export function NowProvider({ children }: { children: ReactNode}) {
+  const { currentLeague } = useLeague();
   const now = currentLeague?.name === DEMO_LEAGUE_NAME ? DEMO_NOW_MS : Date.now();
   return <NowContext.Provider value={now}>{children}</NowContext.Provider>;
 }

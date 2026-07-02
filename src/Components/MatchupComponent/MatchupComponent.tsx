@@ -2,19 +2,20 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
 import { getCurrentFantasyWeek } from '../../api/seasonService';
-import { CurrentUser, CurrentLeague, RosterSlot, Schedule, LeagueMember, RosterRules } from '../../types';
+import { RosterSlot, Schedule, LeagueMember, RosterRules } from '../../types';
 import PlayerCard from '../PlayerCard/PlayerCard';
+
+import { useUser } from '../../context/UserContext';
+import { useLeague } from '../../context/LeagueContext';
 import { useNow } from '../../context/NowContext';
+
 import './MatchupComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-interface MatchupComponentProps {
-  currentUser: CurrentUser;
-  currentLeague: CurrentLeague;
-}
-
-const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps) => {
+const MatchupComponent = () => {
   const nowMs = useNow();
+  const { currentUser } = useUser();
+  const { currentLeague } = useLeague();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [leagueMembers, setLeagueMembers] = useState<LeagueMember[]>([]);
   const [rosterRules, setRosterRules] = useState<Record<number, RosterRules> | null>(null);
@@ -88,13 +89,14 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
 
   // Fetch static data on mount — members, roster rules, schedules, and current fantasy week
   useEffect(() => {
+    if (!currentLeague) {
+      setMessage('Invalid league data.');
+      setMessageType('error');
+      setIsLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
-      if (!currentLeague?.league_id) {
-        setMessage('Invalid league data.');
-        setMessageType('error');
-        setIsLoading(false);
-        return;
-      }
 
       try {
         const [
@@ -161,12 +163,12 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
       }
     };
     fetchData();
-  }, [currentLeague.league_id, nowMs]);
+  }, [currentLeague?.league_id, nowMs]);
 
   // Auto-select the current user's matchup; fall back to the first matchup
   useEffect(() => {
     if (matchups.length > 0) {
-      const currentMember = leagueMembers.find(m => m.user_id === currentUser.id);
+      const currentMember = leagueMembers.find(m => m.user_id === currentUser?.id);
       const userMatchup = currentMember
         ? matchups.find(m => m.home_league_member === currentMember.id || m.away_league_member === currentMember.id)
         : null;
@@ -196,7 +198,7 @@ const MatchupComponent = ({ currentUser, currentLeague }: MatchupComponentProps)
 
       try {
         const res = await axiosInstance.get(
-          `/matchups/getMatchupPageData/${currentLeague.league_id}/${selectedMatchup}`,
+          `/matchups/getMatchupPageData/${currentLeague?.league_id}/${selectedMatchup}`,
           { params: { week, year, ...(isHistorical ? { historical: true } : {}) } }
         );
 
@@ -235,7 +237,7 @@ setHomeRosterSlots(buildHistoricalSlots(home_roster || []));
       }
     };
     fetchRosters();
-  }, [selectedMatchup, rosterRules, currentFantasyWeek, matchups, currentLeague.league_id, nowMs]);
+  }, [selectedMatchup, rosterRules, currentFantasyWeek, matchups, currentLeague?.league_id, nowMs]);
 
   const POSITION_ORDER = ['QB', 'RB', 'WR', 'TE', 'WRT', 'FLEX', 'BENCH', 'IR'];
 

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
-import { CurrentLeague, WaiverRule } from '../../../types';
+import { WaiverRule } from '../../../types';
+
+import { useLeague } from '../../../context/LeagueContext';
+
 import './WaiverRulesDisplayComponent.css';
 
-interface WaiverRulesDisplayComponentProps {
-  currentLeague: CurrentLeague;
-}
-
-const WaiverRulesDisplayComponent = ({ currentLeague }: WaiverRulesDisplayComponentProps) => {
+const WaiverRulesDisplayComponent = () => {
+  const { currentLeague } = useLeague();
   const [waiverRule, setWaiverRule] = useState<WaiverRule | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

@@ -1,18 +1,19 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
-import { CurrentUser, CurrentLeague, LeagueMember, Player } from '../../types';
+import { LeagueMember, Player } from '../../types';
 import PlayerStatsCard from '../PlayerStatsCard/PlayerStatsCard';
 import WaiverClaimFormComponent from '../WaiverClaimFormComponent/WaiverClaimFormComponent';
 import DirectAddPlayerComponent from '../DirectAddPlayerComponent/DirectAddPlayerComponent';
+
+import { useUser } from '../../context/UserContext';
+import { useLeague } from '../../context/LeagueContext';
+
 import './WaiversComponent.css';
 
-interface WaiversComponentProps {
-  currentUser: CurrentUser;
-  currentLeague: CurrentLeague;
-}
-
-const WaiversComponent = ({ currentUser, currentLeague }: WaiversComponentProps) => {
+const WaiversComponent = () => {
+  const { currentUser } = useUser();
+  const { currentLeague } = useLeague();
   const [userRoster, setUserRoster] = useState([] as any[]);
   const [freeAgents, setFreeAgents] = useState([] as any[]);
   const [nameFilter, setNameFilter] = useState<string>('');

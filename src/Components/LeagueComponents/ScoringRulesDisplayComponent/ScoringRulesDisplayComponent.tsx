@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
-import { CurrentLeague, ScoringRules } from '../../../types';
+import { ScoringRules } from '../../../types';
+
+import { useLeague } from '../../../context/LeagueContext';
+
 import './ScoringRulesDisplayComponent.css';
 
-interface ScoringRulesDisplayComponentProps {
-  currentLeague: CurrentLeague;
-}
-
-const ScoringRulesDisplayComponent = ({ currentLeague }: ScoringRulesDisplayComponentProps) => {
+const ScoringRulesDisplayComponent = () => {
+  const { currentLeague } = useLeague();
   const [scoringRules, setScoringRules] = useState<ScoringRules | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

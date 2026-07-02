@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axiosInstance from '../../../api';
+import { isAxiosError } from 'axios';
 import { getCurrentFantasyWeek, getGamesByWeekAndYear } from '../../../api/seasonService';
-import { CurrentUser, CurrentLeague, RosterSlot, RosteredPlayer, LeagueMember, NFLGame, RosterRules } from '../../../types';
+import { RosterSlot, RosteredPlayer, LeagueMember, NFLGame, RosterRules } from '../../../types';
 import PlayerCard from '../../PlayerCard/PlayerCard';
+
+import { useUser } from '../../../context/UserContext';
+import { useLeague } from '../../../context/LeagueContext';
+
 import './ViewLeagueMemberRosterComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { isAxiosError } from 'axios';
 
-interface ViewLeagueMemberRosterProps {
-  currentUser: CurrentUser;
-  currentLeague: CurrentLeague;
-}
-
-const ViewLeagueMemberRosterComponent = ({ currentUser, currentLeague }: ViewLeagueMemberRosterProps) => {
+const ViewLeagueMemberRosterComponent = () => {
+  const { currentUser } = useUser();
+  const { currentLeague } = useLeague();
   const [rosterRules, setRosterRules] = useState<RosterRules | null>(null);
   const [rosteredPlayers, setRosteredPlayers] = useState<RosteredPlayer[]>([]);
   const [message, setMessage] = useState<string>('');
@@ -147,7 +148,7 @@ const ViewLeagueMemberRosterComponent = ({ currentUser, currentLeague }: ViewLea
           const rosterTypeId = member.is_vamp ? 2 : 1;
 
           // Fetch roster rules for this member
-          const rulesResponse = await axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague.league_id}/${rosterTypeId}`);
+          const rulesResponse = await axiosInstance.get(`/roster_rules/getRosterRulesByLeagueId/${currentLeague?.league_id}/${rosterTypeId}`);
           if (!rulesResponse.data || Object.keys(rulesResponse.data).length === 0) {
             setMessage('No roster rules found for this league.');
             setMessageType('error');
@@ -202,7 +203,7 @@ const ViewLeagueMemberRosterComponent = ({ currentUser, currentLeague }: ViewLea
       }
     };
     fetchRosteredPlayers();
-  }, [selectedMemberId, members, currentLeague.league_id]);
+  }, [selectedMemberId, members, currentLeague?.league_id]);
 
   const handleMemberChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const memberId = parseInt(event.target.value, 10);

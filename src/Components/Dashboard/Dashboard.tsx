@@ -2,16 +2,16 @@ import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
-import { getCurrentFantasyWeek } from '../../api/seasonService';
-import { CurrentUser, CurrentLeague, LeagueMember, Schedule } from '../../types';
-import RecentActivityComponent from '../LeagueComponents/RecentActivityComponent/RecentActivityComponent';
-import { useNow } from '../../context/NowContext';
-import './Dashboard.css';
 
-interface DashboardProps {
-  currentUser: CurrentUser;
-  currentLeague: CurrentLeague;
-}
+import { getCurrentFantasyWeek } from '../../api/seasonService';
+import { LeagueMember, Schedule } from '../../types';
+import RecentActivityComponent from '../LeagueComponents/RecentActivityComponent/RecentActivityComponent';
+
+import { useUser } from '../../context/UserContext';
+import { useLeague } from '../../context/LeagueContext';
+import { useNow } from '../../context/NowContext';
+
+import './Dashboard.css';
 
 interface TeamData {
   team_name: string;
@@ -26,8 +26,10 @@ interface CurrentMatchup {
   opponentScore: number | null;
 }
 
-const Dashboard = ({ currentUser, currentLeague }: DashboardProps) => {
+const Dashboard = () => {
   const nowMs = useNow();
+  const { currentUser } = useUser();
+  const { currentLeague } = useLeague();
   const [teamData, setTeamData] = useState<TeamData>({ team_name: '', remaining_faab_budget: '0' });
   const [record, setRecord] = useState({ wins: 0, losses: 0 });
   const [currentMatchup, setCurrentMatchup] = useState<CurrentMatchup | null>(null);

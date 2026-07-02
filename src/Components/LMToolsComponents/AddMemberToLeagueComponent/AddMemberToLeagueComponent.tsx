@@ -2,13 +2,10 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
-import { CurrentUser, CurrentLeague } from '../../../types';
-import './AddMemberToLeagueComponent.css';
 
-interface AddMemberToLeagueComponentProps {
-  currentUser: CurrentUser;
-  currentLeague: CurrentLeague;
-}
+import { useLeague } from '../../../context/LeagueContext';
+
+import './AddMemberToLeagueComponent.css';
 
 interface FoundUser {
   id: number;
@@ -17,7 +14,8 @@ interface FoundUser {
   last_name: string;
 }
 
-const AddMemberToLeagueComponent = ({ currentLeague }: AddMemberToLeagueComponentProps) => {
+const AddMemberToLeagueComponent = () => {
+  const { currentLeague } = useLeague();
   const [username, setUsername] = useState<string>('');
   const [isVampire, setIsVampire] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
@@ -88,7 +86,7 @@ const AddMemberToLeagueComponent = ({ currentLeague }: AddMemberToLeagueComponen
     } else {
       try {
         const response = await axiosInstance.post('/league_members/create', {
-          league_id: currentLeague.league_id,
+          league_id: currentLeague?.league_id,
           user_id: foundUser.id,
           role: 'invited',
           team_name: null,

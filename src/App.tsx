@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, ReactNode } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Login from './Components/Login/Login';
@@ -23,8 +23,8 @@ import ViewLeagueMemberRosterComponent from './Components/LeagueComponents/ViewL
 import ActivateLeagueComponent from './Components/LMToolsComponents/ActivateLeagueComponent/ActivateLeagueComponent';
 import ActivityFeedPage from './Components/ActivityFeedPage/ActivityFeedPage';
 import { NowProvider } from './context/NowContext';
-import axiosInstance from './api';
-import { CurrentUser, CurrentLeague, LeagueMember, League } from './types';
+import { LeagueProvider } from './context/LeagueContext';
+import { UserProvider } from './context/UserContext';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -48,277 +48,154 @@ const ErrorBoundary = ({ children }: ErrorBoundaryProps) => {
 };
 
 const AppContent = () => {
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-  const [currentLeague, setCurrentLeague] = useState<CurrentLeague | null>(null);
-  const [isCommissioner, setIsCommissioner] = useState<boolean>(false);
-
-  useEffect(() => {
-    const user = localStorage.getItem('user');
-    const league = localStorage.getItem('league');
-    if (user) setCurrentUser(JSON.parse(user));
-    if (league) setCurrentLeague(JSON.parse(league));
-  }, []);
-
-  const getCachedMembership = useCallback(async (userId: number): Promise<LeagueMember[]> => {
-    const response = await axiosInstance.get(`/league_members/getLeagueMembersByUserId/${userId}`);
-    return response.data;
-  }, []);
-
-  const getCachedLeague = useCallback(async (leagueId: number): Promise<League> => {
-    const response = await axiosInstance.get(`/leagues/getLeagueById/${leagueId}`);
-    return response.data;
-  }, []);
-
-  useEffect(() => {
-    const checkCommissionerStatus = async () => {
-      if (currentUser?.id && currentLeague?.league_id) {
-        try {
-          const response = await axiosInstance.get(`/league_members/getLeagueMembersByUserId/${currentUser.id}`);
-          const membership: LeagueMember | undefined = (response.data as LeagueMember[]).find(
-            m => m.league_id === currentLeague.league_id
-          );
-          setIsCommissioner(membership?.role === 'commish');
-        } catch {
-          setIsCommissioner(false);
-        }
-      } else {
-        setIsCommissioner(false);
-      }
-    };
-    checkCommissionerStatus();
-  }, [currentUser?.id, currentLeague?.league_id]);
-
+  
   return (
-    <NowProvider currentLeague={currentLeague}>
-    <ErrorBoundary>
-      <div className="app-content">
-        <Navbar
-          currentUser={currentUser}
-          setCurrentUser={setCurrentUser}
-          currentLeague={currentLeague}
-          setCurrentLeague={setCurrentLeague}
-          isCommissioner={isCommissioner}
+    <div className="app-content">
+      <Navbar/>
+      <div className="page-content">
+      <Routes>
+        <Route path="/login" element={ <Login /> } />
+        <Route path="/register" element={<Registration />} />
+        <Route
+          path="/landing"
+          element={
+            <PrivateRoute>
+              <LandingComponent />
+            </PrivateRoute>
+          }
         />
-        <div className="page-content">
-        <Routes>
-          <Route path="/login" element={<Login setCurrentUser={setCurrentUser} currentUser={currentUser} />} />
-          <Route path="/register" element={<Registration />} />
-          <Route
-            path="/landing"
-            element={
-              <PrivateRoute>
-                {currentUser ? (
-                  <LandingComponent
-                    currentUser={currentUser}
-                    setCurrentLeague={setCurrentLeague}
-                    setIsCommissioner={setIsCommissioner}
-                    getCachedMembership={getCachedMembership}
-                    getCachedLeague={getCachedLeague}
-                  />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <Dashboard currentUser={currentUser} currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/roster"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <RosterComponent currentUser={currentUser} currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/matchups"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <MatchupComponent currentUser={currentUser} currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/waivers"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <WaiversComponent currentUser={currentUser} currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/active-waiver-claims"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <ActiveWaiverClaimsComponent currentUser={currentUser} currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/edit-team-info"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <EditTeamInfoComponent currentUser={currentUser} currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/league-member-schedule"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <LeagueMemberScheduleComponent currentUser={currentUser} currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/league-member-roster"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <ViewLeagueMemberRosterComponent currentUser={currentUser} currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/scoring-rules"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <ScoringRulesDisplayComponent currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/roster-rules"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <RosterRulesDisplayComponent currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/waiver-rules"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <WaiverRulesDisplayComponent currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/create-league"
-            element={
-              <PrivateRoute>
-                {currentUser ? (
-                  <CreateLeagueForm currentUser={currentUser} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/add-member-to-league"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague && isCommissioner ? (
-                  <AddMemberToLeagueComponent currentUser={currentUser} currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/add-player-to-team"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague && isCommissioner ? (
-                  <AddPlayerToTeamComponent currentUser={currentUser} currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/activate-league"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <ActivateLeagueComponent currentUser={currentUser} currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/activity"
-            element={
-              <PrivateRoute>
-                {currentUser && currentLeague ? (
-                  <ActivityFeedPage currentUser={currentUser} currentLeague={currentLeague} />
-                ) : (
-                  <Navigate to="/login" />
-                )}
-              </PrivateRoute>
-            }
-          />
-          <Route path="/" element={<Navigate to="/login" />} />
-        </Routes>
-        </div>
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute requireLeague>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/roster"
+          element={
+            <PrivateRoute requireLeague>
+              <RosterComponent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/matchups"
+          element={
+            <PrivateRoute requireLeague>
+              <MatchupComponent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/waivers"
+          element={
+            <PrivateRoute requireLeague>
+              <WaiversComponent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/active-waiver-claims"
+          element={
+            <PrivateRoute requireLeague>
+              <ActiveWaiverClaimsComponent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/edit-team-info"
+          element={
+            <PrivateRoute requireLeague>
+              <EditTeamInfoComponent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/league-member-schedule"
+          element={
+            <PrivateRoute requireLeague>
+              <LeagueMemberScheduleComponent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/league-member-roster"
+          element={
+            <PrivateRoute requireLeague>
+              <ViewLeagueMemberRosterComponent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/scoring-rules"
+          element={
+            <PrivateRoute requireLeague>
+              <ScoringRulesDisplayComponent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/roster-rules"
+          element={
+            <PrivateRoute requireLeague>
+              <RosterRulesDisplayComponent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/waiver-rules"
+          element={
+            <PrivateRoute requireLeague>
+              <WaiverRulesDisplayComponent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/create-league"
+          element={
+            <PrivateRoute>
+              <CreateLeagueForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/add-member-to-league"
+          element={
+            <PrivateRoute requireLeague requireCommissioner>
+                <AddMemberToLeagueComponent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/add-player-to-team"
+          element={
+            <PrivateRoute requireLeague requireCommissioner>
+              <AddPlayerToTeamComponent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/activate-league"
+          element={
+            <PrivateRoute requireLeague>
+              <ActivateLeagueComponent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/activity"
+          element={
+            <PrivateRoute requireLeague>
+              <ActivityFeedPage />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/" element={<Navigate to="/login" />} />
+      </Routes>
       </div>
-    </ErrorBoundary>
-    </NowProvider>
+    </div>
   );
 };
 
@@ -326,7 +203,15 @@ function App() {
   return (
     <div className="app-wrapper">
       <Router>
-        <AppContent />
+        <UserProvider>
+          <LeagueProvider>
+            <NowProvider>
+              <ErrorBoundary>
+                <AppContent />
+              </ErrorBoundary>
+            </NowProvider>
+          </LeagueProvider>
+        </UserProvider>
       </Router>
     </div>
   );

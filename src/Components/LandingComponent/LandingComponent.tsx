@@ -3,23 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
 import { CurrentUser, CurrentLeague, LeagueMember, League } from '../../types';
+import { useUser } from '../../context/UserContext';
+import { useLeague } from '../../context/LeagueContext';
 import './LandingComponent.css';
 
-interface LandingComponentProps {
-  currentUser: CurrentUser;
-  setCurrentLeague: (league: CurrentLeague) => void;
-  setIsCommissioner: (value: boolean) => void;
-  getCachedMembership: (userId: number) => Promise<LeagueMember[]>;
-  getCachedLeague: (leagueId: number) => Promise<League>;
-}
-
-const LandingComponent = ({
-  currentUser,
-  setCurrentLeague,
-  setIsCommissioner,
-  getCachedMembership,
-  getCachedLeague,
-}: LandingComponentProps) => {
+const LandingComponent = () => {
+  const { currentUser } = useUser();
+  const { setCurrentLeague, setIsCommissioner, getCachedMembership, getCachedLeague } = useLeague();
   const [leagues, setLeagues] = useState<LeagueMember[]>([]);
   const [invitations, setInvitations] = useState<LeagueMember[]>([]);
   const [error, setError] = useState<string>('');
@@ -38,7 +28,7 @@ const LandingComponent = ({
     const fetchLeagues = async () => {
       setIsDataLoading(true);
       try {
-        const memberships = await getCachedMembership(currentUser.id);
+        const memberships = getCachedMembership(currentUser.id);
         const list = Array.isArray(memberships) ? memberships : [];
         setLeagues(list.filter(m => m.role === 'player' || m.role === 'commish'));
         setInvitations(list.filter(m => m.role === 'invited'));
@@ -62,22 +52,24 @@ const LandingComponent = ({
   const handleSelectLeague = async (league: LeagueMember) => {
     setIsLoading(true);
     setError('');
+    if(!currentUser) return;
+    
     try {
       const [leagueResponse, membershipResponse] = await Promise.all([
         getCachedLeague(league.league_id),
-        axiosInstance.get(`/league_members/getLeagueMembersByUserId/${currentUser.id}`),
+        getCachedMembership(currentUser.id),
       ]);
 
       if (!leagueResponse?.league_id) {
         throw new Error('Invalid league response data');
       }
-      if (!Array.isArray(membershipResponse.data)) {
+      if (!Array.isArray(membershipResponse)) {
         throw new Error('Invalid membership response data');
       }
 
       setCurrentLeague(leagueResponse);
       localStorage.setItem('league', JSON.stringify(leagueResponse));
-      const isCommish = membershipResponse.data.some(
+      const isCommish = membershipResponse.some(
         (m: LeagueMember) => m.league_id === league.league_id && m.role === 'commish'
       );
       setIsCommissioner(isCommish);
@@ -95,6 +87,8 @@ const LandingComponent = ({
   const handleAcceptInvitation = async (invitation: LeagueMember) => {
     setIsLoading(true);
     setError('');
+    if(!currentUser) return;
+
     try {
       const leagueMemberResponse = await axiosInstance.get(
         `/league_members/getLeagueMemberByLeagueAndUserId/${invitation.league_id}/${currentUser.id}`
@@ -169,6 +163,8 @@ const LandingComponent = ({
   const handleDenyInvitation = async (invitation: LeagueMember) => {
     setIsLoading(true);
     setError('');
+    if(!currentUser) return;
+
     try {
       const response = await axiosInstance.put(
         `/league_members/updateRole/${invitation.league_id}/${currentUser.id}`,

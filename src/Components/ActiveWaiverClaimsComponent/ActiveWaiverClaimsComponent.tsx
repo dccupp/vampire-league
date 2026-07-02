@@ -1,14 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
-import { CurrentUser, CurrentLeague, LeagueMember, RosteredPlayer, WaiverClaim, Player } from '../../types';
+import { LeagueMember, RosteredPlayer, WaiverClaim, Player } from '../../types';
 import WaiverClaimFormComponent from '../WaiverClaimFormComponent/WaiverClaimFormComponent';
-import './ActiveWaiverClaimsComponent.css';
 
-interface ActiveWaiverClaimsProps {
-  currentUser: CurrentUser;
-  currentLeague: CurrentLeague;
-}
+import { useUser } from '../../context/UserContext';
+import { useLeague } from '../../context/LeagueContext';
+
+import './ActiveWaiverClaimsComponent.css';
 
 type RosterEntry = RosteredPlayer & {
   name: string;
@@ -36,7 +35,9 @@ interface SelectedClaim {
   rostered_player_to_drop_name: string;
 }
 
-const ActiveWaiverClaimsComponent = ({ currentUser, currentLeague }: ActiveWaiverClaimsProps) => {
+const ActiveWaiverClaimsComponent = () => {
+  const { currentUser } = useUser();
+  const { currentLeague } = useLeague();
   const [waiverClaims, setWaiverClaims] = useState<WaiverClaim[]>([]);
   const [leagueMember, setLeagueMember] = useState<LeagueMember | null>(null);
   const [playerNames, setPlayerNames] = useState<Record<number, string>>({});

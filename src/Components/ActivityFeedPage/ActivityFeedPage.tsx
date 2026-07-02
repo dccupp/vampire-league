@@ -1,14 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../api';
-import { CurrentUser, CurrentLeague, LeagueMember, LeagueLog } from '../../types';
-import { useNow } from '../../context/NowContext';
-import './ActivityFeedPage.css';
+import { LeagueMember, LeagueLog } from '../../types';
 
-interface ActivityFeedPageProps {
-  currentUser: CurrentUser;
-  currentLeague: CurrentLeague;
-}
+import { useLeague } from '../../context/LeagueContext';
+import { useNow } from '../../context/NowContext';
+
+import './ActivityFeedPage.css';
 
 type TimeRange = '7days' | '30days' | 'season';
 type LogType = 'all' | LeagueLog['type'];
@@ -36,7 +34,8 @@ function timeAgo(dateStr: string, nowMs: number): string {
   return `${days}d ago`;
 }
 
-const ActivityFeedPage = ({ currentLeague }: ActivityFeedPageProps) => {
+const ActivityFeedPage = () => {
+  const { currentLeague } = useLeague();
   const [logs, setLogs] = useState<LeagueLog[]>([]);
   const [members, setMembers] = useState<LeagueMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,6 +49,12 @@ const ActivityFeedPage = ({ currentLeague }: ActivityFeedPageProps) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if(!currentLeague) {
+        setError('Missing league information.');
+        setLoading(false);
+        return;
+      }
+
       try {
         const [logsRes, membersRes] = await Promise.all([
           axiosInstance.get(`/logs/getLogsByLeagueId/${currentLeague.league_id}`),
@@ -67,7 +72,7 @@ const ActivityFeedPage = ({ currentLeague }: ActivityFeedPageProps) => {
       }
     };
     fetchData();
-  }, [currentLeague.league_id]);
+  }, [currentLeague?.league_id]);
 
   const filtered = useMemo(() => {
     const cutoff = timeRange !== 'season'

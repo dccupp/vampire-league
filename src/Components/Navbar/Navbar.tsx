@@ -1,18 +1,13 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
-import { CurrentUser, CurrentLeague } from '../../types';
+import { useUser } from '../../context/UserContext';
+import { useLeague } from '../../context/LeagueContext';
 import './Navbar.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-interface NavBarProps {
-  currentUser: CurrentUser | null;
-  setCurrentUser: (user: CurrentUser | null) => void;
-  currentLeague: CurrentLeague | null;
-  setCurrentLeague: (league: CurrentLeague | null) => void;
-  isCommissioner: boolean;
-}
-
-const NavBar = ({ currentUser, setCurrentUser, currentLeague, setCurrentLeague, isCommissioner }: NavBarProps) => {
+const NavBar = () => {
+  const { currentUser, setCurrentUser } = useUser();
+  const { currentLeague, setCurrentLeague, isCommissioner } = useLeague();
   const navigate = useNavigate();
   const location = useLocation();
   const isLoggedIn = !!currentUser;

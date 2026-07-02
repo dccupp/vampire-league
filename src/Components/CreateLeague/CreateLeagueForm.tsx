@@ -1,17 +1,15 @@
 import { useState, useCallback, useEffect, useRef, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createLeague } from '../../api/leagueService';
-import { CurrentUser } from '../../types';
 import ProgressBar from './ProgressBar';
 import LeagueInfoStep from './LeagueInfoStep';
 import RosterRulesStep from './RosterRulesStep';
 import ScoringRulesStep from './ScoringRulesStep';
 import WaiverRulesStep from './WaiverRulesStep';
-import './CreateLeagueFormComponent.css';
 
-interface CreateLeagueFormProps {
-  currentUser: CurrentUser;
-}
+import { useUser } from '../../context/UserContext';
+
+import './CreateLeagueFormComponent.css';
 
 const defaultFormValues: Record<string, string> = {
   leagueName: '',
@@ -73,7 +71,8 @@ const defaultFormValues: Record<string, string> = {
   waiver_day: 'Wednesday',
 };
 
-const CreateLeagueForm = ({ currentUser }: CreateLeagueFormProps) => {
+const CreateLeagueForm = () => {
+  const { currentUser } = useUser();
   const navigate = useNavigate();
   const [step, setStep] = useState<number>(1);
   const [formData, setFormData] = useState<Record<string, string>>(defaultFormValues);

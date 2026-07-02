@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
-import { CurrentUser, CurrentLeague } from '../../../types';
+
+import { useUser } from '../../../context/UserContext';
+import { useLeague } from '../../../context/LeagueContext';
+
 import './EditTeamInfoComponent.css';
 
-interface EditTeamInfoComponentProps {
-  currentUser: CurrentUser;
-  currentLeague: CurrentLeague;
-}
-
-const EditTeamInfoComponent = ({ currentUser, currentLeague }: EditTeamInfoComponentProps) => {
+const EditTeamInfoComponent = () => {
+  const { currentUser } = useUser();
+  const { currentLeague } = useLeague();
   const [teamName, setTeamName] = useState<string>('');
   const [message, setMessage] = useState<string>('');
   const [messageType, setMessageType] = useState<string>('');
@@ -86,7 +86,7 @@ const EditTeamInfoComponent = ({ currentUser, currentLeague }: EditTeamInfoCompo
     setIsLoading(true);
     try {
       const response = await axiosInstance.put(
-        `/league_members/updateTeamName/${currentLeague.league_id}/${currentUser.id}`,
+        `/league_members/updateTeamName/${currentLeague?.league_id}/${currentUser?.id}`,
         { team_name: trimmedTeamName }
       );
       if (response.data.status === 'success') {
