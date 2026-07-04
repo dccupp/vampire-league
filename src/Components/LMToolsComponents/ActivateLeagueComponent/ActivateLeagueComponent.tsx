@@ -9,11 +9,10 @@ import './ActivateLeagueComponent.css';
 
 const ActivateLeagueComponent = () => {
   const { currentUser } = useUser();
-  const { currentLeague } = useLeague();
+  const { currentLeague, setCurrentLeague, leagueMembers, currentLeagueMember, isCommissioner } = useLeague();
   const [message, setMessage] = useState<string>('');
   const [messageType, setMessageType] = useState<string>('');
   const [isMessageFading, setIsMessageFading] = useState<boolean>(false);
-  const [leagueMemberId, setLeagueMemberId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [canActivate, setCanActivate] = useState<boolean>(false);
   const [memberCount, setMemberCount] = useState<number | null>(null);
@@ -34,7 +33,7 @@ const ActivateLeagueComponent = () => {
   }, [message]);
 
   useEffect(() => {
-    const checkLeagueConditions = async () => {
+    const checkLeagueConditions = () => {
       if (!currentUser?.id || !currentLeague?.league_id) {
         setMessage('User or league data is missing. Please try again.');
         setMessageType('error');
@@ -43,66 +42,41 @@ const ActivateLeagueComponent = () => {
         return;
       }
 
-      try {
-        const [membersResponse, leagueResponse, memberResponse] = await Promise.all([
-          axiosInstance.get(`/league_members/getLeagueMembersByLeagueId/${currentLeague.league_id}`),
-          axiosInstance.get(`/leagues/getLeagueById/${currentLeague.league_id}`),
-          axiosInstance.get(`/league_members/getLeagueMembersByUserId/${currentUser.id}`),
-        ]);
+      const members = Array.isArray(leagueMembers) ? leagueMembers : [];
+      const validMembers = members.filter(member => ['player', 'commish'].includes(member.role));
+      const commishCount = members.filter(member => member.role === 'commish').length;
+      const count = validMembers.length;
+      setMemberCount(count);
 
-        const members = Array.isArray(membersResponse.data) ? membersResponse.data : [];
-        const validMembers = members.filter(member => ['player', 'commish'].includes(member.role));
-        const commishCount = members.filter(member => member.role === 'commish').length;
-        const count = validMembers.length;
-        setMemberCount(count);
+      const isActive = currentLeague.is_active;
 
-        const isActive = leagueResponse.data.is_active;
-
-        const leagueMember = Array.isArray(memberResponse.data)
-          ? memberResponse.data.find(member => member.league_id === currentLeague.league_id)
-          : null;
-
-        if (!leagueMember || leagueMember.role !== 'commish') {
-          setMessage('Only the league commissioner can activate the league.');
-          setMessageType('error');
-          setCanActivate(false);
-        } else if (isActive) {
-          setLeagueMemberId(leagueMember.id);
-          setMessage('League is already activated.');
-          setMessageType('error');
-          setCanActivate(false);
-        } else if (commishCount > 1) {
-          setLeagueMemberId(leagueMember.id);
-          setMessage('League has multiple commissioners. Only one commissioner is allowed.');
-          setMessageType('error');
-          setCanActivate(false);
-        } else if (count !== 10) {
-          setLeagueMemberId(leagueMember.id);
-          setMessage(`League has ${count} valid members (player or commish). Need exactly 10.`);
-          setMessageType('error');
-          setCanActivate(false);
-        } else {
-          setLeagueMemberId(leagueMember.id);
-          setCanActivate(true);
-        }
-      } catch (error) {
-        const msg = isAxiosError(error)
-          ? error.response?.data?.message || error.message
-          : 'Error checking league conditions.';
-        setMessage('Error checking league conditions: ' + msg);
+      if (!isCommissioner) {
+        setMessage('Only the league commissioner can activate the league.');
         setMessageType('error');
         setCanActivate(false);
-      } finally {
-        setIsLoading(false);
+      } else if (isActive) {
+        setMessage('League is already activated.');
+        setMessageType('error');
+        setCanActivate(false);
+      } else if (commishCount > 1) {
+        setMessage('League has multiple commissioners. Only one commissioner is allowed.');
+        setMessageType('error');
+        setCanActivate(false);
+      } else if (count !== 10) {
+        setMessage(`League has ${count} valid members (player or commish). Need exactly 10.`);
+        setMessageType('error');
+        setCanActivate(false);
+      } else {
+        setCanActivate(true);
       }
     };
 
     checkLeagueConditions();
-  }, [currentUser?.id, currentLeague?.league_id]);
+  }, [currentUser?.id, currentLeague?.league_id, leagueMembers, isCommissioner]);
 
   const handleActivateLeague = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!leagueMemberId) {
+    if (currentLeagueMember?.league_id !== currentLeague?.league_id) {
       setMessage('Cannot activate league: User is not a member.');
       setMessageType('error');
       return;
@@ -111,14 +85,16 @@ const ActivateLeagueComponent = () => {
     setIsLoading(true);
 
     try {
-      const response = await axiosInstance.post(`/leagues/activate/${currentLeague?.league_id}/${leagueMemberId}`, {});
+      const response = await axiosInstance.post(`/leagues/activate/${currentLeague?.league_id}/${currentLeagueMember?.id}`, {});
       if (response.data.status !== 'success') {
         throw new Error(response.data.message || 'Failed to activate league');
       }
       setMessage('League activated successfully!');
       setMessageType('success');
       setCanActivate(false);
-      setTimeout(() => window.location.reload(), 2000);
+      if(currentLeague) {
+        setCurrentLeague({ ...currentLeague, is_active: true });
+      }
     } catch (error) {
       const msg = isAxiosError(error)
         ? error.response?.data?.message || error.message
@@ -134,13 +110,6 @@ const ActivateLeagueComponent = () => {
     <div className="alc-container">
       <div className="alc-card animate__animated animate__fadeIn">
         <h3 className="alc-title">Activate League</h3>
-        {memberCount !== null && (
-          <p className={`alc-member-count ${memberCount === 10 ? 'ready' : 'not-ready'}`}>
-            {memberCount !== 10
-              ? `League has ${memberCount} valid members (player or commish). Need exactly 10.`
-              : 'League has 10 valid members and is ready to activate.'}
-          </p>
-        )}
         <form onSubmit={handleActivateLeague}>
           {message && (
             <p className={`alc-message ${messageType} animate__animated ${isMessageFading ? 'animate__fadeOut' : 'animate__fadeIn'}`}>
