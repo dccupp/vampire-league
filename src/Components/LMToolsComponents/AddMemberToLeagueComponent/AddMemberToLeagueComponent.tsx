@@ -1,5 +1,4 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import axiosInstance from '../../../api';
 
@@ -22,7 +21,6 @@ const AddMemberToLeagueComponent = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [foundUser, setFoundUser] = useState<FoundUser | null>(null);
   const [remainingSpots, setRemainingSpots] = useState<number | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchLeagueMembersCount = async () => {
@@ -100,7 +98,6 @@ const AddMemberToLeagueComponent = () => {
           setUsername('');
           setIsVampire(false);
           setRemainingSpots(prev => prev !== null ? prev - 1 : null);
-          setTimeout(() => navigate('/dashboard'), 2000);
         } else {
           setMessage(response.data.message || 'Error adding user to league. Please try again.');
         }

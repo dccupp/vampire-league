@@ -28,7 +28,7 @@ const LandingComponent = () => {
     const fetchLeagues = async () => {
       setIsDataLoading(true);
       try {
-        const memberships = getCachedMembership(currentUser.id);
+        const memberships = await getCachedMembership(currentUser.id);
         const list = Array.isArray(memberships) ? memberships : [];
         setLeagues(list.filter(m => m.role === 'player' || m.role === 'commish'));
         setInvitations(list.filter(m => m.role === 'invited'));

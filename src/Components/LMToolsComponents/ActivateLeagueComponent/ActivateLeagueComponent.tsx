@@ -15,7 +15,6 @@ const ActivateLeagueComponent = () => {
   const [isMessageFading, setIsMessageFading] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [canActivate, setCanActivate] = useState<boolean>(false);
-  const [memberCount, setMemberCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (message) {
@@ -45,8 +44,6 @@ const ActivateLeagueComponent = () => {
       const members = Array.isArray(leagueMembers) ? leagueMembers : [];
       const validMembers = members.filter(member => ['player', 'commish'].includes(member.role));
       const commishCount = members.filter(member => member.role === 'commish').length;
-      const count = validMembers.length;
-      setMemberCount(count);
 
       const isActive = currentLeague.is_active;
 
@@ -62,8 +59,8 @@ const ActivateLeagueComponent = () => {
         setMessage('League has multiple commissioners. Only one commissioner is allowed.');
         setMessageType('error');
         setCanActivate(false);
-      } else if (count !== 10) {
-        setMessage(`League has ${count} valid members (player or commish). Need exactly 10.`);
+      } else if (validMembers.length !== 10) {
+        setMessage(`League has ${validMembers.length} valid members (player or commish). Need exactly 10.`);
         setMessageType('error');
         setCanActivate(false);
       } else {
@@ -96,6 +93,7 @@ const ActivateLeagueComponent = () => {
         setCurrentLeague({ ...currentLeague, is_active: true });
       }
     } catch (error) {
+      console.error('ActivateLeagueComponent: Error activating league:', error);
       const msg = isAxiosError(error)
         ? error.response?.data?.message || error.message
         : error instanceof Error ? error.message : 'Failed to activate league.';
